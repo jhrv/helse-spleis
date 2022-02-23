@@ -804,6 +804,23 @@ internal class JsonBuilder : AbstractBuilder() {
         }
     }
 
+    internal class ArbeidsgiverOpptjeningsgrunnlagState(private val opptjeningMap: MutableMap<String, Any>) : BuilderState() {
+        lateinit var arbeidsforhold: MutableList<Map<String, Any?>>
+
+        override fun preVisitArbeidsgiverOpptjeningsgrunnlag(orgnummer: String, arbeidsforhold: List<Arbeidsforholdhistorikk.Arbeidsforhold>) {
+            this.arbeidsforhold = mutableListOf()
+            opptjeningMap.put(orgnummer, this.arbeidsforhold)
+        }
+
+        override fun visitArbeidsforhold(ansattFom: LocalDate, ansattTom: LocalDate?, deaktivert: Boolean) {
+            arbeidsforhold.add(mapOf("ansattFom" to ansattFom, "ansattTom" to ansattTom, "deaktivert" to deaktivert))
+        }
+
+        override fun postVisitArbeidsgiverOpptjeningsgrunnlag(orgnummer: String, arbeidsforhold: List<Arbeidsforholdhistorikk.Arbeidsforhold>) {
+            popState()
+        }
+    }
+
     class GrunnlagsdataState(private val vilkårsgrunnlagElement: MutableList<Map<String, Any?>>) : BuilderState() {
         private val sykepengegrunnlagMap = mutableMapOf<String, Any>()
         private val sammenligningsgrunnlagMap = mutableMapOf<String, Any>()

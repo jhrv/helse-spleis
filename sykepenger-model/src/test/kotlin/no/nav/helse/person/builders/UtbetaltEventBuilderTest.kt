@@ -2,11 +2,11 @@ package no.nav.helse.person.builders
 
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.til
+import no.nav.helse.januar
 import no.nav.helse.person.*
+import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.testhelpers.AP
 import no.nav.helse.testhelpers.NAV
-import no.nav.helse.januar
-import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.testhelpers.tidslinjeOf
 import no.nav.helse.utbetalingslinjer.Fagområde
 import no.nav.helse.utbetalingslinjer.Oppdrag
@@ -48,7 +48,7 @@ internal class UtbetaltEventBuilderTest {
                 ),
             ),
             avviksprosent = null,
-            opptjening = Opptjening.opptjening(emptyMap(), 1.januar, MaskinellJurist()),
+            opptjening = Opptjening.opptjening(emptyList(), 1.januar, MaskinellJurist()),
             antallOpptjeningsdagerErMinst = 30,
             harOpptjening = true,
             medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,

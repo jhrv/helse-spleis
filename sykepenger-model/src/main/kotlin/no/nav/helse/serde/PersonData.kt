@@ -308,7 +308,7 @@ internal data class PersonData(
         ) {
             fun tilOpptjening() = Opptjening(
                 opptjeningsperiode = opptjeningFom til opptjeningTom,
-                arbeidsforhold = arbeidsforhold.mapValues { (_, forhold) -> forhold.map { it.tilArbeidsforhold() } }
+                arbeidsforhold = emptyList()
             )
         }
     }
