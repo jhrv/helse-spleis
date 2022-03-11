@@ -105,7 +105,10 @@ internal class Utbetalingstidslinje private constructor(
         if (begrunnelser.isEmpty()) return
         utbetalingsdager.forEachIndexed { index, utbetalingsdag ->
             if (strategi(utbetalingsdag)) {
-                utbetalingsdag.avvis(begrunnelser)?.also { utbetalingsdager[index] = it }
+                utbetalingsdag.avvis(begrunnelser)?.also {
+                    utbetalingsdager[index] = it
+                    cached.clear()
+                }
             }
         }
     }
@@ -140,6 +143,7 @@ internal class Utbetalingstidslinje private constructor(
 
     private fun add(dag: Utbetalingsdag) {
         utbetalingsdager.add(dag)
+        cached.clear()
     }
 
     internal operator fun plus(other: Utbetalingstidslinje): Utbetalingstidslinje {
@@ -178,19 +182,12 @@ internal class Utbetalingstidslinje private constructor(
         return this.binde(other, plusstrategy)
     }
 
+    private val cached = mutableListOf<Utbetalingsdag>()
     override fun iterator(): Iterator<Utbetalingsdag> {
         if (utbetalingsdager.isEmpty()) return emptyList<Utbetalingsdag>().iterator()
         val periode = if (førsteDato > sisteDato) (sisteDato til førsteDato).reversed() else førsteDato til sisteDato
-        val periodeIterator = periode.iterator()
-        return object : Iterator<Utbetalingsdag> {
-            override fun hasNext(): Boolean {
-                return periodeIterator.hasNext()
-            }
-
-            override fun next(): Utbetalingsdag {
-                return get(periodeIterator.next())
-            }
-        }
+        if (cached.isEmpty()) periode.forEach { cached.add(this[it]) }
+        return cached.iterator()
     }
 
     private fun binde(
