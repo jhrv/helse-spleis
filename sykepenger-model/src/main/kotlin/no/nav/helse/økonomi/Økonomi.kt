@@ -1,5 +1,6 @@
 package no.nav.helse.økonomi
 
+import java.time.LocalDate
 import no.nav.helse.Grunnbeløp
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.SykdomstidslinjeVisitor
@@ -7,13 +8,16 @@ import no.nav.helse.person.UtbetalingsdagVisitor
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.Arbeidsdag
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDag
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.AvvistDag
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavDag
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavHelgDag
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.summer
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import java.time.LocalDate
 import kotlin.math.roundToInt
 import kotlin.properties.Delegates
 
@@ -297,7 +301,7 @@ internal class Økonomi private constructor(
 
     internal fun er6GBegrenset() = tilstand.er6GBegrenset(this)
 
-    internal fun harPersonbeløp() = personbeløp!! > INGEN
+    internal fun harPersonbeløp() = personbeløp?.let { it > INGEN } ?: false
 
     private fun _betal() {
         val total = dekningsgrunnlag * grad().ratio()

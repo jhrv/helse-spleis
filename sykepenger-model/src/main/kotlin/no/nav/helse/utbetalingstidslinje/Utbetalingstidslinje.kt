@@ -25,7 +25,7 @@ import no.nav.helse.økonomi.Økonomi.Companion.avgrensTilArbeidsgiverperiode
 
 internal class Utbetalingstidslinje private constructor(
     private val utbetalingsdager: MutableList<Utbetalingsdag>
-) : List<Utbetalingsdag> by utbetalingsdager {
+) : Collection<Utbetalingsdag> by utbetalingsdager {
 
     private val førsteDato get() = utbetalingsdager.first().dato
     private val sisteDato get() = utbetalingsdager.last().dato
@@ -34,7 +34,7 @@ internal class Utbetalingstidslinje private constructor(
 
     internal companion object {
         internal fun periode(tidslinjer: List<Utbetalingstidslinje>) = tidslinjer
-            .filter { it.utbetalingsdager.isNotEmpty() }
+            .filter { it.isNotEmpty() }
             .map { it.periode() }
             .reduce(Periode::merge)
 
@@ -78,14 +78,12 @@ internal class Utbetalingstidslinje private constructor(
     }
 
     internal fun er6GBegrenset(): Boolean {
-        return utbetalingsdager.any {
-            it.økonomi.er6GBegrenset()
-        }
+        return any { it.økonomi.er6GBegrenset() }
     }
 
     internal fun accept(visitor: UtbetalingsdagVisitor) {
         visitor.preVisitUtbetalingstidslinje(this)
-        utbetalingsdager.forEach { it.accept(visitor) }
+        forEach { it.accept(visitor) }
         visitor.postVisitUtbetalingstidslinje(this)
     }
 
@@ -132,15 +130,6 @@ internal class Utbetalingstidslinje private constructor(
         add(NavHelgDag(dato, økonomi))
     }
 
-    private fun addUkjentDag(dato: LocalDate) =
-        Økonomi.ikkeBetalt().let { økonomi ->
-            if (dato.erHelg()) addFridag(dato, økonomi) else addUkjentDag(dato, økonomi)
-        }
-
-    private fun addUkjentDag(dato: LocalDate, økonomi: Økonomi) {
-        add(UkjentDag(dato, økonomi))
-    }
-
     internal fun addAvvistDag(dato: LocalDate, økonomi: Økonomi, begrunnelser: List<Begrunnelse>) {
         add(AvvistDag(dato, økonomi, begrunnelser))
     }
@@ -169,7 +158,7 @@ internal class Utbetalingstidslinje private constructor(
         periode.any { harBetalt(it) }
 
     internal fun kunArbeidsgiverdager() =
-        this.utbetalingsdager.all {
+        all {
             it is ArbeidsgiverperiodeDag ||
                 it is Arbeidsdag ||
                 it is NavHelgDag ||
@@ -178,7 +167,7 @@ internal class Utbetalingstidslinje private constructor(
 
     internal fun harUtbetalinger() = sykepengeperiode() != null
 
-    internal fun harBrukerutbetalinger() = any { it.økonomi.harPersonbeløp() }
+    internal fun harBrukerutbetalinger() = utbetalingsdager.any { it.økonomi.harPersonbeløp() }
 
     internal fun plus(
         other: Utbetalingstidslinje,
@@ -186,42 +175,34 @@ internal class Utbetalingstidslinje private constructor(
     ): Utbetalingstidslinje {
         if (other.isEmpty()) return this
         if (this.isEmpty()) return other
-        val tidligsteDato = this.tidligsteDato(other)
-        val sisteDato = this.sisteDato(other)
-        return this.utvide(tidligsteDato, sisteDato).binde(other.utvide(tidligsteDato, sisteDato), plusstrategy)
+        return this.binde(other, plusstrategy)
+    }
+
+    override fun iterator(): Iterator<Utbetalingsdag> {
+        if (utbetalingsdager.isEmpty()) return emptyList<Utbetalingsdag>().iterator()
+        val periode = if (førsteDato > sisteDato) (sisteDato til førsteDato).reversed() else førsteDato til sisteDato
+        val periodeIterator = periode.iterator()
+        return object : Iterator<Utbetalingsdag> {
+            override fun hasNext(): Boolean {
+                return periodeIterator.hasNext()
+            }
+
+            override fun next(): Utbetalingsdag {
+                return get(periodeIterator.next())
+            }
+        }
     }
 
     private fun binde(
         other: Utbetalingstidslinje,
         strategy: (Utbetalingsdag, Utbetalingsdag) -> Utbetalingsdag
     ) = Utbetalingstidslinje(
-        this.utbetalingsdager.zip(other.utbetalingsdager, strategy).toMutableList()
-    ).trim()
-
-    private fun trim(): Utbetalingstidslinje {
-        val første = firstOrNull { it !is UkjentDag }?.dato ?: return Utbetalingstidslinje()
-        return subset(første til last { it !is UkjentDag }.dato)
-    }
+        Companion.periode(listOf(this, other)).mapNotNull {
+            strategy(this[it], other[it]).takeUnless { it is UkjentDag }
+        }.toMutableList()
+    )
 
     private fun trimLedendeFridager() = Utbetalingstidslinje(dropWhile { it is Fridag }.toMutableList())
-
-    private fun utvide(tidligsteDato: LocalDate, sisteDato: LocalDate) =
-        Utbetalingstidslinje().apply {
-            val original = this@Utbetalingstidslinje
-            tidligsteDato.datesUntil(original.førsteDato)
-                .forEach { this.addUkjentDag(it) }
-            this.utbetalingsdager.addAll(original.utbetalingsdager)
-            original.sisteDato.plusDays(1).datesUntil(sisteDato.plusDays(1))
-                .forEach { this.addUkjentDag(it) }
-        }
-
-    private fun tidligsteDato(other: Utbetalingstidslinje) =
-        minOf(this.førsteDato, other.førsteDato)
-
-    private fun sisteDato(other: Utbetalingstidslinje) =
-        maxOf(this.sisteDato, other.sisteDato)
-
-    internal fun sisteUkedag() = utbetalingsdager.last { it !is NavHelgDag }.dato
 
     internal fun periode() = Periode(førsteDato, sisteDato)
 
@@ -257,16 +238,15 @@ internal class Utbetalingstidslinje private constructor(
     }
 
     private fun harUtbetalinger(periode: Periode) =
-        subset(periode).any { it is UkjentDag || it is NavDag || it is NavHelgDag || it is ForeldetDag }
+        periode.asSequence().map(::get).any { it is UkjentDag || it is NavDag || it is NavHelgDag || it is ForeldetDag }
 
     internal fun kutt(sisteDato: LocalDate) = subset(LocalDate.MIN til sisteDato)
 
     internal operator fun get(dato: LocalDate) =
-        if (isEmpty() || dato !in periode()) UkjentDag(dato, Økonomi.ikkeBetalt())
-        else utbetalingsdager.first { it.dato == dato }
+        utbetalingsdager.firstOrNull { it.dato == dato } ?: UkjentDag(dato, Økonomi.ikkeBetalt())
 
     override fun toString(): String {
-        return utbetalingsdager.joinToString(separator = "") {
+        return joinToString(separator = "") {
             (if (it.dato.dayOfWeek == DayOfWeek.MONDAY) " " else "") +
                 when (it::class) {
                     NavDag::class -> "N"

@@ -1,9 +1,27 @@
 package no.nav.helse.utbetalingstidslinje
 
-import no.nav.helse.*
+import no.nav.helse.april
+import no.nav.helse.desember
+import no.nav.helse.februar
 import no.nav.helse.hendelser.til
-import no.nav.helse.testhelpers.*
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
+import no.nav.helse.januar
+import no.nav.helse.juni
+import no.nav.helse.mai
+import no.nav.helse.mars
+import no.nav.helse.testhelpers.AP
+import no.nav.helse.testhelpers.F
+import no.nav.helse.testhelpers.FRI
+import no.nav.helse.testhelpers.HELG
+import no.nav.helse.testhelpers.NAV
+import no.nav.helse.testhelpers.S
+import no.nav.helse.testhelpers.resetSeed
+import no.nav.helse.testhelpers.tidslinjeOf
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.Arbeidsdag
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDag
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.Fridag
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavDag
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavHelgDag
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.UkjentDag
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -181,7 +199,7 @@ internal class HistorieEnArbeidsgiverTest : HistorieTest() {
         )
         addTidligereUtbetaling(AG1, tidslinjeOf(5.NAV, 2.HELG, 5.NAV, 2.HELG, 5.NAV, 2.HELG))
         val utbetalingstidslinje = beregn(AG1, 1.januar til 21.januar, 1.januar)
-        assertEquals(21, utbetalingstidslinje.size)
+        assertEquals(16, utbetalingstidslinje.size)
         assertTrue(utbetalingstidslinje[7.januar] is ArbeidsgiverperiodeDag)
         assertTrue(utbetalingstidslinje[8.januar] is UkjentDag)
         assertTrue(utbetalingstidslinje[12.januar] is UkjentDag)
