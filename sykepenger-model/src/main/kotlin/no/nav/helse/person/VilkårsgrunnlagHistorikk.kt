@@ -1,5 +1,8 @@
 package no.nav.helse.person
 
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.UUID
 import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Vilkårsgrunnlag
@@ -10,9 +13,6 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Prosent
 import org.slf4j.LoggerFactory
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.*
 
 internal class VilkårsgrunnlagHistorikk private constructor(private val historikk: MutableList<Innslag>) {
 
@@ -41,8 +41,8 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
 
     internal fun vilkårsgrunnlagFor(skjæringstidspunkt: LocalDate) = historikk.firstOrNull()?.vilkårsgrunnlagFor(skjæringstidspunkt)
 
-    internal fun avvisInngangsvilkår(tidslinjer: List<Utbetalingstidslinje>, alder: Alder) {
-        historikk.firstOrNull()?.avvis(tidslinjer, alder)
+    internal fun avvisInngangsvilkår(tidslinjer: List<Utbetalingstidslinje>, alder: Alder): List<Utbetalingstidslinje> {
+        return historikk.firstOrNull()?.avvis(tidslinjer, alder) ?: tidslinjer
     }
 
     internal fun inntektsopplysningPerSkjæringstidspunktPerArbeidsgiver() = historikk.firstOrNull()?.inntektsopplysningPerSkjæringstidspunktPerArbeidsgiver()
@@ -95,9 +95,9 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         internal fun harSykepengegrunnlag(organisasjonsnummer: String, skjæringstidspunkt: LocalDate) =
             vilkårsgrunnlag[skjæringstidspunkt]?.sykepengegrunnlag()?.inntektsopplysningPerArbeidsgiver()?.containsKey(organisasjonsnummer) ?: false
 
-        internal fun avvis(tidslinjer: List<Utbetalingstidslinje>, alder: Alder) {
-            vilkårsgrunnlag.forEach { (skjæringstidspunkt, element) ->
-                element.avvis(tidslinjer, skjæringstidspunkt, alder)
+        internal fun avvis(tidslinjer: List<Utbetalingstidslinje>, alder: Alder): List<Utbetalingstidslinje> {
+            return vilkårsgrunnlag.toList().fold(tidslinjer) { challenger, (skjæringstidspunkt, element) ->
+                element.avvis(challenger, skjæringstidspunkt, alder)
             }
         }
 
@@ -118,7 +118,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         fun gjelderFlereArbeidsgivere(): Boolean
         fun oppdaterManglendeMinimumInntekt(person: Person, skjæringstidspunkt: LocalDate) {}
         fun sjekkAvviksprosent(aktivitetslogg: IAktivitetslogg): Boolean = true
-        fun avvis(tidslinjer: List<Utbetalingstidslinje>, skjæringstidspunkt: LocalDate, alder: Alder) {}
+        fun avvis(tidslinjer: List<Utbetalingstidslinje>, skjæringstidspunkt: LocalDate, alder: Alder): List<Utbetalingstidslinje> = tidslinjer
     }
 
     internal class Grunnlagsdata(
@@ -191,13 +191,13 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
 
         override fun gjelderFlereArbeidsgivere() = sykepengegrunnlag.inntektsopplysningPerArbeidsgiver().size > 1
 
-        override fun avvis(tidslinjer: List<Utbetalingstidslinje>, skjæringstidspunkt: LocalDate, alder: Alder) {
-            if (vurdertOk) return
+        override fun avvis(tidslinjer: List<Utbetalingstidslinje>, skjæringstidspunkt: LocalDate, alder: Alder): List<Utbetalingstidslinje> {
+            if (vurdertOk) return tidslinjer
             val begrunnelser = mutableListOf<Begrunnelse>()
             if (medlemskapstatus == Medlemskapsvurdering.Medlemskapstatus.Nei) begrunnelser.add(Begrunnelse.ManglerMedlemskap)
             if (harMinimumInntekt == false) begrunnelser.add(alder.begrunnelseForMinimumInntekt(skjæringstidspunkt))
             if (!opptjening.erOppfylt()) begrunnelser.add(Begrunnelse.ManglerOpptjening)
-            Utbetalingstidslinje.avvis(tidslinjer, setOf(skjæringstidspunkt), begrunnelser)
+            return Utbetalingstidslinje.avvis(tidslinjer, setOf(skjæringstidspunkt), begrunnelser)
         }
 
         override fun toSpesifikkKontekst() = SpesifikkKontekst(

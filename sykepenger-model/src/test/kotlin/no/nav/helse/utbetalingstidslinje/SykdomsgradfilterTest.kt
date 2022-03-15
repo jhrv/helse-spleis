@@ -8,8 +8,14 @@ import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.etterlevelse.MaskinellJurist
-import no.nav.helse.testhelpers.*
-import org.junit.jupiter.api.Assertions.*
+import no.nav.helse.testhelpers.AP
+import no.nav.helse.testhelpers.ARB
+import no.nav.helse.testhelpers.FRI
+import no.nav.helse.testhelpers.NAV
+import no.nav.helse.testhelpers.tidslinjeOf
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class SykdomsgradfilterTest {
@@ -71,11 +77,11 @@ internal class SykdomsgradfilterTest {
             tidslinjeOf(16.AP, 5.NAV(1200, 19.0))
         )
         val periode = Periode(1.januar, 21.januar)
-        undersøke(tidslinjer, periode)
-        assertEquals(3, tidslinjer.inspektør(0).avvistDagTeller)
-        assertEquals(2, tidslinjer.inspektør(0).navHelgDagTeller)
-        assertEquals(3, tidslinjer.inspektør(1).avvistDagTeller)
-        assertEquals(2, tidslinjer.inspektør(1).navHelgDagTeller)
+        val result = undersøke(tidslinjer, periode)
+        assertEquals(3, result.inspektør(0).avvistDagTeller)
+        assertEquals(2, result.inspektør(0).navHelgDagTeller)
+        assertEquals(3, result.inspektør(1).avvistDagTeller)
+        assertEquals(2, result.inspektør(1).navHelgDagTeller)
     }
 
     @Test
@@ -85,13 +91,13 @@ internal class SykdomsgradfilterTest {
             tidslinjeOf(16.AP, 5.NAV, 1.FRI)
         )
         val periode = Periode(1.januar, 22.januar)
-        undersøke(tidslinjer, periode)
-        assertEquals(3, tidslinjer.inspektør(0).navDagTeller)
-        assertEquals(2, tidslinjer.inspektør(0).navHelgDagTeller)
-        assertEquals(1, tidslinjer.inspektør(0).avvistDagTeller)
-        assertEquals(3, tidslinjer.inspektør(1).navDagTeller)
-        assertEquals(2, tidslinjer.inspektør(1).navHelgDagTeller)
-        assertEquals(1, tidslinjer.inspektør(1).fridagTeller)
+        val result = undersøke(tidslinjer, periode)
+        assertEquals(3, result.inspektør(0).navDagTeller)
+        assertEquals(2, result.inspektør(0).navHelgDagTeller)
+        assertEquals(1, result.inspektør(0).avvistDagTeller)
+        assertEquals(3, result.inspektør(1).navDagTeller)
+        assertEquals(2, result.inspektør(1).navHelgDagTeller)
+        assertEquals(1, result.inspektør(1).fridagTeller)
     }
 
     @Test
@@ -110,10 +116,11 @@ internal class SykdomsgradfilterTest {
         assertEquals(1, tidslinjer.inspektør(1).fridagTeller)
     }
 
-    private fun undersøke(tidslinjer: List<Utbetalingstidslinje>, periode: Periode) {
+    private fun undersøke(tidslinjer: List<Utbetalingstidslinje>, periode: Periode): List<Utbetalingstidslinje> {
         aktivitetslogg = Aktivitetslogg()
-        Sykdomsgradfilter(tidslinjer, periode, aktivitetslogg, MaskinellJurist()).filter()
-        inspektør = tidslinjer.inspektør(0)
+        return Sykdomsgradfilter(tidslinjer, periode, aktivitetslogg, MaskinellJurist()).filter().also { result ->
+            inspektør = result.inspektør(0)
+        }
     }
 
     private fun List<Utbetalingstidslinje>.inspektør(index: Int) = this[index].inspektør

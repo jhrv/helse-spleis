@@ -1,5 +1,8 @@
 package no.nav.helse.person
 
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.UUID
 import no.nav.helse.Fødselsnummer
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.inspectors.inspektør
@@ -15,9 +18,6 @@ import no.nav.helse.økonomi.Prosent.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.*
 
 internal class VilkårsgrunnlagHistorikkInnslagTest {
     private lateinit var innslag: VilkårsgrunnlagHistorikk.Innslag
@@ -45,8 +45,8 @@ internal class VilkårsgrunnlagHistorikkInnslagTest {
         val tidslinjer = listOf(tidslinjeOf(1.NAV))
         innslag.add(1.januar, testgrunnlag)
         innslag.add(1.januar, grunnlagsdata(1.januar, vurdertOk = false))
-        innslag.avvis(tidslinjer, ALDER)
-        val avvisteDager = avvisteDager(tidslinjer)
+        val result = innslag.avvis(tidslinjer, ALDER)
+        val avvisteDager = avvisteDager(result)
         assertEquals(1, avvisteDager.size)
         assertNotNull(avvisteDager.first().erAvvistMed(Begrunnelse.ManglerOpptjening))
     }
@@ -55,8 +55,8 @@ internal class VilkårsgrunnlagHistorikkInnslagTest {
     fun `avviser dager uten opptjening`() {
         val tidslinjer = listOf(tidslinjeOf(1.NAV))
         innslag.add(1.januar, grunnlagsdata(1.januar, vurdertOk = false))
-        innslag.avvis(tidslinjer, ALDER)
-        val avvisteDager = avvisteDager(tidslinjer)
+        val result = innslag.avvis(tidslinjer, ALDER)
+        val avvisteDager = avvisteDager(result)
         assertEquals(1, avvisteDager.size)
         assertNotNull(avvisteDager.first().erAvvistMed(Begrunnelse.ManglerOpptjening))
     }
@@ -73,8 +73,8 @@ internal class VilkårsgrunnlagHistorikkInnslagTest {
     fun `avviser med flere begrunnelser`() {
         val tidslinjer = listOf(tidslinjeOf(1.NAV))
         innslag.add(1.januar, grunnlagsdata(1.januar, vurdertOk = false, harMinimumInntekt = false))
-        innslag.avvis(tidslinjer, ALDER)
-        val avvisteDager = avvisteDager(tidslinjer)
+        val result = innslag.avvis(tidslinjer, ALDER)
+        val avvisteDager = avvisteDager(result)
         assertEquals(1, avvisteDager.size)
         avvisteDager.first().also {
             assertNotNull(it.erAvvistMed(Begrunnelse.MinimumInntekt))
@@ -87,8 +87,8 @@ internal class VilkårsgrunnlagHistorikkInnslagTest {
         val tidslinjer = listOf(tidslinjeOf(2.NAV, skjæringstidspunkter = listOf(1.januar, 2.januar)))
         innslag.add(1.januar, grunnlagsdata(1.januar, vurdertOk = false))
         innslag.add(2.januar, grunnlagsdata(2.januar, vurdertOk = false, harMinimumInntekt = false))
-        innslag.avvis(tidslinjer, ALDER)
-        val avvisteDager = avvisteDager(tidslinjer)
+        val result = innslag.avvis(tidslinjer, ALDER)
+        val avvisteDager = avvisteDager(result)
         assertEquals(2, avvisteDager.size)
         assertNotNull(avvisteDager.first().erAvvistMed(Begrunnelse.ManglerOpptjening))
         assertNotNull(avvisteDager.last().erAvvistMed(Begrunnelse.MinimumInntekt))
@@ -99,8 +99,8 @@ internal class VilkårsgrunnlagHistorikkInnslagTest {
         val tidslinjer = listOf(tidslinjeOf(2.NAV, skjæringstidspunkter = listOf(1.januar, 2.januar)))
         innslag.add(1.januar, grunnlagsdata(1.januar, vurdertOk = true))
         innslag.add(2.januar, grunnlagsdata(2.januar, vurdertOk = false, harMinimumInntekt = false, erMedlem = false))
-        innslag.avvis(tidslinjer, ALDER)
-        val avvisteDager = avvisteDager(tidslinjer)
+        val result = innslag.avvis(tidslinjer, ALDER)
+        val avvisteDager = avvisteDager(result)
         assertEquals(1, avvisteDager.size)
         avvisteDager.first().also {
             assertNotNull(it.erAvvistMed(Begrunnelse.ManglerOpptjening))

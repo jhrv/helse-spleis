@@ -1,5 +1,6 @@
 package no.nav.helse.utbetalingstidslinje
 
+import java.time.LocalDate
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.person.IAktivitetslogg
@@ -9,7 +10,6 @@ import no.nav.helse.person.etterlevelse.SubsumsjonObserver.Companion.subsumsjons
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavDag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.UkjentDag
 import no.nav.helse.økonomi.Økonomi
-import java.time.LocalDate
 
 internal class MaksimumSykepengedagerfilter(
     private val alder: Alder,
@@ -31,6 +31,7 @@ internal class MaksimumSykepengedagerfilter(
     private val avvisteDager get() = begrunnelserForAvvisteDager.values.flatten().toSet()
     private lateinit var beregnetTidslinje: Utbetalingstidslinje
     private lateinit var tidslinjegrunnlag: List<Utbetalingstidslinje>
+    lateinit var maksimumSykepenger: Alder.MaksimumSykepenger
 
     private fun avvisDag(dag: LocalDate, begrunnelse: Begrunnelse) {
         begrunnelserForAvvisteDager.getOrPut(begrunnelse) {
@@ -68,7 +69,7 @@ internal class MaksimumSykepengedagerfilter(
         override fun `§ 8-3 ledd 1 punktum 2`(sisteDag: LocalDate, forbrukteDager: Int, gjenståendeDager: Int) {}
     }
 
-    internal fun filter(tidslinjer: List<Utbetalingstidslinje>, personTidslinje: Utbetalingstidslinje): Alder.MaksimumSykepenger {
+    internal fun filter(tidslinjer: List<Utbetalingstidslinje>, personTidslinje: Utbetalingstidslinje): List<Utbetalingstidslinje> {
         beregnetTidslinje = tidslinjer
             .reduce(Utbetalingstidslinje::plus)
             .plus(personTidslinje)
@@ -77,17 +78,18 @@ internal class MaksimumSykepengedagerfilter(
         state = State.Initiell
         beregnetTidslinje.accept(this)
 
-        val maksimumSykepenger = teller.maksimumSykepenger(sisteDag).also {
+        maksimumSykepenger = teller.maksimumSykepenger(sisteDag).also {
             it.sisteDag(karantenesporing)
         }
 
-        begrunnelserForAvvisteDager.forEach { (begrunnelse, avvisteDager) ->
+        val result = begrunnelserForAvvisteDager.toList().fold(tidslinjer) { challenger, (begrunnelse, avvisteDager) ->
             Utbetalingstidslinje.avvis(
-                tidslinjer = tidslinjer,
+                tidslinjer = challenger,
                 avvistePerioder = avvisteDager.grupperSammenhengendePerioder(),
                 begrunnelser = listOf(begrunnelse)
             )
         }
+
         if (begrunnelserForAvvisteDager[Begrunnelse.NyVilkårsprøvingNødvendig]?.any { it in periode } == true) {
             aktivitetslogg.error("Bruker er fortsatt syk 26 uker etter maksdato")
         }
@@ -96,7 +98,7 @@ internal class MaksimumSykepengedagerfilter(
         else
             aktivitetslogg.info("Maksimalt antall sykedager overskrides ikke i perioden")
 
-        return maksimumSykepenger
+        return result
     }
 
     private fun state(nyState: State) {

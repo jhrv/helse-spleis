@@ -1,40 +1,69 @@
 package no.nav.helse.utbetalingstidslinje
 
-import no.nav.helse.hendelser.til
-import no.nav.helse.sykdomstidslinje.Dag
-import no.nav.helse.testhelpers.*
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
-import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.Test
 import no.nav.helse.desember
 import no.nav.helse.februar
+import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mars
+import no.nav.helse.sykdomstidslinje.Dag
+import no.nav.helse.testhelpers.AP
+import no.nav.helse.testhelpers.ARB
+import no.nav.helse.testhelpers.AVV
+import no.nav.helse.testhelpers.FOR
+import no.nav.helse.testhelpers.FRI
+import no.nav.helse.testhelpers.NAV
+import no.nav.helse.testhelpers.tidslinjeOf
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.AvvistDag
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavDag
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavHelgDag
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.UkjentDag
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Test
 
 internal class UtbetalingstidslinjeTest {
 
     @Test
+    fun `muterer ikke tidslinjen ved avvisning`() {
+        val original = tidslinjeOf(5.NAV)
+        val avvist1 = Utbetalingstidslinje.avvis(listOf(original), setOf(1.januar), listOf(Begrunnelse.MinimumSykdomsgrad)).first()
+        val avvist2 = Utbetalingstidslinje.avvis(listOf(avvist1), setOf(1.januar), listOf(Begrunnelse.EtterDødsdato)).first()
+        val avvist3 = Utbetalingstidslinje.avvis(listOf(avvist2), setOf(1.januar), listOf(Begrunnelse.ManglerMedlemskap)).first()
+        assertFalse(original[1.januar] is AvvistDag)
+        assertTrue(avvist1[1.januar] is AvvistDag)
+        assertEquals(1, (avvist1[1.januar] as AvvistDag).begrunnelser.size)
+        assertTrue(avvist2[1.januar] is AvvistDag)
+        assertEquals(2, (avvist2[1.januar] as AvvistDag).begrunnelser.size)
+        assertTrue(avvist3[1.januar] is AvvistDag)
+        assertEquals(3, (avvist3[1.januar] as AvvistDag).begrunnelser.size)
+    }
+
+    @Test
     fun `avviser skjæringstidspunkt med flere begrunnelser`() {
-        tidslinjeOf(5.NAV).also {
-            Utbetalingstidslinje.avvis(listOf(it), setOf(1.januar), listOf(Begrunnelse.MinimumSykdomsgrad))
-            Utbetalingstidslinje.avvis(listOf(it), setOf(1.januar), listOf(Begrunnelse.EtterDødsdato))
-            Utbetalingstidslinje.avvis(listOf(it), setOf(1.januar), listOf(Begrunnelse.ManglerMedlemskap))
-            val dag = it[1.januar] as AvvistDag
-            assertEquals(3, dag.begrunnelser.size)
-        }
+        val original = tidslinjeOf(5.NAV)
+        val avvist1 = Utbetalingstidslinje.avvis(listOf(original), setOf(1.januar), listOf(Begrunnelse.MinimumSykdomsgrad)).first()
+        val avvist2 = Utbetalingstidslinje.avvis(listOf(avvist1), setOf(1.januar), listOf(Begrunnelse.EtterDødsdato)).first()
+        val avvist3 = Utbetalingstidslinje.avvis(listOf(avvist2), setOf(1.januar), listOf(Begrunnelse.ManglerMedlemskap)).first()
+        assertFalse(original[1.januar] is AvvistDag)
+        assertTrue(avvist1[1.januar] is AvvistDag)
+        assertEquals(listOf(Begrunnelse.MinimumSykdomsgrad), (avvist1[1.januar] as AvvistDag).begrunnelser)
+        assertTrue(avvist2[1.januar] is AvvistDag)
+        assertEquals(listOf(Begrunnelse.MinimumSykdomsgrad, Begrunnelse.EtterDødsdato), (avvist2[1.januar] as AvvistDag).begrunnelser)
+        assertTrue(avvist3[1.januar] is AvvistDag)
+        assertEquals(listOf(Begrunnelse.MinimumSykdomsgrad, Begrunnelse.EtterDødsdato, Begrunnelse.ManglerMedlemskap), (avvist3[1.januar] as AvvistDag).begrunnelser)
     }
 
     @Test
     fun `avviser perioder med flere begrunnelser`() {
         val periode = 1.januar til 5.januar
-        tidslinjeOf(5.NAV).also {
-            Utbetalingstidslinje.avvis(listOf(it), listOf(periode), listOf(Begrunnelse.MinimumSykdomsgrad))
-            Utbetalingstidslinje.avvis(listOf(it), listOf(periode), listOf(Begrunnelse.EtterDødsdato))
-            Utbetalingstidslinje.avvis(listOf(it), listOf(periode), listOf(Begrunnelse.ManglerMedlemskap))
-            periode.forEach { dato ->
-                val dag = it[dato] as AvvistDag
-                assertEquals(3, dag.begrunnelser.size)
-            }
+        val original = tidslinjeOf(5.NAV)
+        val avvist1 = Utbetalingstidslinje.avvis(listOf(original), listOf(periode), listOf(Begrunnelse.MinimumSykdomsgrad)).first()
+        val avvist2 = Utbetalingstidslinje.avvis(listOf(avvist1), listOf(periode), listOf(Begrunnelse.EtterDødsdato)).first()
+        val avvist3 = Utbetalingstidslinje.avvis(listOf(avvist2), listOf(periode), listOf(Begrunnelse.ManglerMedlemskap)).first()
+        periode.forEach { dato ->
+            val dag = avvist3[dato] as AvvistDag
+            assertEquals(3, dag.begrunnelser.size)
         }
     }
 

@@ -1,26 +1,24 @@
 package no.nav.helse.utbetalingstidslinje
 
-import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.til
-import no.nav.helse.hentErrors
-import no.nav.helse.inspectors.inspektør
-import no.nav.helse.person.Aktivitetslogg
-import no.nav.helse.person.etterlevelse.MaskinellJurist
-import no.nav.helse.sykdomstidslinje.erHelg
-import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import no.nav.helse.april
 import no.nav.helse.desember
 import no.nav.helse.februar
+import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.til
+import no.nav.helse.hentErrors
 import no.nav.helse.hentInfo
+import no.nav.helse.inspectors.UtbetalingstidslinjeInspektør
+import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.juli
 import no.nav.helse.juni
 import no.nav.helse.mars
 import no.nav.helse.oktober
+import no.nav.helse.person.Aktivitetslogg
+import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.somFødselsnummer
+import no.nav.helse.sykdomstidslinje.erHelg
 import no.nav.helse.testhelpers.AP
 import no.nav.helse.testhelpers.ARB
 import no.nav.helse.testhelpers.FRI
@@ -30,9 +28,12 @@ import no.nav.helse.testhelpers.NAVDAGER
 import no.nav.helse.testhelpers.UTELATE
 import no.nav.helse.testhelpers.Utbetalingsdager
 import no.nav.helse.testhelpers.tidslinjeOf
+import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 
 internal class MaksimumSykepengedagerfilterTest {
     private companion object {
@@ -43,6 +44,7 @@ internal class MaksimumSykepengedagerfilterTest {
 
     private lateinit var maksimumSykepenger: Alder.MaksimumSykepenger
     private lateinit var aktivitetslogg: Aktivitetslogg
+    private lateinit var inspektør: UtbetalingstidslinjeInspektør
 
     @BeforeEach
     internal fun setup() {
@@ -222,16 +224,16 @@ internal class MaksimumSykepengedagerfilterTest {
         val tidslinje = tidslinjeOf(248.NAVDAGER, 2.NAVDAGER, startDato = 23.februar(2017))
         val avvisteDager = tidslinje.utbetalingsavgrenser(PERSON_67_ÅR_11_JANUAR_2018)
         assertEquals(2, avvisteDager.size)
-        assertTrue(tidslinje.inspektør.avvistedager.all { it.begrunnelser.single() == Begrunnelse.SykepengedagerOppbrukt })
+        assertTrue(inspektør.avvistedager.all { it.begrunnelser.single() == Begrunnelse.SykepengedagerOppbrukt })
     }
 
     @Test
     fun `bruke opp alt fom 67 år`() {
         val tidslinje = tidslinjeOf(188.NAVDAGER, 61.NAVDAGER, (26 * 7).ARB, 61.NAVDAGER, 36.ARB, 365.ARB, 365.ARB, 1.NAVDAGER, startDato = 30.mars(2017))
         assertEquals(listOf(13.mars, 5.desember, 11.januar(2021)), tidslinje.utbetalingsavgrenser(PERSON_67_ÅR_11_JANUAR_2018))
-        assertEquals(listOf(Begrunnelse.SykepengedagerOppbrukt), tidslinje.inspektør.begrunnelse(13.mars))
-        assertEquals(listOf(Begrunnelse.SykepengedagerOppbruktOver67), tidslinje.inspektør.begrunnelse(5.desember))
-        assertEquals(listOf(Begrunnelse.Over70), tidslinje.inspektør.begrunnelse(11.januar(2021)))
+        assertEquals(listOf(Begrunnelse.SykepengedagerOppbrukt), inspektør.begrunnelse(13.mars))
+        assertEquals(listOf(Begrunnelse.SykepengedagerOppbruktOver67), inspektør.begrunnelse(5.desember))
+        assertEquals(listOf(Begrunnelse.Over70), inspektør.begrunnelse(11.januar(2021)))
     }
 
     @Test
@@ -239,7 +241,7 @@ internal class MaksimumSykepengedagerfilterTest {
         val tidslinje = tidslinjeOf(11.NAV, 60.NAVDAGER, 2.NAVDAGER)
         val avvisteDager = tidslinje.utbetalingsavgrenser(PERSON_67_ÅR_11_JANUAR_2018)
         assertEquals(2, avvisteDager.size)
-        assertTrue(tidslinje.inspektør.avvistedager.all { it.begrunnelser.single() == Begrunnelse.SykepengedagerOppbruktOver67 })
+        assertTrue(inspektør.avvistedager.all { it.begrunnelser.single() == Begrunnelse.SykepengedagerOppbruktOver67 })
     }
 
     @Test
@@ -247,7 +249,7 @@ internal class MaksimumSykepengedagerfilterTest {
         val tidslinje = tidslinjeOf(248.NAVDAGER, 25.ARB, 2.NAVDAGER, startDato = 23.februar(2017))
         val avvisteDager = tidslinje.utbetalingsavgrenser(PERSON_67_ÅR_11_JANUAR_2018)
         assertEquals(2, avvisteDager.size)
-        assertTrue(tidslinje.inspektør.avvistedager.all { it.begrunnelser.single() == Begrunnelse.SykepengedagerOppbrukt })
+        assertTrue(inspektør.avvistedager.all { it.begrunnelser.single() == Begrunnelse.SykepengedagerOppbrukt })
     }
 
     @Test
@@ -255,15 +257,15 @@ internal class MaksimumSykepengedagerfilterTest {
         val tidslinje = tidslinjeOf(248.NAVDAGER, 1.NAVDAGER, (26 * 7).ARB, 60.NAVDAGER, 1.NAVDAGER, startDato = 23.februar(2017))
         val avvisteDager = tidslinje.utbetalingsavgrenser(PERSON_67_ÅR_11_JANUAR_2018)
         assertEquals(2, avvisteDager.size)
-        assertEquals(Begrunnelse.SykepengedagerOppbrukt, tidslinje.inspektør.avvistedager.first().begrunnelser.single())
-        assertEquals(Begrunnelse.SykepengedagerOppbruktOver67, tidslinje.inspektør.avvistedager.last().begrunnelser.single())
+        assertEquals(Begrunnelse.SykepengedagerOppbrukt, inspektør.avvistedager.first().begrunnelser.single())
+        assertEquals(Begrunnelse.SykepengedagerOppbruktOver67, inspektør.avvistedager.last().begrunnelser.single())
     }
 
     @Test
     fun `begrunnelse ved fylte 70`() {
         val tidslinje = tidslinjeOf(11.NAV)
         assertEquals(2, tidslinje.utbetalingsavgrenser(PERSON_70_ÅR_10_JANUAR_2018).size)
-        assertTrue(tidslinje.inspektør.avvistedager.all { it.begrunnelser.single() == Begrunnelse.Over70 })
+        assertTrue(inspektør.avvistedager.all { it.begrunnelser.single() == Begrunnelse.Over70 })
     }
 
     @Test
@@ -468,11 +470,11 @@ internal class MaksimumSykepengedagerfilterTest {
     fun `error dersom 26 uker med sammenhengende sykdom etter maksdato`() {
         val tidslinje = tidslinjeOf(248.NAVDAGER, 182.NAV, 1.NAVDAGER)
         tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018)
-        tidslinje.inspektør.avvistedatoer.dropLast(1).forEach { dato ->
-            assertEquals(listOf(Begrunnelse.SykepengedagerOppbrukt), tidslinje.inspektør.begrunnelse(dato))
+        inspektør.avvistedatoer.dropLast(1).forEach { dato ->
+            assertEquals(listOf(Begrunnelse.SykepengedagerOppbrukt), inspektør.begrunnelse(dato))
         }
         assertTrue(aktivitetslogg.hentErrors().contains("Bruker er fortsatt syk 26 uker etter maksdato"))
-        assertEquals(listOf(Begrunnelse.NyVilkårsprøvingNødvendig), tidslinje.inspektør.begrunnelse(tidslinje.inspektør.avvistedatoer.last()))
+        assertEquals(listOf(Begrunnelse.NyVilkårsprøvingNødvendig), inspektør.begrunnelse(inspektør.avvistedatoer.last()))
     }
 
     @Test
@@ -493,8 +495,8 @@ internal class MaksimumSykepengedagerfilterTest {
     fun `ikke error dersom sykedager oppbrukt fram til 26 uker med sammenhengende sykdom etter maksdato`() {
         val tidslinje = tidslinjeOf(248.NAVDAGER, 182.NAV)
         tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018)
-        tidslinje.inspektør.avvistedatoer.forEach { dato ->
-            assertEquals(listOf(Begrunnelse.SykepengedagerOppbrukt), tidslinje.inspektør.begrunnelse(dato))
+        inspektør.avvistedatoer.forEach { dato ->
+            assertEquals(listOf(Begrunnelse.SykepengedagerOppbrukt), inspektør.begrunnelse(dato))
         }
         assertFalse(aktivitetslogg.hasErrorsOrWorse())
         assertFalse(tidslinje.last().dato.erHelg())
@@ -545,13 +547,16 @@ internal class MaksimumSykepengedagerfilterTest {
         periode: Periode? = null,
         personTidslinje: Utbetalingstidslinje = Utbetalingstidslinje()
     ): List<LocalDate> {
-        maksimumSykepenger = MaksimumSykepengedagerfilter(
+        val filter = MaksimumSykepengedagerfilter(
             fnr.somFødselsnummer().alder(),
             NormalArbeidstaker,
             periode ?: (this + personTidslinje).periode(),
             aktivitetslogg,
             subsumsjonObserver = MaskinellJurist()
-        ).filter(listOf(this), personTidslinje)
-        return inspektør.avvistedatoer
+        )
+        val result = filter.filter(listOf(this), personTidslinje)
+        maksimumSykepenger = filter.maksimumSykepenger
+        this@MaksimumSykepengedagerfilterTest.inspektør = result.first().inspektør
+        return this@MaksimumSykepengedagerfilterTest.inspektør.avvistedatoer
     }
 }

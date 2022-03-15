@@ -1,5 +1,6 @@
 package no.nav.helse.utbetalingstidslinje
 
+import java.time.LocalDate
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.inspectors.UtbetalingstidslinjeInspektør
 import no.nav.helse.inspectors.inspektør
@@ -10,7 +11,6 @@ import no.nav.helse.testhelpers.NAV
 import no.nav.helse.testhelpers.tidslinjeOf
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
 
 internal class AvvisDagerEtterDødsdatofilterTest {
     private lateinit var inspektør: UtbetalingstidslinjeInspektør
@@ -81,14 +81,15 @@ internal class AvvisDagerEtterDødsdatofilterTest {
             tidslinjeOf(16.AP, 5.NAV)
         )
         val periode = Periode(1.januar, 21.januar)
-        undersøke(tidslinjer, 1.januar, periode)
-        assertEquals(3, tidslinjer.first().inspektør.avvistDagTeller)
-        assertEquals(3, tidslinjer.last().inspektør.avvistDagTeller)
+        val result = undersøke(tidslinjer, 1.januar, periode)
+        assertEquals(3, result.first().inspektør.avvistDagTeller)
+        assertEquals(3, result.last().inspektør.avvistDagTeller)
     }
 
-    private fun undersøke(tidslinjer: List<Utbetalingstidslinje>, dødsdato: LocalDate?, periode: Periode) {
+    private fun undersøke(tidslinjer: List<Utbetalingstidslinje>, dødsdato: LocalDate?, periode: Periode): List<Utbetalingstidslinje> {
         aktivitetslogg = Aktivitetslogg()
-        AvvisDagerEtterDødsdatofilter(tidslinjer, periode, dødsdato, aktivitetslogg).filter()
-        inspektør = tidslinjer.first().inspektør
+        return AvvisDagerEtterDødsdatofilter(tidslinjer, periode, dødsdato, aktivitetslogg).filter().also { result ->
+            inspektør = result.first().inspektør
+        }
     }
 }
