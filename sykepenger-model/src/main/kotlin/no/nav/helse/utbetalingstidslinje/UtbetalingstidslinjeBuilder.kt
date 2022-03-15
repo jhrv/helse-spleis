@@ -62,6 +62,10 @@ internal class UtbetalingstidslinjeBuilder(private val inntekter: Inntekter) : I
         builder.addNAVdag(dato, inntekter.medInntekt(dato, økonomi, nåværendeArbeidsgiverperiode))
     }
 
+    override fun ukjentdag(dato: LocalDate, økonomi: Økonomi) {
+        builder.addUkjentDag(dato, økonomi)
+    }
+
     override fun foreldetDag(dato: LocalDate, økonomi: Økonomi) {
         builder.addForeldetDag(dato, inntekter.medInntekt(dato, økonomi, nåværendeArbeidsgiverperiode))
     }

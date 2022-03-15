@@ -31,7 +31,7 @@ internal class Utbetalingstidslinje(utbetalingsdager: List<Utbetalingsdag>) : Co
     internal constructor() : this(mutableListOf())
 
     init {
-        check(utbetalingsdager.distinctBy { it.dato }.size == utbetalingsdager.size) {
+        check(this.utbetalingsdager.distinctBy { it.dato }.size == this.utbetalingsdager.size) {
             "Utbetalingstidslinjen består av minst én dato som pekes på av mer enn én Utbetalingsdag"
         }
     }
@@ -116,10 +116,6 @@ internal class Utbetalingstidslinje(utbetalingsdager: List<Utbetalingsdag>) : Co
         }
     }
 
-    internal operator fun plus(other: Utbetalingstidslinje): Utbetalingstidslinje {
-        return this.plus(other) { venstre, høyre -> maxOf(venstre, høyre) }
-    }
-
     internal fun reverse(): Utbetalingstidslinje {
         return Utbetalingstidslinje(utbetalingsdager.asReversed())
     }
@@ -145,15 +141,13 @@ internal class Utbetalingstidslinje(utbetalingsdager: List<Utbetalingsdag>) : Co
 
     override fun iterator() = this.utbetalingsdager.iterator()
 
-    internal fun plus(
-        other: Utbetalingstidslinje,
-        plusstrategy: (Utbetalingsdag, Utbetalingsdag) -> Utbetalingsdag
-    ): Utbetalingstidslinje {
+    internal operator fun plus(other: Utbetalingstidslinje): Utbetalingstidslinje {
         if (other.isEmpty()) return this
         if (this.isEmpty()) return other
-        val tidligsteDato = this.tidligsteDato(other)
-        val sisteDato = this.sisteDato(other)
-        return this.utvide(tidligsteDato, sisteDato).binde(other.utvide(tidligsteDato, sisteDato), plusstrategy)
+        val periode = periode(listOf(this, other))
+        return this.utvide(periode).binde(other.utvide(periode)) { venstre, høyre ->
+            maxOf(venstre, høyre)
+        }
     }
 
     private fun binde(
@@ -161,34 +155,21 @@ internal class Utbetalingstidslinje(utbetalingsdager: List<Utbetalingsdag>) : Co
         strategy: (Utbetalingsdag, Utbetalingsdag) -> Utbetalingsdag
     ) = Utbetalingstidslinje(
         this.utbetalingsdager.zip(other.utbetalingsdager, strategy).toMutableList()
-    ).trim()
-
-    private fun trim(): Utbetalingstidslinje {
-        val første = firstOrNull { it !is UkjentDag }?.dato ?: return Utbetalingstidslinje()
-        return subset(første til last { it !is UkjentDag }.dato)
-    }
+    )
 
     private fun trimLedendeFridager() = Utbetalingstidslinje(dropWhile { it is Fridag }.toMutableList())
 
-    private fun utvide(tidligsteDato: LocalDate, sisteDato: LocalDate): Utbetalingstidslinje {
+    private fun utvide(periode: Periode): Utbetalingstidslinje {
         val original = this
         return Builder().apply {
-            tidligsteDato.datesUntil(original.førsteDato)
+            periode.start.datesUntil(original.førsteDato)
                 .forEach { addUkjentDag(it) }
             original.utbetalingsdager.forEach { add(it) }
             original.sisteDato.plusDays(1)
-                .datesUntil(sisteDato.plusDays(1))
+                .datesUntil(periode.endInclusive.plusDays(1))
                 .forEach { addUkjentDag(it) }
         }.build()
     }
-
-    private fun tidligsteDato(other: Utbetalingstidslinje) =
-        minOf(this.førsteDato, other.førsteDato)
-
-    private fun sisteDato(other: Utbetalingstidslinje) =
-        maxOf(this.sisteDato, other.sisteDato)
-
-    internal fun sisteUkedag() = utbetalingsdager.last { it !is NavHelgDag }.dato
 
     internal fun periode() = Periode(førsteDato, sisteDato)
 
@@ -381,10 +362,12 @@ internal class Utbetalingstidslinje(utbetalingsdager: List<Utbetalingsdag>) : Co
 
         internal fun addUkjentDag(dato: LocalDate) =
             Økonomi.ikkeBetalt().let { økonomi ->
-                if (dato.erHelg()) addFridag(dato, økonomi) else {
-                    add(UkjentDag(dato, økonomi))
-                }
+                if (dato.erHelg()) addFridag(dato, økonomi) else addUkjentDag(dato, økonomi)
             }
+
+        internal fun addUkjentDag(dato: LocalDate, økonomi: Økonomi) {
+            add(UkjentDag(dato, økonomi))
+        }
 
         internal fun addAvvistDag(dato: LocalDate, økonomi: Økonomi, begrunnelser: List<Begrunnelse>) {
             add(AvvistDag(dato, økonomi, begrunnelser))

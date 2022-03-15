@@ -1,7 +1,17 @@
 package no.nav.helse.person.infotrygdhistorikk
 
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.Objects
+import java.util.UUID
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.person.*
+import no.nav.helse.person.IAktivitetslogg
+import no.nav.helse.person.InfotrygdhistorikkVisitor
+import no.nav.helse.person.Periodetype
+import no.nav.helse.person.Person
+import no.nav.helse.person.SykdomstidslinjeVisitor
+import no.nav.helse.person.Sykepengegrunnlag
+import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode.Companion.harBrukerutbetalingFor
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode.Companion.validerInntektForPerioder
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning.Companion.fjern
@@ -10,16 +20,12 @@ import no.nav.helse.sykdomstidslinje.Dag.Companion.replace
 import no.nav.helse.sykdomstidslinje.Dag.Companion.sammenhengendeSykdom
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
-import no.nav.helse.sykdomstidslinje.erHelg
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
+import no.nav.helse.utbetalingstidslinje.ArbeidsgiverperiodeMediator
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiodeteller
 import no.nav.helse.utbetalingstidslinje.Infotrygddekoratør
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.*
 
 internal class InfotrygdhistorikkElement private constructor(
     private val id: UUID,
@@ -94,7 +100,7 @@ internal class InfotrygdhistorikkElement private constructor(
     }
 
     internal fun build(organisasjonsnummer: String, sykdomstidslinje: Sykdomstidslinje, teller: Arbeidsgiverperiodeteller, builder: SykdomstidslinjeVisitor) {
-        val dekoratør = Infotrygddekoratør(teller, builder, perioder.filterIsInstance<Utbetalingsperiode>().filter { it.gjelder(organisasjonsnummer) })
+        val dekoratør = Infotrygddekoratør(teller, builder, utbetalinger(organisasjonsnummer))
         historikkFor(organisasjonsnummer, sykdomstidslinje).accept(dekoratør)
     }
 
@@ -212,16 +218,8 @@ internal class InfotrygdhistorikkElement private constructor(
                 .fold(Utbetalingstidslinje(), Utbetalingstidslinje::plus)
         }
 
-    internal fun fjernHistorikk(utbetalingstidlinje: Utbetalingstidslinje, organisasjonsnummer: String): Utbetalingstidslinje {
-        return utbetalingstidlinje.plus(utbetalingstidslinje(organisasjonsnummer).subset(utbetalingstidlinje.periode())) { spleisDag: Utbetalingstidslinje.Utbetalingsdag, infotrygdDag: Utbetalingstidslinje.Utbetalingsdag ->
-            when {
-                // fjerner utbetalinger i ukedager (bevarer fridager)
-                !infotrygdDag.dato.erHelg() && infotrygdDag is NavDag -> UkjentDag(spleisDag.dato, spleisDag.økonomi)
-                // fjerner utbetalinger i helger (bevarer fridager)
-                infotrygdDag.dato.erHelg() && infotrygdDag !is Fridag -> UkjentDag(spleisDag.dato, spleisDag.økonomi)
-                else -> spleisDag
-            }
-        }
+    internal fun dekoratør(organisasjonsnummer: String, builder: ArbeidsgiverperiodeMediator): ArbeidsgiverperiodeMediator {
+        return InfotrygdUtbetalingstidslinjedekoratør(builder, utbetalinger(organisasjonsnummer))
     }
 
     internal fun harBetaltRettFør(periode: Periode): Boolean {

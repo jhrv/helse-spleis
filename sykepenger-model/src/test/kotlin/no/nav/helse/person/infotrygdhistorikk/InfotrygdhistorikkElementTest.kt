@@ -1,27 +1,44 @@
 package no.nav.helse.person.infotrygdhistorikk
 
-import no.nav.helse.*
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.UUID
+import no.nav.helse.april
+import no.nav.helse.august
+import no.nav.helse.februar
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
-import no.nav.helse.person.*
+import no.nav.helse.januar
+import no.nav.helse.juni
+import no.nav.helse.mai
+import no.nav.helse.mars
+import no.nav.helse.person.Aktivitetslogg
+import no.nav.helse.person.Inntektshistorikk
+import no.nav.helse.person.Periodetype
+import no.nav.helse.person.Person
+import no.nav.helse.person.Sykepengegrunnlag
 import no.nav.helse.person.Sykepengegrunnlag.Begrensning.ER_IKKE_6G_BEGRENSET
+import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.person.etterlevelse.MaskinellJurist
+import no.nav.helse.somFødselsnummer
 import no.nav.helse.sykdomstidslinje.Dag
-import no.nav.helse.testhelpers.*
+import no.nav.helse.testhelpers.A
+import no.nav.helse.testhelpers.S
+import no.nav.helse.testhelpers.opphold
+import no.nav.helse.testhelpers.resetSeed
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertNotEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.*
 import kotlin.math.roundToInt
 
 internal class InfotrygdhistorikkElementTest {
@@ -138,64 +155,6 @@ internal class InfotrygdhistorikkElementTest {
         )
         element.utbetalingstidslinje().also {
             assertEquals(1.januar til 20.januar, it.periode())
-        }
-    }
-
-    @Test
-    fun `fjerner historiske utbetalinger`() {
-        val element = historikkelement(
-            listOf(
-                ArbeidsgiverUtbetalingsperiode("ag1", 1.januar, 10.januar, 100.prosent, 25000.månedlig),
-                Friperiode(11.januar, 20.januar),
-                ArbeidsgiverUtbetalingsperiode("ag1", 21.januar, 31.januar, 100.prosent, 25000.månedlig),
-                ArbeidsgiverUtbetalingsperiode("ag1", 1.februar, 28.februar, 100.prosent, 25000.månedlig)
-            )
-        )
-        element.fjernHistorikk(tidslinjeOf(10.NAV), "ag1").also { utbetalingstidslinje ->
-            assertTrue(utbetalingstidslinje.isEmpty())
-        }
-        element.fjernHistorikk(tidslinjeOf(10.NAV, 10.FRI, 11.NAV, 28.NAV, 31.NAV), "ag1").also { utbetalingstidslinje ->
-            assertEquals(11.januar til 31.mars, utbetalingstidslinje.periode())
-            assertTrue(utbetalingstidslinje.subset(11.januar til 20.januar).all { it is Fridag })
-            assertTrue(utbetalingstidslinje.subset(21.januar til 28.februar).all { it is UkjentDag })
-            assertTrue(utbetalingstidslinje.subset(1.mars til 31.mars).all { it is NavDag || it is NavHelgDag })
-        }
-        element.fjernHistorikk(tidslinjeOf(31.UTELATE, 28.NAV, 31.NAV), "ag1").also {
-            assertEquals(1.mars til 31.mars, it.periode())
-        }
-    }
-
-    @Test
-    fun `tar ikke med historiske fridager`() {
-        val element = historikkelement(
-            listOf(
-                Friperiode(11.januar, 20.januar),
-                ArbeidsgiverUtbetalingsperiode("ag1", 21.januar, 31.januar, 100.prosent, 25000.månedlig),
-            )
-        )
-        element.fjernHistorikk(tidslinjeOf(10.NAV), "ag1").also { utbetalingstidslinje ->
-            assertEquals(1.januar til 10.januar, utbetalingstidslinje.periode())
-        }
-    }
-
-    @Test
-    fun `fjerner ikke historikk fra andre arbeidsgivere`() {
-        val element = historikkelement(
-            listOf(
-                ArbeidsgiverUtbetalingsperiode("ag2", 1.januar, 10.januar, 100.prosent, 25000.månedlig),
-                Friperiode(11.januar, 20.januar)
-            )
-        )
-        element.fjernHistorikk(tidslinjeOf(10.NAV, 10.FRI, 11.NAV), "ag1").also { utbetalingstidslinje ->
-            assertEquals(1.januar til 31.januar, utbetalingstidslinje.periode())
-            assertTrue(utbetalingstidslinje.subset(1.januar til 5.januar).all { it is NavDag })
-            assertTrue(utbetalingstidslinje.subset(6.januar til 7.januar).all { it is NavHelgDag })
-            assertTrue(utbetalingstidslinje.subset(8.januar til 10.januar).all { it is NavDag })
-            assertTrue(utbetalingstidslinje.subset(11.januar til 20.januar).all { it is Fridag })
-            assertTrue(utbetalingstidslinje.subset(21.januar til 21.januar).all { it is NavHelgDag })
-            assertTrue(utbetalingstidslinje.subset(22.januar til 26.januar).all { it is NavDag })
-            assertTrue(utbetalingstidslinje.subset(27.januar til 28.januar).all { it is NavHelgDag })
-            assertTrue(utbetalingstidslinje.subset(29.januar til 31.januar).all { it is NavDag })
         }
     }
 

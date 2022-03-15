@@ -1,15 +1,24 @@
 package no.nav.helse.utbetalingstidslinje
 
-import no.nav.helse.hendelser.til
-import no.nav.helse.sykdomstidslinje.Dag
-import no.nav.helse.testhelpers.*
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
-import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.Test
 import no.nav.helse.desember
 import no.nav.helse.februar
+import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mars
+import no.nav.helse.sykdomstidslinje.Dag
+import no.nav.helse.testhelpers.AP
+import no.nav.helse.testhelpers.ARB
+import no.nav.helse.testhelpers.AVV
+import no.nav.helse.testhelpers.FOR
+import no.nav.helse.testhelpers.FRI
+import no.nav.helse.testhelpers.NAV
+import no.nav.helse.testhelpers.tidslinjeOf
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.AvvistDag
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.UkjentDag
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Test
 
 internal class UtbetalingstidslinjeTest {
 
@@ -143,10 +152,8 @@ internal class UtbetalingstidslinjeTest {
     }
 
     private fun medInfotrygdtidslinje(tidslinje: Utbetalingstidslinje, other: Utbetalingstidslinje) =
-        tidslinje.plus(other) { actual, challenger ->
-            when (challenger) {
-                is NavDag, is NavHelgDag -> UkjentDag(actual.dato, actual.økonomi)
-                else -> actual
-            }
-        }
+        Utbetalingstidslinje(tidslinje.map { dag ->
+            if (other[dag.dato] !is UkjentDag) UkjentDag(dag.dato, dag.økonomi)
+            else dag
+        })
 }

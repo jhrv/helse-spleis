@@ -1,16 +1,27 @@
 package no.nav.helse.person.infotrygdhistorikk
 
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.UUID
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
-import no.nav.helse.person.*
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.utbetalingshistorikk
+import no.nav.helse.person.Arbeidsgiver
+import no.nav.helse.person.IAktivitetslogg
+import no.nav.helse.person.InfotrygdhistorikkVisitor
+import no.nav.helse.person.Periodetype
+import no.nav.helse.person.Person
+import no.nav.helse.person.Sykepengegrunnlag
+import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingslinjer.Utbetaling
-import no.nav.helse.utbetalingstidslinje.*
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.*
+import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
+import no.nav.helse.utbetalingstidslinje.ArbeidsgiverperiodeBuilder
+import no.nav.helse.utbetalingstidslinje.ArbeidsgiverperiodeMediator
+import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiodeteller
+import no.nav.helse.utbetalingstidslinje.IUtbetalingstidslinjeBuilder
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 
 internal class Infotrygdhistorikk private constructor(
     private val elementer: MutableList<InfotrygdhistorikkElement>
@@ -154,7 +165,8 @@ internal class Infotrygdhistorikk private constructor(
         subsumsjonObserver: SubsumsjonObserver
     ) {
         val teller = Arbeidsgiverperiodeteller.NormalArbeidstaker
-        val arbeidsgiverperiodeBuilder = ArbeidsgiverperiodeBuilder(teller, builder, subsumsjonObserver)
+        val dekoratør = if (!harHistorikk()) builder else siste.dekoratør(organisasjonsnummer, builder)
+        val arbeidsgiverperiodeBuilder = ArbeidsgiverperiodeBuilder(teller, dekoratør, subsumsjonObserver)
         if (!harHistorikk()) return sykdomstidslinje.accept(arbeidsgiverperiodeBuilder)
         siste.build(organisasjonsnummer, sykdomstidslinje, teller, arbeidsgiverperiodeBuilder)
     }
@@ -165,13 +177,8 @@ internal class Infotrygdhistorikk private constructor(
         builder: IUtbetalingstidslinjeBuilder,
         subsumsjonObserver: SubsumsjonObserver
     ): Utbetalingstidslinje {
-        build(organisasjonsnummer, sykdomstidslinje, InfotrygdUtbetalingstidslinjedekoratør(builder, sykdomstidslinje.førsteDag()), subsumsjonObserver)
-        return fjernHistorikk(organisasjonsnummer, builder.result())
-    }
-
-    private fun fjernHistorikk(organisasjonsnummer: String, utbetalingstidslinje: Utbetalingstidslinje): Utbetalingstidslinje {
-        if (!harHistorikk()) return utbetalingstidslinje
-        return siste.fjernHistorikk(utbetalingstidslinje, organisasjonsnummer)
+        build(organisasjonsnummer, sykdomstidslinje, builder as ArbeidsgiverperiodeMediator, subsumsjonObserver)
+        return builder.result().subset(sykdomstidslinje.førsteDag() til sykdomstidslinje.sisteDag())
     }
 
     private fun oppfrisket(cutoff: LocalDateTime) =

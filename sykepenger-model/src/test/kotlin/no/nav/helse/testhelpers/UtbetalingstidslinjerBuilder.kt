@@ -97,6 +97,11 @@ internal fun Int.AVV(dekningsgrunnlag: Int, grad: Number = 0) = Utbetalingsdager
     grad = grad
 )
 
+internal val Int.UKJ get() = Utbetalingsdager(
+    antallDager = { this },
+    addDagFun = Utbetalingstidslinje.Builder::addUkjentDag
+)
+
 internal val Int.UTELATE
     get() = Utbetalingsdager(
         antallDager = { this },

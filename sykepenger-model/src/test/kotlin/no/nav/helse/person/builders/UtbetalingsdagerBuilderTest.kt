@@ -2,15 +2,32 @@ package no.nav.helse.person.builders
 
 import no.nav.helse.januar
 import no.nav.helse.person.PersonObserver.Utbetalingsdag
-import no.nav.helse.person.PersonObserver.Utbetalingsdag.Dagtype.*
+import no.nav.helse.person.PersonObserver.Utbetalingsdag.Dagtype.Arbeidsdag
+import no.nav.helse.person.PersonObserver.Utbetalingsdag.Dagtype.ArbeidsgiverperiodeDag
+import no.nav.helse.person.PersonObserver.Utbetalingsdag.Dagtype.AvvistDag
+import no.nav.helse.person.PersonObserver.Utbetalingsdag.Dagtype.Feriedag
+import no.nav.helse.person.PersonObserver.Utbetalingsdag.Dagtype.ForeldetDag
+import no.nav.helse.person.PersonObserver.Utbetalingsdag.Dagtype.Fridag
+import no.nav.helse.person.PersonObserver.Utbetalingsdag.Dagtype.NavDag
+import no.nav.helse.person.PersonObserver.Utbetalingsdag.Dagtype.NavHelgDag
+import no.nav.helse.person.PersonObserver.Utbetalingsdag.Dagtype.Permisjonsdag
+import no.nav.helse.person.PersonObserver.Utbetalingsdag.Dagtype.UkjentDag
 import no.nav.helse.serde.api.BegrunnelseDTO
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
-import no.nav.helse.testhelpers.*
+import no.nav.helse.testhelpers.AP
+import no.nav.helse.testhelpers.ARB
+import no.nav.helse.testhelpers.AVV
+import no.nav.helse.testhelpers.F
+import no.nav.helse.testhelpers.FOR
+import no.nav.helse.testhelpers.FRI
+import no.nav.helse.testhelpers.HELG
 import no.nav.helse.testhelpers.NAV
+import no.nav.helse.testhelpers.P
+import no.nav.helse.testhelpers.UK
+import no.nav.helse.testhelpers.UKJ
+import no.nav.helse.testhelpers.resetSeed
 import no.nav.helse.testhelpers.tidslinjeOf
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.UkjentDag
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
@@ -59,13 +76,7 @@ internal class UtbetalingsdagerBuilderTest {
     @Test
     fun `tidslinje med ukjentdag`() {
         val builder = UtbetalingsdagerBuilder(Sykdomstidslinje())
-        val utbetalingstidslinje = tidslinjeOf(3.NAV).plus(tidslinjeOf(1.UTELATE, 1.NAV)) { venstre, høyre -> when (venstre) {
-            is Utbetalingstidslinje.Utbetalingsdag.NavDag -> when (høyre) {
-                is Utbetalingstidslinje.Utbetalingsdag.NavDag -> UkjentDag(venstre.dato, venstre.økonomi)
-                else -> venstre
-            }
-            else -> høyre
-        }}
+        val utbetalingstidslinje = tidslinjeOf(1.NAV, 1.UKJ, 1.NAV)
         utbetalingstidslinje.accept(builder)
         assertEquals(listOf(
             Utbetalingsdag(1.januar, NavDag),
