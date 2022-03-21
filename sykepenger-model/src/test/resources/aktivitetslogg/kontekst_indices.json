@@ -1,0 +1,100 @@
+{
+  "skjemaVersjon": 148,
+  "fødselsnummer": "01017099999",
+  "aktørId": "aktør",
+  "opprettet": "2020-04-15T15:48:10.454",
+  "dødsdato": null,
+  "arbeidsgivere": [],
+  "infotrygdhistorikk": [],
+  "vilkårsgrunnlagHistorikk": [],
+  "aktivitetslogg": {
+    "aktiviteter": [
+      {
+        "kontekster": [
+          0,
+          1
+        ],
+        "alvorlighetsgrad": "INFO",
+        "melding": "Behandler sykmelding",
+        "detaljer": {},
+        "tidsstempel": "2020-04-15 15:48:10.454"
+      },
+      {
+        "kontekster": [
+          0,
+          1,
+          2
+        ],
+        "alvorlighetsgrad": "INFO",
+        "melding": "Lager ny vedtaksperiode",
+        "detaljer": {},
+        "tidsstempel": "2020-04-15 15:48:10.454"
+      },
+      {
+        "kontekster": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "alvorlighetsgrad": "INFO",
+        "melding": "Fullført behandling av sykmelding",
+        "detaljer": {},
+        "tidsstempel": "2020-04-15 15:48:10.455"
+      },
+      {
+        "kontekster": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "alvorlighetsgrad": "INFO",
+        "melding": "Fullført behandling av sykmelding",
+        "detaljer": {},
+        "tidsstempel": "2020-04-15 15:48:10.455"
+      }
+    ],
+    "kontekster": [
+      {
+        "kontekstType": "Sykmelding",
+        "kontekstMap": {}
+      },
+      {
+        "kontekstType": "Person",
+        "kontekstMap": {
+          "fødselsnummer": "fnr",
+          "aktørId": "aktør"
+        }
+      },
+      {
+        "kontekstType": "Arbeidsgiver",
+        "kontekstMap": {
+          "organisasjonsnummer": "orgnr"
+        }
+      },
+      {
+        "kontekstType": "Vedtaksperiode",
+        "kontekstMap": {
+          "vedtaksperiodeId": "b75ed891-017b-4e4f-a570-24c257557f12"
+        }
+      },
+      {
+        "kontekstType": "Tilstand",
+        "kontekstMap": {
+          "tilstand": "START"
+        }
+      },
+      {
+        "kontekstType": "Tilstand",
+        "kontekstMap": {
+          "tilstand": "MOTTATT_SYKMELDING_FERDIG_GAP"
+        }
+      }
+    ]
+  }
+}

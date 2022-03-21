@@ -1,15 +1,24 @@
 package no.nav.helse.serde.reflection
 
 import no.nav.helse.person.Aktivitetslogg
-import no.nav.helse.person.Aktivitetslogg.Aktivitet.*
+import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov
+import no.nav.helse.person.Aktivitetslogg.Aktivitet.Error
+import no.nav.helse.person.Aktivitetslogg.Aktivitet.Info
+import no.nav.helse.person.Aktivitetslogg.Aktivitet.Severe
+import no.nav.helse.person.Aktivitetslogg.Aktivitet.Warn
 import no.nav.helse.person.AktivitetsloggVisitor
 import no.nav.helse.person.SpesifikkKontekst
 import no.nav.helse.serde.PersonData.AktivitetsloggData.Alvorlighetsgrad
-import no.nav.helse.serde.PersonData.AktivitetsloggData.Alvorlighetsgrad.*
+import no.nav.helse.serde.PersonData.AktivitetsloggData.Alvorlighetsgrad.BEHOV
+import no.nav.helse.serde.PersonData.AktivitetsloggData.Alvorlighetsgrad.ERROR
+import no.nav.helse.serde.PersonData.AktivitetsloggData.Alvorlighetsgrad.INFO
+import no.nav.helse.serde.PersonData.AktivitetsloggData.Alvorlighetsgrad.SEVERE
+import no.nav.helse.serde.PersonData.AktivitetsloggData.Alvorlighetsgrad.WARN
 
 internal class AktivitetsloggMap(aktivitetslogg: Aktivitetslogg) : AktivitetsloggVisitor {
     private val aktiviteter = mutableListOf<Map<String, Any>>()
     private val kontekster = mutableListOf<Map<String, Any>>()
+    private val kontekstIndekser = mutableMapOf<Int, Int>()
 
     init {
         aktivitetslogg.accept(this)
@@ -81,11 +90,10 @@ internal class AktivitetsloggMap(aktivitetslogg: Aktivitetslogg) : Aktivitetslog
 
     private fun kontekstIndices(kontekster: List<SpesifikkKontekst>) = map(kontekster)
         .map { kontekstAsMap ->
-            this.kontekster.indexOfFirst { it == kontekstAsMap }.takeIf { it > -1 }
-                ?: let {
-                    this.kontekster.add(kontekstAsMap)
-                    this.kontekster.size - 1
-                }
+            this.kontekstIndekser.getOrPut(kontekstAsMap.hashCode()) {
+                this.kontekster.add(kontekstAsMap)
+                this.kontekster.size - 1
+            }
         }
 
     private fun map(kontekster: List<SpesifikkKontekst>): List<Map<String, Any>> {
