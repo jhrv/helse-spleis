@@ -1,0 +1,88 @@
+{
+  "aktivitetslogg": {
+    "aktiviteter": [
+      {
+        "kontekster": [
+          0,
+          1
+        ],
+        "alvorlighetsgrad": "INFO",
+        "melding": "Behandler sykmelding",
+        "detaljer": {},
+        "tidsstempel": "2020-04-15 15:48:10.454"
+      },
+      {
+        "kontekster": [
+          0,
+          1
+        ],
+        "alvorlighetsgrad": "INFO",
+        "melding": "Ny arbeidsgiver med organisasjonsnummer 123456789 for denne personen",
+        "detaljer": {},
+        "tidsstempel": "2020-04-15 15:48:10.454"
+      },
+      {
+        "kontekster": [
+          0,
+          1
+        ],
+        "alvorlighetsgrad": "INFO",
+        "melding": "Lager ny vedtaksperiode",
+        "detaljer": {},
+        "tidsstempel": "2020-04-15 15:48:10.454"
+      },
+      {
+        "kontekster": [
+          1,
+          4
+        ],
+        "alvorlighetsgrad": "INFO",
+        "melding": "Sjekker utbetalingshistorikk",
+        "detaljer": {},
+        "tidsstempel": "2020-04-15 15:48:10.454"
+      },
+      {
+        "kontekster": [
+          1,
+          4,
+          3
+        ],
+        "alvorlighetsgrad": "WARN",
+        "melding": "Noe skjedde",
+        "detaljer": {},
+        "tidsstempel": "2020-04-15 15:48:10.454"
+      }
+    ],
+    "kontekster": [
+      {
+        "kontekstType": "Sykmelding",
+        "kontekstMap": {}
+      },
+      {
+        "kontekstType": "Arbeidsgiver",
+        "kontekstMap": {
+          "organisasjonsnummer": "123456789"
+        }
+      },
+      {
+        "kontekstType": "Utbetalingshistorikk",
+        "kontekstMap": {
+          "meldingsreferanseId": "62f92f74-6e5b-4315-88bd-7130f1cf3588"
+        }
+      },
+      {
+        "kontekstType": "Vedtaksperiodetilstand",
+        "kontekstMap": {
+          "tilstand": "MOTTATT_SYKMELDING_FERDIG_GAP"
+        }
+      },
+      {
+        "kontekstType": "Utbetalingshistorikk",
+        "kontekstMap": {
+          "meldingsreferanseId": "4b0cc863-0953-4f0b-8017-70170cdaaf51"
+        }
+      }
+    ]
+  },
+  "skjemaVersjon": 149
+}
