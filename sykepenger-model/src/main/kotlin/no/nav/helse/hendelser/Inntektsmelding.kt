@@ -141,10 +141,14 @@ class Inntektsmelding(
         return arbeidsgiverperiode?.slutterEtter(førsteFraværsdag) != true
     }
 
+    private var validert = false
     internal fun valider(periode: Periode, skjæringstidspunkt: LocalDate, arbeidsgiverperiode: Arbeidsgiverperiode?, subsumsjonObserver: SubsumsjonObserver): IAktivitetslogg {
+        if (validert) return this
         validerFørsteFraværsdag(skjæringstidspunkt)
         if (arbeidsgiverperiode != null) validerArbeidsgiverperiode(arbeidsgiverperiode)
-        return valider(periode, subsumsjonObserver)
+        return valider(periode, subsumsjonObserver).also {
+            validert = true
+        }
     }
 
     override fun valider(periode: Periode, subsumsjonObserver: SubsumsjonObserver): IAktivitetslogg {

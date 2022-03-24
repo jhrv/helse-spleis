@@ -1,16 +1,26 @@
 package no.nav.helse.spleis.e2e
 
+import java.time.LocalDate
+import java.util.UUID
 import no.nav.helse.Fødselsnummer
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.inspectors.TestArbeidsgiverInspektør
 import no.nav.helse.inspectors.personLogg
-import no.nav.helse.person.*
+import no.nav.helse.person.AbstractPersonTest
+import no.nav.helse.person.Aktivitetslogg
+import no.nav.helse.person.AktivitetsloggVisitor
+import no.nav.helse.person.ArbeidstakerHendelse
+import no.nav.helse.person.IdInnhenter
+import no.nav.helse.person.Inntektskilde
+import no.nav.helse.person.Person
+import no.nav.helse.person.SpesifikkKontekst
+import no.nav.helse.person.TilstandType
 import no.nav.helse.sykdomstidslinje.erHelg
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt
-import org.junit.jupiter.api.Assertions.*
-import java.time.LocalDate
-import java.util.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertTrue
 import kotlin.reflect.KClass
 
 
@@ -186,7 +196,7 @@ internal fun AbstractPersonTest.assertWarning(warning: String, vararg filtre: Ak
 
 internal fun AbstractPersonTest.assertNoWarning(warning: String, vararg filtre: AktivitetsloggFilter) {
     val warnings = collectWarnings(*filtre)
-    assertFalse(warnings.contains(warning), "fant ikke forventet warning. Warnings:\n${warnings.joinToString("\n")}")
+    assertFalse(warnings.contains(warning), "Warning som ikke er forventet, finnes. Warnings:\n${warnings.joinToString("\n")}")
 }
 
 internal fun AbstractEndToEndTest.assertError(error: String, vararg filtre: AktivitetsloggFilter) {
