@@ -40,8 +40,8 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         assertTilstander(
             0,
             START,
-            MOTTATT_SYKMELDING_FERDIG_GAP,
-            AVVENTER_SØKNAD_FERDIG_GAP,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
+            AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
             AVVENTER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
@@ -109,8 +109,8 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         assertTilstander(
             0,
             START,
-            MOTTATT_SYKMELDING_FERDIG_GAP,
-            AVVENTER_SØKNAD_FERDIG_GAP,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
+            AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
             AVVENTER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
@@ -133,8 +133,8 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         assertTilstander(
             0,
             START,
-            MOTTATT_SYKMELDING_FERDIG_GAP,
-            AVVENTER_SØKNAD_FERDIG_GAP,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
+            AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
             AVVENTER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
@@ -147,8 +147,8 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         assertTilstander(
             1,
             START,
-            MOTTATT_SYKMELDING_FERDIG_GAP,
-            AVVENTER_SØKNAD_FERDIG_GAP,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
+            AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
             AVVENTER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
@@ -183,8 +183,8 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
                 assertTilstander(
                     1.vedtaksperiode,
                     START,
-                    MOTTATT_SYKMELDING_FERDIG_GAP,
-                    AVVENTER_SØKNAD_FERDIG_GAP,
+                    AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
+                    AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
                     AVVENTER_HISTORIKK,
                     AVVENTER_VILKÅRSPRØVING,
                     AVVENTER_HISTORIKK,
@@ -197,8 +197,8 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
                 assertTilstander(
                     2.vedtaksperiode,
                     START,
-                    MOTTATT_SYKMELDING_FERDIG_GAP,
-                    AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
+                    AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
+                    AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
                     AVVENTER_HISTORIKK,
                     AVVENTER_VILKÅRSPRØVING,
                     AVVENTER_HISTORIKK,
@@ -219,8 +219,8 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
                 assertTilstander(
                     1.vedtaksperiode,
                     START,
-                    MOTTATT_SYKMELDING_FERDIG_GAP,
-                    AVVENTER_SØKNAD_FERDIG_GAP,
+                    AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
+                    AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
                     AVVENTER_HISTORIKK,
                     AVVENTER_VILKÅRSPRØVING,
                     AVVENTER_HISTORIKK,
@@ -237,8 +237,8 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
                 assertTilstander(
                     2.vedtaksperiode,
                     START,
-                    MOTTATT_SYKMELDING_FERDIG_GAP,
-                    AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
+                    AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
+                    AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
                     AVVENTER_HISTORIKK,
                     AVVENTER_VILKÅRSPRØVING,
                     AVVENTER_HISTORIKK,
@@ -278,8 +278,8 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         assertTilstander(
             0,
             START,
-            MOTTATT_SYKMELDING_FERDIG_GAP,
-            AVVENTER_SØKNAD_FERDIG_GAP,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
+            AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
             AVVENTER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
@@ -292,8 +292,8 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         assertTilstander(
             1,
             START,
-            MOTTATT_SYKMELDING_FERDIG_GAP,
-            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
+            AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
             AVVENTER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
@@ -313,8 +313,8 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         assertTilstander(
             0,
             START,
-            MOTTATT_SYKMELDING_FERDIG_GAP,
-            AVVENTER_SØKNAD_FERDIG_GAP,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
+            AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
             AVVENTER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
@@ -338,8 +338,8 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         assertTilstander(
             0,
             START,
-            MOTTATT_SYKMELDING_FERDIG_GAP,
-            AVVENTER_SØKNAD_FERDIG_GAP,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
+            AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
             AVVENTER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
@@ -365,8 +365,8 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         assertTilstander(
             0,
             START,
-            MOTTATT_SYKMELDING_FERDIG_GAP,
-            AVVENTER_SØKNAD_FERDIG_GAP,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
+            AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
             AVVENTER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
@@ -427,8 +427,8 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         assertTilstander(
             0,
             START,
-            MOTTATT_SYKMELDING_FERDIG_GAP,
-            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
+            AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
@@ -439,7 +439,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         assertTilstander(
             1,
             START,
-            MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
+            AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
@@ -667,15 +667,14 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         assertTilstander(
             1.vedtaksperiode,
             START,
-            MOTTATT_SYKMELDING_FERDIG_GAP,
             AVSLUTTET_UTEN_UTBETALING,
             AVSLUTTET_UTEN_UTBETALING
         )
         assertTilstander(
             2.vedtaksperiode,
             START,
-            MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
-            AVVENTER_INNTEKTSMELDING_FERDIG_FORLENGELSE,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
+            AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
             AVVENTER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
@@ -718,14 +717,13 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         assertTilstander(
             1.vedtaksperiode,
             START,
-            MOTTATT_SYKMELDING_FERDIG_GAP,
             AVSLUTTET_UTEN_UTBETALING,
             AVSLUTTET_UTEN_UTBETALING
         )
         assertTilstander(
             2.vedtaksperiode,
             START,
-            MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
+            AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
             AVVENTER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
@@ -795,8 +793,8 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         nyttVedtak(1.januar, 31.januar)
         forlengTilGodkjentVedtak(1.februar, 28.februar)
         håndterOverstyrInntekt(INNTEKT/2, skjæringstidspunkt = 1.januar)
-        assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP, AVVENTER_HISTORIKK, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET)
-        assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING)
+        assertTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER, AVVENTER_HISTORIKK, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET)
+        assertTilstander(2.vedtaksperiode, START, AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING)
     }
 
     @Test
@@ -805,8 +803,8 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         forlengTilGodkjentVedtak(1.februar, 28.februar)
         håndterUtbetalt(status = Oppdragstatus.FEIL)
         håndterOverstyrInntekt(INNTEKT/2, skjæringstidspunkt = 1.januar)
-        assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP, AVVENTER_HISTORIKK, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET)
-        assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, UTBETALING_FEILET)
+        assertTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER, AVVENTER_HISTORIKK, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET)
+        assertTilstander(2.vedtaksperiode, START, AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, UTBETALING_FEILET)
     }
 }
 
