@@ -88,7 +88,7 @@ internal class OverstyrUtkastTilRevurderingFlereAGTest : AbstractEndToEndTest() 
             )
             assertTilstander(
                 2.vedtaksperiode,
-                *TIL_AVSLUTTET_FORLENGELSE(false),
+                *TIL_AVSLUTTET_FORLENGELSE(),
                 AVVENTER_ARBEIDSGIVERE_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING,
                 AVVENTER_GODKJENNING_REVURDERING,
@@ -142,7 +142,7 @@ internal class OverstyrUtkastTilRevurderingFlereAGTest : AbstractEndToEndTest() 
             )
             assertTilstander(
                 2.vedtaksperiode,
-                *TIL_AVSLUTTET_FORLENGELSE(false),
+                *TIL_AVSLUTTET_FORLENGELSE(),
                 AVVENTER_ARBEIDSGIVERE_REVURDERING
             )
         }
@@ -204,7 +204,7 @@ internal class OverstyrUtkastTilRevurderingFlereAGTest : AbstractEndToEndTest() 
             )
             assertTilstander(
                 2.vedtaksperiode,
-                *TIL_AVSLUTTET_FORLENGELSE(false),
+                *TIL_AVSLUTTET_FORLENGELSE(),
                 AVVENTER_ARBEIDSGIVERE_REVURDERING
             )
         }
@@ -280,7 +280,7 @@ internal class OverstyrUtkastTilRevurderingFlereAGTest : AbstractEndToEndTest() 
             )
             assertTilstander(
                 2.vedtaksperiode,
-                *TIL_AVSLUTTET_FORLENGELSE(false),
+                *TIL_AVSLUTTET_FORLENGELSE(),
                 AVVENTER_ARBEIDSGIVERE_REVURDERING
             )
         }
@@ -330,7 +330,7 @@ internal class OverstyrUtkastTilRevurderingFlereAGTest : AbstractEndToEndTest() 
             )
             assertTilstander(
                 2.vedtaksperiode,
-                *TIL_AVSLUTTET_FORLENGELSE(false),
+                *TIL_AVSLUTTET_FORLENGELSE(),
                 AVVENTER_ARBEIDSGIVERE_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING
             )
@@ -381,7 +381,7 @@ internal class OverstyrUtkastTilRevurderingFlereAGTest : AbstractEndToEndTest() 
             )
             assertTilstander(
                 2.vedtaksperiode,
-                *TIL_AVSLUTTET_FORLENGELSE(false),
+                *TIL_AVSLUTTET_FORLENGELSE(),
                 AVVENTER_ARBEIDSGIVERE_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING
             )
