@@ -536,7 +536,7 @@ class SpesifikkKontekst(internal val kontekstType: String, internal val kontekst
         this === other ||
                 (other is SpesifikkKontekst
                         && this.kontekstMap == other.kontekstMap
-                        && this.kontekstType === other.kontekstType)
+                        && this.kontekstType == other.kontekstType)
 
     override fun hashCode(): Int {
         var hash = 17

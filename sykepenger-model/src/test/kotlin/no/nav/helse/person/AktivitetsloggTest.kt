@@ -1,10 +1,12 @@
 package no.nav.helse.person
 
-import org.junit.jupiter.api.Assertions.*
+import java.time.LocalDate
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import java.time.LocalDate
 
 internal class AktivitetsloggTest {
 
@@ -50,7 +52,7 @@ internal class AktivitetsloggTest {
 
     @Test
     fun `overskriver like kontekster`() {
-        val arbeidsgiver1 = TestKontekst(" Arbeidsgiver", "Arbeidsgiver 1")
+        val arbeidsgiver1 = TestKontekst("Arbeidsgiver", "Arbeidsgiver 1")
         val vedtaksperiode1 = TestKontekst("Vedtaksperiode", "Vedtaksperiode 1")
         val vedtaksperiode2 = TestKontekst("Vedtaksperiode", "Vedtaksperiode 2")
 
@@ -88,7 +90,7 @@ internal class AktivitetsloggTest {
     fun `kontekster`() {
         val hendelse1 = TestHendelse("Hendelse1", aktivitetslogg.barn())
         hendelse1.kontekst(person)
-        val arbeidsgiver1 = TestKontekst(" Arbeidsgiver", "Arbeidsgiver 1")
+        val arbeidsgiver1 = TestKontekst("Arbeidsgiver", "Arbeidsgiver 1")
         hendelse1.kontekst(arbeidsgiver1)
         val vedtaksperiode1 = TestKontekst("Vedtaksperiode", "Vedtaksperiode 1")
         hendelse1.kontekst(vedtaksperiode1)
@@ -187,6 +189,25 @@ internal class AktivitetsloggTest {
         assertEquals(5, aktivitetslogg.aktivitetsteller())
         assertEquals(3, aktivitetslogg.logg(vedtaksperiode1).aktivitetsteller())
         assertEquals(2, aktivitetslogg.logg(arbeidsgiver2).aktivitetsteller())
+    }
+
+    @Test
+    fun `Kan fiske ut riktg subsett av aktiviteter selv om det er to forskjellige instanser av String i spill`() {
+        val kontekstType = "Vedtaksperiode"
+        val vedtaksperiodeId = "Vedtaksperiode 1"
+        val vedtaksperiode1 = TestKontekst(type = kontekstType, melding = vedtaksperiodeId)
+
+        val hendelse1 = TestHendelse("Hendelse 1", aktivitetslogg.barn())
+        hendelse1.kontekst(vedtaksperiode1)
+        hendelse1.info("info message")
+
+        val enFakeVedtaksperiode = object : Aktivitetskontekst {
+            override fun toSpesifikkKontekst(): SpesifikkKontekst =
+                SpesifikkKontekst(String(kontekstType.toByteArray()), linkedMapOf(kontekstType to vedtaksperiodeId))
+        }
+
+
+        assertEquals(1, aktivitetslogg.logg(enFakeVedtaksperiode).aktivitetsteller())
     }
 
     @Test
