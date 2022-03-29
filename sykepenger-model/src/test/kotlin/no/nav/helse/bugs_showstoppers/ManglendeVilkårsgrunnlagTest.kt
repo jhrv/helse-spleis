@@ -1,15 +1,45 @@
 package no.nav.helse.bugs_showstoppers
 
-import no.nav.helse.*
+import no.nav.helse.Toggle
+import no.nav.helse.desember
+import no.nav.helse.etterspurteBehov
+import no.nav.helse.februar
 import no.nav.helse.hendelser.Sykmeldingsperiode
-import no.nav.helse.hendelser.Søknad.Søknadsperiode.*
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Permisjon
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.personLogg
-import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.*
-import no.nav.helse.person.TilstandType.*
+import no.nav.helse.januar
+import no.nav.helse.mars
+import no.nav.helse.november
+import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.ArbeidsforholdV2
+import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.InntekterForSammenligningsgrunnlag
+import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.InntekterForSykepengegrunnlag
+import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.Medlemskap
+import no.nav.helse.person.TilstandType.AVSLUTTET
+import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
+import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
+import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
+import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
+import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
+import no.nav.helse.person.TilstandType.AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER
+import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
+import no.nav.helse.person.TilstandType.START
+import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
-import no.nav.helse.spleis.e2e.*
+import no.nav.helse.spleis.e2e.AbstractEndToEndTest
+import no.nav.helse.spleis.e2e.assertTilstander
+import no.nav.helse.spleis.e2e.håndterInntektsmelding
+import no.nav.helse.spleis.e2e.håndterSimulering
+import no.nav.helse.spleis.e2e.håndterSykmelding
+import no.nav.helse.spleis.e2e.håndterSøknad
+import no.nav.helse.spleis.e2e.håndterUtbetalingsgodkjenning
+import no.nav.helse.spleis.e2e.håndterUtbetalingshistorikk
+import no.nav.helse.spleis.e2e.håndterUtbetalt
+import no.nav.helse.spleis.e2e.håndterVilkårsgrunnlag
+import no.nav.helse.spleis.e2e.håndterYtelser
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -39,13 +69,13 @@ internal class ManglendeVilkårsgrunnlagTest : AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(3.vedtaksperiode)
         håndterYtelser(3.vedtaksperiode)
 
-        assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
-        assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
+        assertTilstander(1.vedtaksperiode, START, AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
+        assertTilstander(2.vedtaksperiode, START, AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
         assertTilstander(
             3.vedtaksperiode,
             START,
-            MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
-            AVVENTER_INNTEKTSMELDING_FERDIG_FORLENGELSE,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
+            AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
             AVVENTER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
@@ -81,13 +111,13 @@ internal class ManglendeVilkårsgrunnlagTest : AbstractEndToEndTest() {
 
         håndterYtelser(3.vedtaksperiode)
 
-        assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
-        assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
+        assertTilstander(1.vedtaksperiode, START, AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
+        assertTilstander(2.vedtaksperiode, START, AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
         assertTilstander(
             3.vedtaksperiode,
             START,
-            MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
-            AVVENTER_INNTEKTSMELDING_FERDIG_FORLENGELSE,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
+            AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
             AVVENTER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING
         )
@@ -124,16 +154,26 @@ internal class ManglendeVilkårsgrunnlagTest : AbstractEndToEndTest() {
         assertTilstander(
             1.vedtaksperiode,
             START,
-            MOTTATT_SYKMELDING_FERDIG_GAP,
-            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
+            AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
             TIL_UTBETALING,
             AVSLUTTET
         )
-        assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, AVVENTER_HISTORIKK, AVSLUTTET)
-        assertTilstander(3.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
+        assertTilstander(2.vedtaksperiode,
+            START,
+            AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
+            AVVENTER_HISTORIKK,
+            AVSLUTTET
+        )
+        assertTilstander(3.vedtaksperiode,
+            START,
+            AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING
+        )
     }
 
     @Test
@@ -163,16 +203,27 @@ internal class ManglendeVilkårsgrunnlagTest : AbstractEndToEndTest() {
         assertTilstander(
             1.vedtaksperiode,
             START,
-            MOTTATT_SYKMELDING_FERDIG_GAP,
-            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
+            AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
             TIL_UTBETALING,
             AVSLUTTET
         )
-        assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, AVSLUTTET)
-        assertTilstander(3.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
+        assertTilstander(2.vedtaksperiode,
+            START,
+            AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
+            AVVENTER_HISTORIKK,
+            AVVENTER_GODKJENNING,
+            AVSLUTTET
+        )
+        assertTilstander(3.vedtaksperiode,
+            START,
+            AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING
+        )
     }
 
     @Test
@@ -201,15 +252,15 @@ internal class ManglendeVilkårsgrunnlagTest : AbstractEndToEndTest() {
         assertTilstander(
             1.vedtaksperiode,
             START,
-            MOTTATT_SYKMELDING_FERDIG_GAP,
-            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
+            AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
             TIL_UTBETALING,
             AVSLUTTET
         )
-        assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, AVSLUTTET)
-        assertTilstander(3.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
+        assertTilstander(2.vedtaksperiode, START, AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, AVSLUTTET)
+        assertTilstander(3.vedtaksperiode, START, AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
     }
 }
