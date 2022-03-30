@@ -1,17 +1,43 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.*
-import no.nav.helse.hendelser.*
+import java.time.LocalDate
+import java.time.YearMonth
+import java.util.UUID
+import no.nav.helse.april
+import no.nav.helse.desember
+import no.nav.helse.februar
+import no.nav.helse.hendelser.Inntektsvurdering
+import no.nav.helse.hendelser.Medlemskapsvurdering
+import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Arbeid
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
+import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.GrunnlagsdataInspektør
 import no.nav.helse.inspectors.PersonInspektør
 import no.nav.helse.inspectors.inspektør
-import no.nav.helse.person.*
+import no.nav.helse.januar
+import no.nav.helse.mars
+import no.nav.helse.person.ArbeidsgiverInntektsopplysning
 import no.nav.helse.person.ForlengelseFraInfotrygd.JA
 import no.nav.helse.person.ForlengelseFraInfotrygd.NEI
+import no.nav.helse.person.Inntektshistorikk
+import no.nav.helse.person.Opptjening
+import no.nav.helse.person.Sammenligningsgrunnlag
+import no.nav.helse.person.Sykepengegrunnlag
 import no.nav.helse.person.Sykepengegrunnlag.Begrensning.ER_IKKE_6G_BEGRENSET
-import no.nav.helse.person.TilstandType.*
+import no.nav.helse.person.TilstandType.AVSLUTTET
+import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
+import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
+import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
+import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
+import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
+import no.nav.helse.person.TilstandType.AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER
+import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
+import no.nav.helse.person.TilstandType.START
+import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
+import no.nav.helse.person.TilstandType.TIL_UTBETALING
+import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
@@ -21,11 +47,13 @@ import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosent
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertSame
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
-import java.time.YearMonth
-import java.util.*
 
 internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
 
@@ -115,8 +143,8 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
         assertTilstander(
             1.vedtaksperiode,
             START,
-            MOTTATT_SYKMELDING_FERDIG_GAP,
-            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
+            AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
@@ -131,6 +159,7 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
         assertEquals(JA, inspektør.forlengelseFraInfotrygd(2.vedtaksperiode))
     }
 
+    // TODO: oppdager ikke infotrygdhistorikk
     @Test
     fun `ingen vilkårsgrunnlag når perioden har opphav i Infotrygd`() {
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
@@ -151,8 +180,7 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
         assertTilstander(
             1.vedtaksperiode,
             START,
-            MOTTATT_SYKMELDING_FERDIG_GAP,
-            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
+            AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
@@ -162,9 +190,7 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
         assertTilstander(
             2.vedtaksperiode,
             START,
-            MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
-            AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE,
-            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
+            AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
             AVVENTER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
@@ -194,8 +220,8 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
         assertTilstander(
             1.vedtaksperiode,
             START,
-            MOTTATT_SYKMELDING_FERDIG_GAP,
-            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
+            AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
             AVVENTER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
@@ -207,8 +233,7 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
         assertTilstander(
             2.vedtaksperiode,
             START,
-            MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
-            AVVENTER_UFERDIG,
+            AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING
         )
@@ -237,21 +262,20 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
         assertTilstander(
             1.vedtaksperiode,
             START,
-            MOTTATT_SYKMELDING_FERDIG_GAP,
             AVSLUTTET_UTEN_UTBETALING,
             AVSLUTTET_UTEN_UTBETALING
         )
         assertTilstander(
             2.vedtaksperiode,
             START,
-            MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
-            AVVENTER_INNTEKTSMELDING_FERDIG_FORLENGELSE,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
+            AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
             AVVENTER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING
         )
-        assertEquals(3, inspektør.hendelseIder(2.vedtaksperiode).size)
+        assertEquals(3, inspektør.hendelseIder(2.vedtaksperiode).size) // TODO: greit at sykmeldingsId ikke ligger på vedtaksperiode
         assertTrue(inspektør.hendelseIder(2.vedtaksperiode).containsAll(listOf(sykmeldingId, søknadId, inntektsmeldingId)))
     }
 
@@ -259,13 +283,14 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
     fun `vilkårsgrunnlag tilbakestilles når vi ikke er en forlengelse likevel`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 21.januar, 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(22.januar, 22.februar, 100.prosent))
-        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.januar, 16.januar)))
-        håndterSøknadMedValidering(
-            1.vedtaksperiode, Sykdom(1.januar, 21.januar, 100.prosent),
+        val inntektsmeldingId = håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.januar, 16.januar)))
+        håndterSøknad(
+            Sykdom(1.januar, 21.januar, 100.prosent),
             Arbeid(18.januar, 21.januar)
         )
-        håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(22.januar, 22.februar, 100.prosent))
-        håndterInntektsmeldingMedValidering(2.vedtaksperiode, listOf(Periode(1.januar, 16.januar)), 22.januar)
+        håndterInntektsmeldingReplay(inntektsmeldingId, 1.vedtaksperiode.id(ORGNUMMER))
+        håndterSøknad(Sykdom(22.januar, 22.februar, 100.prosent))
+        håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), 22.januar)
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
@@ -277,16 +302,22 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
         håndterYtelser(2.vedtaksperiode)
         assertTilstander(
             1.vedtaksperiode,
-            START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP, AVVENTER_HISTORIKK, AVVENTER_VILKÅRSPRØVING,
-            AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET
+            START,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
+            AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
+            AVVENTER_HISTORIKK,
+            AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            TIL_UTBETALING,
+            AVSLUTTET
         )
         assertTilstander(
             2.vedtaksperiode,
             START,
-            MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
-            AVVENTER_SØKNAD_UFERDIG_FORLENGELSE,
-            AVVENTER_INNTEKTSMELDING_UFERDIG_GAP,
-            AVVENTER_UFERDIG,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
+            AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
             AVVENTER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
@@ -364,7 +395,7 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
         assertTilstander(
             2.vedtaksperiode,
             START,
-            MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
+            AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
             AVVENTER_HISTORIKK,
             AVVENTER_GODKJENNING,
             AVSLUTTET
@@ -374,10 +405,8 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
     @Test
     fun `Bruker ikke vilkårsgrunnlag for annet skjæringstidpunkt ved beregning av utbetalingstidslinje, selv om skjæringstidspunktet er senere`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 21.januar, 100.prosent))
-        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.januar, 16.januar)))
-        håndterSøknadMedValidering(
-            1.vedtaksperiode, Sykdom(1.januar, 21.januar, 100.prosent)
-        )
+        håndterSøknad(Sykdom(1.januar, 21.januar, 100.prosent))
+        håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)))
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Nei)
         håndterYtelser(1.vedtaksperiode)
@@ -385,9 +414,7 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
 
 
         håndterSykmelding(Sykmeldingsperiode(22.januar, 10.februar, 100.prosent))
-        håndterSøknadMedValidering(
-            2.vedtaksperiode, Sykdom(22.januar, 10.februar, 100.prosent)
-        )
+        håndterSøknad(Sykdom(22.januar, 10.februar, 100.prosent))
         håndterUtbetalingshistorikk(
             2.vedtaksperiode,
             ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 15.desember(2017), 21.januar, 100.prosent, 1000.daglig),
@@ -399,8 +426,8 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
         assertForkastetPeriodeTilstander(
             1.vedtaksperiode,
             START,
-            MOTTATT_SYKMELDING_FERDIG_GAP,
-            AVVENTER_SØKNAD_FERDIG_GAP,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
+            AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
             AVVENTER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
