@@ -159,13 +159,12 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
         assertEquals(JA, inspektør.forlengelseFraInfotrygd(2.vedtaksperiode))
     }
 
-    // TODO: oppdager ikke infotrygdhistorikk
     @Test
     fun `ingen vilkårsgrunnlag når perioden har opphav i Infotrygd`() {
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent))
-        håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent))
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), Arbeid(25.februar, 28.februar))
+        håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent))
         val historikk = ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 17.januar, 31.januar, 100.prosent, 15000.daglig)
         val inntekter = listOf(Inntektsopplysning(ORGNUMMER, 17.januar(2018), INNTEKT, true))
         håndterUtbetalingshistorikk(1.vedtaksperiode, historikk, inntektshistorikk = inntekter)
@@ -180,6 +179,7 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
         assertTilstander(
             1.vedtaksperiode,
             START,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
             AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING,
@@ -190,6 +190,7 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
         assertTilstander(
             2.vedtaksperiode,
             START,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
             AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
             AVVENTER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING,
@@ -275,8 +276,8 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING
         )
-        assertEquals(3, inspektør.hendelseIder(2.vedtaksperiode).size) // TODO: greit at sykmeldingsId ikke ligger på vedtaksperiode
-        assertTrue(inspektør.hendelseIder(2.vedtaksperiode).containsAll(listOf(sykmeldingId, søknadId, inntektsmeldingId)))
+        assertEquals(2, inspektør.hendelseIder(2.vedtaksperiode).size)
+        assertTrue(inspektør.hendelseIder(2.vedtaksperiode).containsAll(listOf(søknadId, inntektsmeldingId)))
     }
 
     @Test
