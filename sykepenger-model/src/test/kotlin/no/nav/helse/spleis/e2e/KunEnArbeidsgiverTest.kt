@@ -1343,7 +1343,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
 
         assertTrue(inspektør.periodeErForkastet(1.vedtaksperiode))
-        assertEquals(1, inspektør.vedtaksperiodeTeller)
+        assertTrue(inspektør.periodeErForkastet(2.vedtaksperiode))
     }
 
     @Test
