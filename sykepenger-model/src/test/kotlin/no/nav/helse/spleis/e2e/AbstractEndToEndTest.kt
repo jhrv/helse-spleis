@@ -22,7 +22,6 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
     }
 
     internal lateinit var hendelselogg: PersonHendelse
-    internal var forventetEndringTeller = 0
     internal val sykmeldinger = mutableMapOf<UUID, Array<out Sykmeldingsperiode>>()
     internal val søknader = mutableMapOf<UUID, Triple<LocalDate, List<Søknad.Inntektskilde>, Array<out Søknadsperiode>>>()
     internal val inntektsmeldinger = mutableMapOf<UUID, () -> Inntektsmelding>()
