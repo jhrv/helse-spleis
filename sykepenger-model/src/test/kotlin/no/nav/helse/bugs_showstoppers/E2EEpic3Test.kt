@@ -1374,7 +1374,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(30.juni(2020), 14.august(2020), 100.prosent))
         håndterSøknad(Sykdom(30.juni(2020), 14.august(2020), 100.prosent))
 
-        håndterInntektsmelding(listOf(Periode(30.juni(2020), 14.august(2020))), førsteFraværsdag = 30.juni(2020))
+        håndterInntektsmelding(listOf(Periode(30.juni(2020), 14.juli(2020))), førsteFraværsdag = 30.juni(2020))
 
         håndterSykmelding(Sykmeldingsperiode(30.juni(2020), 22.august(2020), 100.prosent))
         håndterSøknad(Sykdom(30.juni(2020), 22.august(2020), 100.prosent))
