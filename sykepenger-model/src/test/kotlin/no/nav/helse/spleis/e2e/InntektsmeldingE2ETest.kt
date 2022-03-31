@@ -247,52 +247,6 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Opphør i refusjon som kommer mens forlengelse er i play kaster forlengelsen`() {
-        håndterSykmelding(Sykmeldingsperiode(1.november(2020), 20.november(2020), 100.prosent))
-        håndterInntektsmelding(listOf(Periode(1.november(2020), 16.november(2020))), førsteFraværsdag = 1.november(2020))
-        håndterYtelser(1.vedtaksperiode)
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
-            inntekter = inntektperioderForSammenligningsgrunnlag {
-                1.november(2019) til 1.oktober(2020) inntekter {
-                    ORGNUMMER inntekt INNTEKT
-                }
-            }
-        ))
-        håndterYtelser(1.vedtaksperiode)
-        håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-        håndterUtbetalt()
-        assertTilstander(
-            1.vedtaksperiode,
-            START,
-            MOTTATT_SYKMELDING_FERDIG_GAP,
-            AVVENTER_SØKNAD_FERDIG_GAP,
-            AVVENTER_HISTORIKK,
-            AVVENTER_VILKÅRSPRØVING,
-            AVVENTER_HISTORIKK,
-            AVVENTER_SIMULERING,
-            AVVENTER_GODKJENNING,
-            TIL_UTBETALING,
-            AVSLUTTET
-        )
-
-        håndterSykmelding(Sykmeldingsperiode(21.november(2020), 10.desember(2020), 100.prosent))
-        håndterInntektsmelding(
-            listOf(Periode(1.november(2020), 16.november(2020))),
-            førsteFraværsdag = 1.november(2020), refusjon = Refusjon(INNTEKT, 6.desember(2020), emptyList())
-        )
-        håndterYtelser(2.vedtaksperiode)
-        assertForkastetPeriodeTilstander(
-            2.vedtaksperiode,
-            START,
-            MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
-            AVVENTER_SØKNAD_FERDIG_FORLENGELSE,
-            AVVENTER_HISTORIKK,
-            TIL_INFOTRYGD
-        )
-    }
-
-    @Test
     fun `Opphør i refusjon som kommer mens førstegangssak er i play kaster perioden`() {
         håndterSykmelding(Sykmeldingsperiode(1.november(2020), 20.november(2020), 100.prosent))
         val inntektsmeldingId = håndterInntektsmelding(listOf(Periode(1.november(2020), 16.november(2020))), førsteFraværsdag = 1.november(2020))
@@ -375,105 +329,6 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
             TIL_INFOTRYGD
         )
 
-    }
-
-    @Test
-    fun `Refusjonsbeløp lik 0 i første periode som kommer mens forlengelse er i play kaster forlengelsen`() {
-        håndterSykmelding(Sykmeldingsperiode(1.november(2020), 20.november(2020), 100.prosent))
-        håndterSøknad(Sykdom(1.november(2020), 20.november(2020), 100.prosent))
-        håndterInntektsmelding(listOf(Periode(1.november(2020), 16.november(2020))), førsteFraværsdag = 1.november(2020))
-        håndterYtelser(1.vedtaksperiode)
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
-            inntekter = inntektperioderForSammenligningsgrunnlag {
-                1.november(2019) til 1.oktober(2020) inntekter {
-                    ORGNUMMER inntekt INNTEKT
-                }
-            }
-        ))
-        håndterYtelser(1.vedtaksperiode)
-        håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-        håndterUtbetalt()
-        assertTilstander(
-            1.vedtaksperiode,
-            START,
-            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
-            AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
-            AVVENTER_HISTORIKK,
-            AVVENTER_VILKÅRSPRØVING,
-            AVVENTER_HISTORIKK,
-            AVVENTER_SIMULERING,
-            AVVENTER_GODKJENNING,
-            TIL_UTBETALING,
-            AVSLUTTET
-        )
-        håndterInntektsmelding(
-            listOf(Periode(1.november(2020), 16.november(2020))),
-            førsteFraværsdag = 1.november(2020),
-            beregnetInntekt = INNTEKT,
-            refusjon = Refusjon(INGEN, null, emptyList())
-        )
-
-        håndterSykmelding(Sykmeldingsperiode(21.november(2020), 10.desember(2020), 100.prosent))
-        håndterSøknad(Sykdom(21.november(2020), 10.desember(2020), 100.prosent))
-        håndterYtelser(2.vedtaksperiode)
-        assertForkastetPeriodeTilstander( // TODO: Avsluttet burde få med seg at vi har fått inn en IM uten refusjon
-            2.vedtaksperiode,
-            START,
-            AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
-            AVVENTER_HISTORIKK,
-            TIL_INFOTRYGD
-        )
-    }
-
-    @Test
-    fun `Refusjonsbeløp mindre enn inntekt i første periode som kommer mens forlengelse er i play kaster forlengelsen`() {
-        håndterSykmelding(Sykmeldingsperiode(1.november(2020), 20.november(2020), 100.prosent))
-        håndterSøknad(Sykdom(1.november(2020), 20.november(2020), 100.prosent))
-        håndterInntektsmelding(listOf(Periode(1.november(2020), 16.november(2020))), førsteFraværsdag = 1.november(2020))
-        håndterYtelser(1.vedtaksperiode)
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
-            inntekter = inntektperioderForSammenligningsgrunnlag {
-                1.november(2019) til 1.oktober(2020) inntekter {
-                    ORGNUMMER inntekt INNTEKT
-                }
-            }
-        ))
-        håndterYtelser(1.vedtaksperiode)
-        håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-        håndterUtbetalt()
-
-        håndterSykmelding(Sykmeldingsperiode(21.november(2020), 10.desember(2020), 100.prosent))
-        håndterInntektsmelding(
-            listOf(Periode(1.november(2020), 16.november(2020))),
-            førsteFraværsdag = 1.november(2020),
-            beregnetInntekt = INNTEKT,
-            refusjon = Refusjon(1000.månedlig, null, emptyList())
-        )
-        håndterSøknad(Sykdom(21.november(2020), 10.desember(2020), 100.prosent))
-
-        assertTilstander(
-            1.vedtaksperiode,
-            START,
-            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
-            AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
-            AVVENTER_HISTORIKK,
-            AVVENTER_VILKÅRSPRØVING,
-            AVVENTER_HISTORIKK,
-            AVVENTER_SIMULERING,
-            AVVENTER_GODKJENNING,
-            TIL_UTBETALING,
-            AVSLUTTET
-        )
-        håndterYtelser(2.vedtaksperiode)
-        assertForkastetPeriodeTilstander(
-            2.vedtaksperiode,
-            START,
-            AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
-            AVVENTER_HISTORIKK,
-            TIL_INFOTRYGD
-        )
     }
 
     @Test
@@ -1395,8 +1250,8 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent))
         håndterUtbetalingshistorikk(2.vedtaksperiode)
 
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(2.januar, 1.februar, 100.prosent))
+        håndterSøknad(Sykdom(2.januar, 1.februar, 100.prosent))
 
         assertForkastetPeriodeTilstander(
             1.vedtaksperiode,
@@ -1429,8 +1284,8 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent))
         håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent))
 
-        håndterSykmelding(Sykmeldingsperiode(20.november(2017), 12.desember(2017), 100.prosent))
-        håndterSøknad(Sykdom(20.november(2017), 12.desember(2017), 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(20.november(2017), 13.desember(2017), 100.prosent))
+        håndterSøknad(Sykdom(20.november(2017), 13.desember(2017), 100.prosent))
 
         assertForkastetPeriodeTilstander(
             1.vedtaksperiode,
@@ -1690,8 +1545,8 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterYtelser(2.vedtaksperiode)
 
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent))
-        håndterInntektsmelding(listOf(27.februar til 14.mars))
         håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent))
+        håndterInntektsmelding(listOf(27.februar til 14.mars))
         // Siden vi tidligere fylte ut 2. vedtaksperiode med arbeidsdager ville vi regne ut et ekstra skjæringstidspunkt i den sammenhengende perioden
         assertEquals(listOf(1.januar), person.skjæringstidspunkter())
         håndterYtelser(3.vedtaksperiode)
@@ -1703,8 +1558,6 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         assertNoWarning("Vi har mottatt en inntektsmelding i en løpende sykmeldingsperiode med oppgitt første/bestemmende fraværsdag som er ulik tidligere fastsatt skjæringstidspunkt.", 2.vedtaksperiode.filter())
         assertWarning("Mottatt flere inntektsmeldinger - den første inntektsmeldingen som ble mottatt er lagt til grunn. Utbetal kun hvis det blir korrekt.", 2.vedtaksperiode.filter())
         assertWarning("Mottatt flere inntektsmeldinger - den første inntektsmeldingen som ble mottatt er lagt til grunn. Utbetal kun hvis det blir korrekt.", 3.vedtaksperiode.filter())
-        assertWarning("Første fraværsdag i inntektsmeldingen er ulik skjæringstidspunktet. Kontrollér at inntektsmeldingen er knyttet til riktig periode.", 3.vedtaksperiode.filter())
-        assertWarning("Inntektsmeldingen og vedtaksløsningen er uenige om beregningen av arbeidsgiverperioden. Undersøk hva som er riktig arbeidsgiverperiode.", 3.vedtaksperiode.filter())
         assertEquals(17.januar til 31.mars, inspektør.utbetalinger.last().inspektør.periode)
     }
 
@@ -1717,8 +1570,8 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
 
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent))
-        håndterInntektsmelding(listOf(27.februar til 14.mars))
         håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent))
+        håndterInntektsmelding(listOf(27.februar til 14.mars))
         // Siden vi tidligere fylte ut 2. vedtaksperiode med arbeidsdager ville vi regne ut et ekstra skjæringstidspunkt i den sammenhengende perioden
         assertEquals(listOf(1.januar), person.skjæringstidspunkter())
         håndterYtelser(3.vedtaksperiode)
@@ -1730,22 +1583,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         assertNoWarning("Vi har mottatt en inntektsmelding i en løpende sykmeldingsperiode med oppgitt første/bestemmende fraværsdag som er ulik tidligere fastsatt skjæringstidspunkt.", 2.vedtaksperiode.filter())
         assertWarning("Mottatt flere inntektsmeldinger - den første inntektsmeldingen som ble mottatt er lagt til grunn. Utbetal kun hvis det blir korrekt.", 2.vedtaksperiode.filter())
         assertWarning("Mottatt flere inntektsmeldinger - den første inntektsmeldingen som ble mottatt er lagt til grunn. Utbetal kun hvis det blir korrekt.", 3.vedtaksperiode.filter())
-        assertWarning("Første fraværsdag i inntektsmeldingen er ulik skjæringstidspunktet. Kontrollér at inntektsmeldingen er knyttet til riktig periode.", 3.vedtaksperiode.filter())
-        assertWarning("Inntektsmeldingen og vedtaksløsningen er uenige om beregningen av arbeidsgiverperioden. Undersøk hva som er riktig arbeidsgiverperiode.", 3.vedtaksperiode.filter())
         assertEquals(17.januar til 31.mars, inspektør.utbetalinger.last().inspektør.periode)
-    }
-
-    @Test
-    fun `inntektsmelding oppgir ny arbeidsgiverperiode i en sammenhengende periode, overlapper med mottatt sykmelding ferdig forlengelse`() {
-        nyttVedtak(1.januar, 31.januar)
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
-        håndterInntektsmelding(listOf(27.februar til 14.mars))
-        assertEquals(listOf(27.februar, 1.januar), person.skjæringstidspunkter())
-
-        assertNoWarning("Mottatt flere inntektsmeldinger - den første inntektsmeldingen som ble mottatt er lagt til grunn. Utbetal kun hvis det blir korrekt.", 1.vedtaksperiode.filter())
-        assertWarning("Mottatt flere inntektsmeldinger - den første inntektsmeldingen som ble mottatt er lagt til grunn. Utbetal kun hvis det blir korrekt.", 2.vedtaksperiode.filter())
-        assertNoWarning("Første fraværsdag i inntektsmeldingen er ulik skjæringstidspunktet. Kontrollér at inntektsmeldingen er knyttet til riktig periode.", 2.vedtaksperiode.filter())
-        assertNoWarning("Vi har mottatt en inntektsmelding i en løpende sykmeldingsperiode med oppgitt første/bestemmende fraværsdag som er ulik tidligere fastsatt skjæringstidspunkt.", 2.vedtaksperiode.filter())
     }
 
     @Test
