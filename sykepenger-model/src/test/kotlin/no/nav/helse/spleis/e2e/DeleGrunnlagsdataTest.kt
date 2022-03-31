@@ -252,7 +252,7 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(20.februar, 28.februar, 100.prosent))
         håndterSøknad(Sykdom(20.februar, 28.februar, 100.prosent))
 
-        val sykmeldingId = håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent))
         val søknadId = håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent))
 
         val inntektsmeldingId = håndterInntektsmelding(listOf(Periode(20.februar, 8.mars)), 20.februar)
@@ -263,7 +263,7 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
         assertTilstander(
             1.vedtaksperiode,
             START,
-            AVSLUTTET_UTEN_UTBETALING,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
             AVSLUTTET_UTEN_UTBETALING
         )
         assertTilstander(
@@ -450,20 +450,4 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
         deaktiverteArbeidsforhold = emptyList()
     )
 
-    private fun sammenligningsgrunnlag(inntekt: Inntekt) = Sammenligningsgrunnlag(
-        arbeidsgiverInntektsopplysninger = listOf(
-            ArbeidsgiverInntektsopplysning("orgnummer",
-                Inntektshistorikk.SkattComposite(UUID.randomUUID(), (0 until 12).map {
-                    Inntektshistorikk.Skatt.Sammenligningsgrunnlag(
-                        dato = LocalDate.now(),
-                        hendelseId = UUID.randomUUID(),
-                        beløp = inntekt,
-                        måned = YearMonth.of(2017, it + 1),
-                        type = Inntektshistorikk.Skatt.Inntekttype.LØNNSINNTEKT,
-                        fordel = "fordel",
-                        beskrivelse = "beskrivelse"
-                    )
-                })
-            )),
-    )
 }
