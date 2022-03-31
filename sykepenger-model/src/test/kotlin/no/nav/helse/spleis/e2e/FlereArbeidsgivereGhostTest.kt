@@ -4,7 +4,6 @@ import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
 import no.nav.helse.april
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
@@ -24,7 +23,6 @@ import no.nav.helse.person.Inntektshistorikk.Skatt.Inntekttype.LØNNSINNTEKT
 import no.nav.helse.person.Inntektskilde
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
-import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
@@ -619,18 +617,11 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
 
         håndterUtbetalingshistorikk(2.vedtaksperiode, orgnummer = a1, utbetalinger = utbetalinger, inntektshistorikk = inntektshistorikk)
 
-        assertForventetFeil(
-            forklaring = "Må identifisere pingpong-saker for å ikke vente på IM i disse tilfellene",
-            nå = { assertTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, orgnummer = a1) },
-            ønsket = {
-                assertTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a1)
-                håndterYtelser(2.vedtaksperiode, orgnummer = a1)
+        assertTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a1)
+        håndterYtelser(2.vedtaksperiode, orgnummer = a1)
 
-                assertWarning("Flere arbeidsgivere, ulikt starttidspunkt for sykefraværet eller ikke fravær fra alle arbeidsforhold", 1.vedtaksperiode.filter(a1))
-                assertNoWarnings(2.vedtaksperiode.filter(orgnummer = a1))
-            }
-        )
-
+        assertWarning("Flere arbeidsgivere, ulikt starttidspunkt for sykefraværet eller ikke fravær fra alle arbeidsforhold", 1.vedtaksperiode.filter(a1))
+        assertNoWarnings(2.vedtaksperiode.filter(orgnummer = a1))
     }
 
     @Test
