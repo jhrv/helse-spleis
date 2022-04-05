@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 
 internal class InntektsmeldingHendelseTest : AbstractPersonTest() {
 
@@ -31,29 +32,13 @@ internal class InntektsmeldingHendelseTest : AbstractPersonTest() {
     @Test
     fun `skjæringstidspunkt oppdateres i vedtaksperiode når inntektsmelding håndteres`() {
         person.håndter(sykmelding(Sykmeldingsperiode(6.januar, 20.januar, 100.prosent)))
+        person.håndter(søknad(Sykdom(6.januar, 20.januar, 100.prosent)))
         assertEquals(6.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
         person.håndter(inntektsmelding(førsteFraværsdag = 1.januar))
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(1.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
     }
 
-    @Test
-    fun `inntektsmelding før søknad`() {
-        person.håndter(sykmelding(Sykmeldingsperiode(6.januar, 20.januar, 100.prosent)))
-        person.håndter(inntektsmelding())
-        assertEquals(1, inspektør.vedtaksperiodeTeller)
-        assertEquals(TilstandType.AVVENTER_SØKNAD_FERDIG_GAP, inspektør.sisteTilstand(1.vedtaksperiode))
-    }
-
-    @Test
-    fun `søknad etter inntektsmelding`() {
-        person.håndter(sykmelding(Sykmeldingsperiode(6.januar, 20.januar, 100.prosent)))
-        person.håndter(inntektsmelding())
-        person.håndter(søknad(Søknadsperiode.Sykdom(6.januar,  20.januar, 100.prosent)))
-        assertFalse(person.personLogg.hasErrorsOrWorse(), person.personLogg.toString())
-        assertEquals(1, inspektør.vedtaksperiodeTeller)
-        assertEquals(TilstandType.AVVENTER_HISTORIKK, inspektør.sisteTilstand(1.vedtaksperiode))
-    }
 
     @Test
     fun `mangler sykmelding`() {
@@ -65,12 +50,13 @@ internal class InntektsmeldingHendelseTest : AbstractPersonTest() {
     @Test
     fun `flere inntektsmeldinger`() {
         person.håndter(sykmelding(Sykmeldingsperiode(6.januar, 20.januar, 100.prosent)))
+        person.håndter(søknad(Sykdom(6.januar, 20.januar, 100.prosent)))
         person.håndter(inntektsmelding())
         person.håndter(inntektsmelding())
         assertTrue(person.personLogg.hasWarningsOrWorse())
         assertFalse(person.personLogg.hasErrorsOrWorse())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
-        assertEquals(TilstandType.AVVENTER_SØKNAD_FERDIG_GAP, inspektør.sisteTilstand(1.vedtaksperiode))
+        assertEquals(TilstandType.AVVENTER_HISTORIKK, inspektør.sisteTilstand(1.vedtaksperiode))
     }
 
     @Test
@@ -90,8 +76,9 @@ internal class InntektsmeldingHendelseTest : AbstractPersonTest() {
         )
         assertFalse(inntektsmelding.valider(Periode(1.januar, 31.januar), MaskinellJurist()).hasErrorsOrWorse())
         person.håndter(sykmelding(Sykmeldingsperiode(6.januar, 20.januar, 100.prosent)))
+        person.håndter(søknad(Sykdom(6.januar, 20.januar, 100.prosent)))
         person.håndter(inntektsmelding)
-        assertEquals(TilstandType.AVVENTER_SØKNAD_FERDIG_GAP, inspektør.sisteTilstand(1.vedtaksperiode))
+        assertEquals(TilstandType.AVVENTER_HISTORIKK, inspektør.sisteTilstand(1.vedtaksperiode))
     }
 
     private fun inntektsmelding(
