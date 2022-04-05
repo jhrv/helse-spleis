@@ -132,7 +132,6 @@ internal class GrunnbeløpsreguleringTest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
         håndterUtbetalt()
-        håndterPåminnelse(2.vedtaksperiode, TilstandType.MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, LocalDateTime.now().minusMonths(3)) // forkast
 
         håndterGrunnbeløpsregulering(gyldighetsdato = GYLDIGHETSDATO_2020_GRUNNBELØP)
         inspektør.utbetalingUtbetalingstidslinje(0).also { utbetalingUtbetalingstidslinje ->
