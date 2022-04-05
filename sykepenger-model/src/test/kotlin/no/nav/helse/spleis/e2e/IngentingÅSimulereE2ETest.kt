@@ -9,11 +9,10 @@ import no.nav.helse.januar
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
+import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
-import no.nav.helse.person.TilstandType.AVVENTER_SØKNAD_FERDIG_GAP
+import no.nav.helse.person.TilstandType.AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
-import no.nav.helse.person.TilstandType.MOTTATT_SYKMELDING_FERDIG_FORLENGELSE
-import no.nav.helse.person.TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -26,9 +25,15 @@ internal class IngentingÅSimulereE2ETest : AbstractEndToEndTest() {
     fun `forlenger et vedtak med bare helg`() {
         nyttVedtak(1.januar, 19.januar)
         håndterSykmelding(Sykmeldingsperiode(20.januar, 21.januar, 100.prosent))
-        håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(20.januar, 21.januar, 100.prosent))
+        håndterSøknad(Sykdom(20.januar, 21.januar, 100.prosent))
         håndterYtelser(2.vedtaksperiode)
-        assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, AVVENTER_HISTORIKK, AVSLUTTET)
+        assertTilstander(
+            2.vedtaksperiode,
+            START,
+            AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
+            AVVENTER_HISTORIKK,
+            AVSLUTTET
+        )
         assertEquals(Utbetaling.GodkjentUtenUtbetaling, inspektør.utbetalingtilstand(1))
     }
 
@@ -36,10 +41,10 @@ internal class IngentingÅSimulereE2ETest : AbstractEndToEndTest() {
     fun `forlenger et vedtak med bare helg - Avsluttes via godkjenningsbehov`() = Toggle.AvsluttIngenUtbetaling.disable {
         nyttVedtak(1.januar, 19.januar)
         håndterSykmelding(Sykmeldingsperiode(20.januar, 21.januar, 100.prosent))
-        håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(20.januar, 21.januar, 100.prosent))
+        håndterSøknad(Sykdom(20.januar, 21.januar, 100.prosent))
         håndterYtelser(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
-        assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, AVSLUTTET)
+        assertTilstander(2.vedtaksperiode, START, AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, AVSLUTTET)
         assertEquals(Utbetaling.GodkjentUtenUtbetaling, inspektør.utbetalingtilstand(1))
     }
 
@@ -47,12 +52,21 @@ internal class IngentingÅSimulereE2ETest : AbstractEndToEndTest() {
     fun `førstegangsbehandling på eksisterende utbetaling med bare helg`() {
         nyttVedtak(1.januar, 18.januar)
         håndterSykmelding(Sykmeldingsperiode(20.januar, 21.januar, 100.prosent))
-        håndterInntektsmeldingMedValidering(2.vedtaksperiode, listOf(Periode(1.januar, 16.januar)), førsteFraværsdag = 20.januar)
-        håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(20.januar, 21.januar, 100.prosent))
+        håndterSøknad(Sykdom(20.januar, 21.januar, 100.prosent))
+        håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), førsteFraværsdag = 20.januar)
         håndterYtelser(2.vedtaksperiode)
         håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
-        assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP, AVVENTER_HISTORIKK, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVSLUTTET)
+        assertTilstander(
+            2.vedtaksperiode,
+            START,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
+            AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
+            AVVENTER_HISTORIKK,
+            AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_HISTORIKK,
+            AVSLUTTET
+        )
         assertEquals(Utbetaling.GodkjentUtenUtbetaling, inspektør.utbetalingtilstand(1))
     }
 
@@ -61,13 +75,23 @@ internal class IngentingÅSimulereE2ETest : AbstractEndToEndTest() {
     fun `førstegangsbehandling på eksisterende utbetaling med bare helg - Avsluttes via godkjenningsbehov`() = Toggle.AvsluttIngenUtbetaling.disable {
         nyttVedtak(1.januar, 18.januar)
         håndterSykmelding(Sykmeldingsperiode(20.januar, 21.januar, 100.prosent))
-        håndterInntektsmeldingMedValidering(2.vedtaksperiode, listOf(Periode(1.januar, 16.januar)), førsteFraværsdag = 20.januar)
-        håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(20.januar, 21.januar, 100.prosent))
+        håndterSøknad(Sykdom(20.januar, 21.januar, 100.prosent))
+        håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), førsteFraværsdag = 20.januar)
         håndterYtelser(2.vedtaksperiode)
         håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
-        assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP, AVVENTER_HISTORIKK, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, AVSLUTTET)
+        assertTilstander(
+            2.vedtaksperiode,
+            START,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
+            AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
+            AVVENTER_HISTORIKK,
+            AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_HISTORIKK,
+            AVVENTER_GODKJENNING,
+            AVSLUTTET
+        )
         assertEquals(Utbetaling.GodkjentUtenUtbetaling, inspektør.utbetalingtilstand(1))
     }
 
@@ -76,9 +100,15 @@ internal class IngentingÅSimulereE2ETest : AbstractEndToEndTest() {
     fun `forlenger et vedtak med bare helg og litt ferie`() {
         nyttVedtak(1.januar, 19.januar)
         håndterSykmelding(Sykmeldingsperiode(20.januar, 23.januar, 100.prosent))
-        håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(20.januar, 23.januar, 100.prosent), Ferie(22.januar, 23.januar))
+        håndterSøknad(Sykdom(20.januar, 23.januar, 100.prosent), Ferie(22.januar, 23.januar))
         håndterYtelser(2.vedtaksperiode)
-        assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, AVVENTER_HISTORIKK, AVSLUTTET)
+        assertTilstander(
+            2.vedtaksperiode,
+            START,
+            AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
+            AVVENTER_HISTORIKK,
+            AVSLUTTET
+        )
         assertEquals(Utbetaling.GodkjentUtenUtbetaling, inspektør.utbetalingtilstand(1))
     }
 
@@ -86,22 +116,39 @@ internal class IngentingÅSimulereE2ETest : AbstractEndToEndTest() {
     fun `forlenger et vedtak med bare helg og litt ferie - Avsluttes via godkjenningsbehov`() = Toggle.AvsluttIngenUtbetaling.disable {
         nyttVedtak(1.januar, 19.januar)
         håndterSykmelding(Sykmeldingsperiode(20.januar, 23.januar, 100.prosent))
-        håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(20.januar, 23.januar, 100.prosent), Ferie(22.januar, 23.januar))
+        håndterSøknad(Sykdom(20.januar, 23.januar, 100.prosent), Ferie(22.januar, 23.januar))
         håndterYtelser(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
-        assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, AVSLUTTET)
+        assertTilstander(
+            2.vedtaksperiode,
+            START,
+            AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
+            AVVENTER_HISTORIKK,
+            AVVENTER_GODKJENNING,
+            AVSLUTTET
+        )
         assertEquals(Utbetaling.GodkjentUtenUtbetaling, inspektør.utbetalingtilstand(1))
     }
 
     @Test
     fun `tomt simuleringsresultat`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 21.januar, 100.prosent))
-        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.januar, 16.januar)))
-        håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.januar, 21.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 21.januar, 100.prosent))
+        håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)))
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode, simuleringsresultat = null)
-        assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP, AVVENTER_HISTORIKK, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING)
+        assertTilstander(
+            1.vedtaksperiode,
+            START,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
+            AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
+            AVVENTER_HISTORIKK,
+            AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING
+        )
     }
 }
