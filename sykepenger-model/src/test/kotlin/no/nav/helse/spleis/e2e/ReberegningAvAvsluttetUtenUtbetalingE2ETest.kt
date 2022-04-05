@@ -144,7 +144,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingE2ETest : AbstractEndToEndTes
     }
 
     @Test
-    fun `gjenopptar behandling på neste periode avsluttet periode etter IM`() = (Toggle.GjenopptaAvsluttetUtenUtbetaling + Toggle.NyTilstandsflyt).enable {
+    fun `skal ikke gjenoppta behandling på neste periode avsluttet periode etter IM`() = (Toggle.GjenopptaAvsluttetUtenUtbetaling + Toggle.NyTilstandsflyt).enable {
         håndterSykmelding(Sykmeldingsperiode(12.januar, 20.januar, 100.prosent))
         håndterSøknad(Sykdom(12.januar, 20.januar, 100.prosent))
         håndterUtbetalingshistorikk(1.vedtaksperiode)
@@ -171,7 +171,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingE2ETest : AbstractEndToEndTes
     }
 
     @Test
-    fun `gjenopptar ikke behandling på neste periode etter at kort periode reberegnes`() = (Toggle.GjenopptaAvsluttetUtenUtbetaling + Toggle.NyTilstandsflyt).enable {
+    fun `skal ikke gjenoppta behandling på neste periode etter at kort periode reberegnes`() = (Toggle.GjenopptaAvsluttetUtenUtbetaling + Toggle.NyTilstandsflyt).enable {
         håndterSykmelding(Sykmeldingsperiode(12.januar, 20.januar, 100.prosent))
         håndterSøknad(Sykdom(12.januar, 20.januar, 100.prosent))
         håndterUtbetalingshistorikk(1.vedtaksperiode)
@@ -188,7 +188,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingE2ETest : AbstractEndToEndTes
     }
 
     @Test
-    fun `gjenopptar ikke behandling på neste gap periode etter at kort periode reberegnes`() {
+    fun `skal ikke gjenoppta behandling på neste gap periode etter at kort periode reberegnes`() {
         håndterSykmelding(Sykmeldingsperiode(12.januar, 20.januar, 100.prosent))
         håndterSøknad(Sykdom(12.januar, 20.januar, 100.prosent))
         håndterUtbetalingshistorikk(1.vedtaksperiode)
@@ -217,7 +217,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingE2ETest : AbstractEndToEndTes
     }
 
     @Test
-    fun `gjenopptar ikke behandling på neste periode avsluttet periode etter IM dersom det er nyere vedtak`() {
+    fun `skal ikke gjenoppta behandling på neste periode avsluttet periode etter IM dersom det er nyere vedtak`() {
         håndterSykmelding(Sykmeldingsperiode(12.januar, 20.januar, 100.prosent))
         håndterSøknad(Sykdom(12.januar, 20.januar, 100.prosent))
         håndterUtbetalingshistorikk(1.vedtaksperiode)
@@ -231,7 +231,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingE2ETest : AbstractEndToEndTes
     }
 
     @Test
-    fun `gjenopptar ikke behandling på neste periode avsluttet periode som fortsatt er innenfor agp`() {
+    fun `skal ikke gjenoppta behandling på neste periode avsluttet periode som fortsatt er innenfor agp`() {
         håndterSykmelding(Sykmeldingsperiode(12.januar, 20.januar, 100.prosent))
         håndterSøknad(Sykdom(12.januar, 20.januar, 100.prosent))
         håndterUtbetalingshistorikk(1.vedtaksperiode)

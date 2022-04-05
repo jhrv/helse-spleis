@@ -930,7 +930,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `egen tilstandstype for perioder med kun fravær - permisjonsdager (gir warning) `() {
+    fun `egen tilstandstype for perioder med kun fravær - permisjonsdager (gir warning)`() = Toggle.AvsluttIngenUtbetaling.disable {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 24.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 24.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar))

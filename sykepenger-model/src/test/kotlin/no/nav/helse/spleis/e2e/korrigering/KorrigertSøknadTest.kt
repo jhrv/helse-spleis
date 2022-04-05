@@ -101,7 +101,6 @@ internal class KorrigertSøknadTest : AbstractEndToEndTest() {
             assertTrue(it[31.januar] is Sykedag)
         }
         assertTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
-        assertWarning("Permisjon oppgitt i perioden i søknaden.", 1.vedtaksperiode.filter())
     }
 
     @Test
@@ -114,7 +113,6 @@ internal class KorrigertSøknadTest : AbstractEndToEndTest() {
             assertTrue(it[31.januar] is Feriedag)
         }
         assertTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
-        assertWarning("Permisjon oppgitt i perioden i søknaden.", 1.vedtaksperiode.filter())
     }
 
     @Test
