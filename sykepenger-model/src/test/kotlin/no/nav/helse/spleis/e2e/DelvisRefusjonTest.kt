@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.Toggle
 import no.nav.helse.februar
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsmelding
@@ -16,15 +15,12 @@ import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.november
 import no.nav.helse.person.TilstandType.AVSLUTTET
-import no.nav.helse.person.TilstandType.AVVENTER_ARBEIDSGIVERE
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
-import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
-import no.nav.helse.person.TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
@@ -636,6 +632,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
     @Test
     fun `korrigerende inntektsmelding endrer på refusjonsbeløp`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 50.prosent))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 50.prosent))
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
             refusjon = Inntektsmelding.Refusjon(INNTEKT, null, emptyList())
@@ -644,7 +641,6 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
             listOf(1.januar til 16.januar),
             refusjon = Inntektsmelding.Refusjon(INNTEKT / 2, null, emptyList())
         )
-        håndterSøknad(Sykdom(1.januar, 31.januar, 50.prosent))
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
@@ -820,6 +816,8 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
     @Test
     fun `førstegangsbehandling i Spleis etter en overgang fra Infotrygd uten inntektsmelding `() {
         håndterSykmelding(Sykmeldingsperiode(1.februar, 10.februar, 100.prosent))
+
+        håndterSøknad(Sykdom(1.februar, 10.februar, 100.prosent))
         håndterUtbetalingshistorikk(
             1.vedtaksperiode,
             inntektshistorikk = listOf(
@@ -829,8 +827,6 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
                 ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 17.januar, 31.januar, 100.prosent, INNTEKT)
             )
         )
-
-        håndterSøknad(Sykdom(1.februar, 10.februar, 100.prosent))
 
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -850,12 +846,12 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         // Når vi ser etter refusjon for Infotrygdperioden finner vi alikevel frem til denne inntektsmeldingen og forsøker å finne
         // refusjonsbeløp på 1-5.Januar som er før arbeidsgiverperioden
         håndterInntektsmelding(listOf(Periode(6.januar, 21.januar)))
+        håndterSøknad(Sykdom(22.januar, 31.januar, 100.prosent))
         håndterUtbetalingshistorikk(
             1.vedtaksperiode,
             ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 21.januar, 100.prosent, 1000.daglig),
             inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 1.januar, INNTEKT, true))
         )
-        håndterSøknad(Sykdom(22.januar, 31.januar, 100.prosent))
 
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -868,8 +864,8 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
     @Test
     fun `Første utbetalte dag er før første fraværsdag`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
-        håndterInntektsmelding(listOf(), førsteFraværsdag = 17.januar)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterInntektsmelding(listOf(), førsteFraværsdag = 17.januar)
 
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
@@ -885,8 +881,8 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
     @Test
     fun `Korrigerende inntektsmelding med feil skjæringstidspunkt går til manuell behandling på grunn av warning`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
-        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar)
         håndterInntektsmelding(emptyList(), førsteFraværsdag = 17.januar)
 
         håndterYtelser(1.vedtaksperiode)
@@ -1010,9 +1006,8 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         assertForkastetPeriodeTilstander(
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
             START,
-            MOTTATT_SYKMELDING_FERDIG_GAP,
-            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
-            AVVENTER_ARBEIDSGIVERE,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
+            AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
             AVVENTER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
@@ -1022,9 +1017,8 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         assertForkastetPeriodeTilstander(
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
             START,
-            MOTTATT_SYKMELDING_FERDIG_GAP,
-            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
-            AVVENTER_ARBEIDSGIVERE,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
+            AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
             TIL_INFOTRYGD,
             orgnummer = a2
         )
