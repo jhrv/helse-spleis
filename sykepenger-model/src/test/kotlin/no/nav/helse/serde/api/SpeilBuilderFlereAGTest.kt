@@ -1,13 +1,45 @@
 package no.nav.helse.serde.api
 
-import no.nav.helse.*
-import no.nav.helse.hendelser.*
+import java.time.LocalDate
+import java.time.Month
+import java.time.YearMonth
+import no.nav.helse.desember
+import no.nav.helse.februar
+import no.nav.helse.hendelser.InntektForSykepengegrunnlag
+import no.nav.helse.hendelser.Inntektsmelding
+import no.nav.helse.hendelser.Inntektsvurdering
+import no.nav.helse.hendelser.OverstyrArbeidsforhold
+import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Vilkårsgrunnlag
+import no.nav.helse.hendelser.til
+import no.nav.helse.januar
+import no.nav.helse.november
+import no.nav.helse.oktober
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
-import no.nav.helse.serde.api.v2.*
-import no.nav.helse.spleis.e2e.*
+import no.nav.helse.september
+import no.nav.helse.serde.api.v2.Arbeidsgiverinntekt
+import no.nav.helse.serde.api.v2.BeregnetPeriode
+import no.nav.helse.serde.api.v2.InntekterFraAOrdningen
+import no.nav.helse.serde.api.v2.Inntektkilde
+import no.nav.helse.serde.api.v2.OmregnetÅrsinntekt
+import no.nav.helse.spleis.e2e.AbstractEndToEndTest
+import no.nav.helse.spleis.e2e.grunnlag
+import no.nav.helse.spleis.e2e.håndterInntektsmelding
+import no.nav.helse.spleis.e2e.håndterOverstyrArbeidsforhold
+import no.nav.helse.spleis.e2e.håndterSimulering
+import no.nav.helse.spleis.e2e.håndterSykmelding
+import no.nav.helse.spleis.e2e.håndterSøknad
+import no.nav.helse.spleis.e2e.håndterUtbetalingsgodkjenning
+import no.nav.helse.spleis.e2e.håndterUtbetalingshistorikk
+import no.nav.helse.spleis.e2e.håndterUtbetalt
+import no.nav.helse.spleis.e2e.håndterVilkårsgrunnlag
+import no.nav.helse.spleis.e2e.håndterYtelser
+import no.nav.helse.spleis.e2e.nyttVedtak
+import no.nav.helse.spleis.e2e.repeat
+import no.nav.helse.spleis.e2e.sammenligningsgrunnlag
+import no.nav.helse.spleis.e2e.speilApi
 import no.nav.helse.testhelpers.assertNotNull
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.testhelpers.inntektperioderForSykepengegrunnlag
@@ -17,9 +49,6 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
-import java.time.Month
-import java.time.YearMonth
 
 internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
 
@@ -268,6 +297,7 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
         val utbetalinger = arrayOf(
             ArbeidsgiverUtbetalingsperiode(a2, 1.januar(2017), 31.januar(2017), 100.prosent, 1000.daglig)
         )
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         val inntektshistorikk = listOf(
             Inntektsopplysning(a2, 1.januar(2017), INNTEKT, true)
         )
@@ -276,7 +306,6 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
             utbetalinger = utbetalinger,
             inntektshistorikk = inntektshistorikk
         )
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterVilkårsgrunnlag(
