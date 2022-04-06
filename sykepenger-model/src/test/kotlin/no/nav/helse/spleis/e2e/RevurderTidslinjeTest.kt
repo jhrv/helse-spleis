@@ -1485,25 +1485,6 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(20.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(20.januar, 31.januar, 100.prosent), Arbeid(22.januar, 31.januar))
         håndterYtelser(2.vedtaksperiode)
-        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(24.januar, Dagtype.Feriedag)))
-        håndterYtelser(2.vedtaksperiode)
-        assertTilstander(
-            2.vedtaksperiode,
-            START,
-            AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
-            AVVENTER_HISTORIKK,
-            AVSLUTTET,
-            AVVENTER_HISTORIKK_REVURDERING,
-            AVSLUTTET
-        )
-    }
-
-    @Test
-    fun `Forlengelse med kun helg og arbeid hvor en arbeidsdag blir overstyrt til ferie - Avsluttes via godkjenningsbehov`() = Toggle.AvsluttIngenUtbetaling.disable {
-        nyttVedtak(1.januar, 19.januar)
-        håndterSykmelding(Sykmeldingsperiode(20.januar, 31.januar, 100.prosent))
-        håndterSøknad(Sykdom(20.januar, 31.januar, 100.prosent), Arbeid(22.januar, 31.januar))
-        håndterYtelser(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(24.januar, Dagtype.Feriedag)))
         håndterYtelser(2.vedtaksperiode)

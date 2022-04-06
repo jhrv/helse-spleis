@@ -904,33 +904,11 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         val personDTO = serializePersonForSpeil(person)
         val vedtaksperiode = personDTO.arbeidsgivere[0].vedtaksperioder[1] as VedtaksperiodeDTO
         assertTrue(vedtaksperiode.fullstendig)
-        assertEquals(TilstandstypeDTO.KunFerie, vedtaksperiode.tilstand)
-    }
-
-    @Test
-    fun `egen tilstandstype for perioder med kun fravær - feriedager - Avsluttes via godkjenningsbehov`() = Toggle.AvsluttIngenUtbetaling.disable {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 24.januar, 100.prosent))
-        håndterSøknad(Sykdom(1.januar, 24.januar, 100.prosent))
-        håndterInntektsmelding(listOf(1.januar til 16.januar))
-        håndterYtelser(1.vedtaksperiode)
-        håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
-        håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt()
-
-        håndterSykmelding(Sykmeldingsperiode(25.januar, 31.januar, 100.prosent))
-        håndterSøknad(Sykdom(25.januar, 31.januar, 100.prosent), Ferie(25.januar, 31.januar))
-        håndterYtelser(2.vedtaksperiode)
-
-        val personDTO = serializePersonForSpeil(person)
-        val vedtaksperiode = personDTO.arbeidsgivere[0].vedtaksperioder[1] as VedtaksperiodeDTO
-        assertTrue(vedtaksperiode.fullstendig)
         assertEquals(TilstandstypeDTO.Oppgaver, vedtaksperiode.tilstand)
     }
 
     @Test
-    fun `egen tilstandstype for perioder med kun fravær - permisjonsdager (gir warning)`() = Toggle.AvsluttIngenUtbetaling.disable {
+    fun `egen tilstandstype for perioder med kun fravær - permisjonsdager (gir warning)`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 24.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 24.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar))
@@ -1055,41 +1033,6 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Total sykdomsgrad ved flere arbeidsgivere`() = Toggle.FlereArbeidsgivereFraInfotrygd.enable {
-        val periode = 27.januar(2021) til 31.januar(2021)
-        val inntekt = 30000.månedlig
-
-        håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 50.prosent), orgnummer = a1)
-        håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
-
-        val inntektshistorikk = listOf(
-            Inntektsopplysning(a1, 20.januar(2021), inntekt, true),
-            Inntektsopplysning(a2, 20.januar(2021), inntekt, true)
-        )
-
-        val utbetalinger = arrayOf(
-            ArbeidsgiverUtbetalingsperiode(a1, 20.januar(2021), 26.januar(2021), 100.prosent, inntekt),
-            ArbeidsgiverUtbetalingsperiode(a2, 20.januar(2021), 26.januar(2021), 100.prosent, inntekt)
-        )
-
-        håndterSøknad(Sykdom(periode.start, periode.endInclusive, 50.prosent), orgnummer = a1)
-        håndterUtbetalingshistorikk(1.vedtaksperiode, utbetalinger = utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a1)
-
-        håndterSøknad(Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
-        håndterUtbetalingshistorikk(1.vedtaksperiode, utbetalinger = utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a2)
-
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
-
-        val navdagDTO = serializePersonForSpeil(person)
-            .arbeidsgivere.first()
-            .vedtaksperioder.last()
-            .utbetalingstidslinje.filterIsInstance<NavDagDTO>().last()
-
-        assertEquals(75.0, navdagDTO.totalGrad)
-    }
-
-    @Test
     fun `markerer forkastede vedtaksperioder som forkastet`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
@@ -1126,38 +1069,6 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         val serialisertPerson = serializePersonForSpeil(person)
         val vedtaksperiode = serialisertPerson.arbeidsgivere.first().vedtaksperioder.first()
         assertFalse(vedtaksperiode.erForkastet)
-    }
-
-    @Test
-    fun `Inntektskilde ved flere arbeidsgivere`() = Toggle.FlereArbeidsgivereFraInfotrygd.enable {
-        val periode = 27.januar(2021) til 31.januar(2021)
-        val inntekt = 30000.månedlig
-        val inntektshistorikk = listOf(
-            Inntektsopplysning(a1, 20.januar(2021), inntekt, true),
-            Inntektsopplysning(a2, 20.januar(2021), inntekt, true)
-        )
-
-        val utbetalinger = arrayOf(
-            ArbeidsgiverUtbetalingsperiode(a1, 20.januar(2021), 26.januar(2021), 100.prosent, inntekt),
-            ArbeidsgiverUtbetalingsperiode(a2, 20.januar(2021), 26.januar(2021), 100.prosent, inntekt)
-        )
-
-        håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 50.prosent), orgnummer = a1)
-        håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
-        håndterSøknad(Sykdom(periode.start, periode.endInclusive, 50.prosent), orgnummer = a1)
-        håndterUtbetalingshistorikk(1.vedtaksperiode, utbetalinger = utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a1)
-
-        håndterSøknad(Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
-        håndterUtbetalingshistorikk(1.vedtaksperiode, utbetalinger = utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a2)
-
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
-
-        val vedtaksperiode = serializePersonForSpeil(person)
-            .arbeidsgivere.first()
-            .vedtaksperioder.single()
-
-        assertEquals(Inntektskilde.FLERE_ARBEIDSGIVERE, vedtaksperiode.inntektskilde)
     }
 
     @Test

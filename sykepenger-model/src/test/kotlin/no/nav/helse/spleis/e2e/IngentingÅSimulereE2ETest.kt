@@ -27,22 +27,6 @@ internal class IngentingÅSimulereE2ETest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(20.januar, 21.januar, 100.prosent))
         håndterSøknad(Sykdom(20.januar, 21.januar, 100.prosent))
         håndterYtelser(2.vedtaksperiode)
-        assertTilstander(
-            2.vedtaksperiode,
-            START,
-            AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
-            AVVENTER_HISTORIKK,
-            AVSLUTTET
-        )
-        assertEquals(Utbetaling.GodkjentUtenUtbetaling, inspektør.utbetalingtilstand(1))
-    }
-
-    @Test
-    fun `forlenger et vedtak med bare helg - Avsluttes via godkjenningsbehov`() = Toggle.AvsluttIngenUtbetaling.disable {
-        nyttVedtak(1.januar, 19.januar)
-        håndterSykmelding(Sykmeldingsperiode(20.januar, 21.januar, 100.prosent))
-        håndterSøknad(Sykdom(20.januar, 21.januar, 100.prosent))
-        håndterYtelser(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
         assertTilstander(2.vedtaksperiode, START, AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, AVSLUTTET)
         assertEquals(Utbetaling.GodkjentUtenUtbetaling, inspektør.utbetalingtilstand(1))
@@ -50,29 +34,6 @@ internal class IngentingÅSimulereE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `førstegangsbehandling på eksisterende utbetaling med bare helg`() {
-        nyttVedtak(1.januar, 18.januar)
-        håndterSykmelding(Sykmeldingsperiode(20.januar, 21.januar, 100.prosent))
-        håndterSøknad(Sykdom(20.januar, 21.januar, 100.prosent))
-        håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), førsteFraværsdag = 20.januar)
-        håndterYtelser(2.vedtaksperiode)
-        håndterVilkårsgrunnlag(2.vedtaksperiode)
-        håndterYtelser(2.vedtaksperiode)
-        assertTilstander(
-            2.vedtaksperiode,
-            START,
-            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
-            AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
-            AVVENTER_HISTORIKK,
-            AVVENTER_VILKÅRSPRØVING,
-            AVVENTER_HISTORIKK,
-            AVSLUTTET
-        )
-        assertEquals(Utbetaling.GodkjentUtenUtbetaling, inspektør.utbetalingtilstand(1))
-    }
-
-
-    @Test
-    fun `førstegangsbehandling på eksisterende utbetaling med bare helg - Avsluttes via godkjenningsbehov`() = Toggle.AvsluttIngenUtbetaling.disable {
         nyttVedtak(1.januar, 18.januar)
         håndterSykmelding(Sykmeldingsperiode(20.januar, 21.januar, 100.prosent))
         håndterSøknad(Sykdom(20.januar, 21.januar, 100.prosent))
@@ -98,22 +59,6 @@ internal class IngentingÅSimulereE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `forlenger et vedtak med bare helg og litt ferie`() {
-        nyttVedtak(1.januar, 19.januar)
-        håndterSykmelding(Sykmeldingsperiode(20.januar, 23.januar, 100.prosent))
-        håndterSøknad(Sykdom(20.januar, 23.januar, 100.prosent), Ferie(22.januar, 23.januar))
-        håndterYtelser(2.vedtaksperiode)
-        assertTilstander(
-            2.vedtaksperiode,
-            START,
-            AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
-            AVVENTER_HISTORIKK,
-            AVSLUTTET
-        )
-        assertEquals(Utbetaling.GodkjentUtenUtbetaling, inspektør.utbetalingtilstand(1))
-    }
-
-    @Test
-    fun `forlenger et vedtak med bare helg og litt ferie - Avsluttes via godkjenningsbehov`() = Toggle.AvsluttIngenUtbetaling.disable {
         nyttVedtak(1.januar, 19.januar)
         håndterSykmelding(Sykmeldingsperiode(20.januar, 23.januar, 100.prosent))
         håndterSøknad(Sykdom(20.januar, 23.januar, 100.prosent), Ferie(22.januar, 23.januar))

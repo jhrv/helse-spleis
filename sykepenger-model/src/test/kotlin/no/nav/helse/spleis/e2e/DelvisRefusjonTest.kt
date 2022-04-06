@@ -844,44 +844,6 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `to arbeidsgivere, en av dem mangler refusjon, begge får warning`() = Toggle.FlereArbeidsgivereFraInfotrygd.enable {
-        håndterInntektsmelding(arbeidsgiverperioder = listOf(1.januar til 16.januar), orgnummer = a1)
-
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 10.februar, 100.prosent), orgnummer = a1)
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 10.februar, 100.prosent), orgnummer = a2)
-
-        håndterSøknad(Sykdom(1.februar, 10.februar, 100.prosent), orgnummer = a1)
-
-        håndterUtbetalingshistorikk(
-            1.vedtaksperiode,
-            orgnummer = a1,
-            inntektshistorikk = listOf(
-                Inntektsopplysning(orgnummer = a1, sykepengerFom = 17.januar, inntekt = INNTEKT, refusjonTilArbeidsgiver = true),
-                Inntektsopplysning(orgnummer = a2, sykepengerFom = 17.januar, inntekt = INNTEKT, refusjonTilArbeidsgiver = true)
-            ),
-            utbetalinger = arrayOf(
-                ArbeidsgiverUtbetalingsperiode(a1, 17.januar, 31.januar, 100.prosent, INNTEKT),
-                ArbeidsgiverUtbetalingsperiode(a2, 17.januar, 31.januar, 100.prosent, INNTEKT)
-            )
-        )
-
-        håndterSøknad(Sykdom(1.februar, 10.februar, 100.prosent), orgnummer = a2)
-
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalt(orgnummer = a1)
-
-        håndterYtelser(1.vedtaksperiode, orgnummer = a2)
-        håndterSimulering(1.vedtaksperiode, orgnummer = a2)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
-        håndterUtbetalt(orgnummer = a2)
-
-        assertWarning("Fant ikke refusjonsgrad for perioden. Undersøk oppgitt refusjon før du utbetaler.", 1.vedtaksperiode.filter(a1))
-        assertWarning("Fant ikke refusjonsgrad for perioden. Undersøk oppgitt refusjon før du utbetaler.", 1.vedtaksperiode.filter(a2))
-    }
-
-    @Test
     fun `Finner refusjon fra feil inntektsmelding ved Infotrygdforlengelse`() {
         håndterSykmelding(Sykmeldingsperiode(22.januar, 31.januar, 100.prosent))
         // Inntektsmelding blir ikke brukt ettersom det er forlengelse fra Infotrygd.
