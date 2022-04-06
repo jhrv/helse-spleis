@@ -19,8 +19,8 @@ internal class StatslønnWarningTest : AbstractEndToEndTest() {
     @Test
     fun `Ikke warning ved statslønn når det ikke er overgang`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
-        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.januar, 16.januar)))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), sendtTilNAVEllerArbeidsgiver = 18.februar)
+        håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)))
         håndterYtelser(vedtaksperiodeIdInnhenter = 1.vedtaksperiode, statslønn = true)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
@@ -34,8 +34,8 @@ internal class StatslønnWarningTest : AbstractEndToEndTest() {
     @Test
     fun `Warning ved statslønn`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
-        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.januar, 16.januar)))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), sendtTilNAVEllerArbeidsgiver = 18.februar)
+        håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)))
         val historikk = arrayOf(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.desember(2017),  31.desember(2017), 100.prosent, 15000.daglig))
         håndterYtelser(1.vedtaksperiode, *historikk, statslønn = true)
 
