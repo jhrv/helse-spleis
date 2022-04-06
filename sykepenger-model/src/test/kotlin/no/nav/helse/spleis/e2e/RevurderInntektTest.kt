@@ -648,6 +648,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
     fun `revurdering av inntekt delegeres til den første perioden som har en utbetalingstidslinje - arbeidsgiversøknad først`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 15.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 15.januar, 100.prosent))
+        håndterUtbetalingshistorikk(1.vedtaksperiode)
         håndterSykmelding(Sykmeldingsperiode(16.januar, 15.februar, 100.prosent))
         håndterSøknad(Sykdom(16.januar, 15.februar, 100.prosent))
         håndterInntektsmelding(
@@ -667,6 +668,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         assertTilstander(
             1.vedtaksperiode,
             START,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
             AVSLUTTET_UTEN_UTBETALING,
             AVSLUTTET_UTEN_UTBETALING
         )
@@ -693,6 +695,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
     fun `revurdering av inntekt delegeres til den første perioden som har en utbetalingstidslinje - periode uten utbetaling først`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Ferie(1.januar, 31.januar))
+        håndterUtbetalingshistorikk(1.vedtaksperiode)
         håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)))
 
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
@@ -717,6 +720,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         assertTilstander(
             1.vedtaksperiode,
             START,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
             AVSLUTTET_UTEN_UTBETALING,
             AVSLUTTET_UTEN_UTBETALING
         )
