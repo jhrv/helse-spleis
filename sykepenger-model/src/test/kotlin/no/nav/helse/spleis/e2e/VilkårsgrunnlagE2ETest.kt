@@ -89,7 +89,6 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
             START,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
             AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
-            AVVENTER_HISTORIKK,
             TIL_INFOTRYGD
         )
     }
