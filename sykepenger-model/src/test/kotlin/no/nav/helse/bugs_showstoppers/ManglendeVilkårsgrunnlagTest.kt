@@ -1,6 +1,6 @@
 package no.nav.helse.bugs_showstoppers
 
-import no.nav.helse.Toggle
+import java.time.LocalDate
 import no.nav.helse.desember
 import no.nav.helse.etterspurteBehov
 import no.nav.helse.februar
@@ -41,6 +41,7 @@ import no.nav.helse.spleis.e2e.håndterUtbetalt
 import no.nav.helse.spleis.e2e.håndterVilkårsgrunnlag
 import no.nav.helse.spleis.e2e.håndterYtelser
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
@@ -87,12 +88,15 @@ internal class ManglendeVilkårsgrunnlagTest : AbstractEndToEndTest() {
     fun `inntektsmelding drar periode tilbake og lager tilstøtende`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 5.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 5.januar, 100.prosent))
+        håndterUtbetalingshistorikk(1.vedtaksperiode, besvart = LocalDate.EPOCH.atStartOfDay())
 
         håndterSykmelding(Sykmeldingsperiode(26.januar, 2.februar, 100.prosent))
         håndterSøknad(Sykdom(26.januar, 2.februar, 100.prosent))
+        håndterUtbetalingshistorikk(2.vedtaksperiode, besvart = LocalDate.EPOCH.atStartOfDay())
 
         håndterSykmelding(Sykmeldingsperiode(5.februar, 21.februar, 100.prosent))
         håndterSøknad(Sykdom(5.februar, 21.februar, 100.prosent))
+        håndterUtbetalingshistorikk(3.vedtaksperiode, besvart = LocalDate.EPOCH.atStartOfDay())
 
         // inntektsmelding inneholder en ukjent dag — 8. januar — som vi ikke
         // har registrert før i forbindelse med verken søknad eller sykmelding
@@ -111,8 +115,20 @@ internal class ManglendeVilkårsgrunnlagTest : AbstractEndToEndTest() {
 
         håndterYtelser(3.vedtaksperiode)
 
-        assertTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVSLUTTET_UTEN_UTBETALING)
-        assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVSLUTTET_UTEN_UTBETALING)
+        assertTilstander(
+            1.vedtaksperiode,
+            START,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
+            AVSLUTTET_UTEN_UTBETALING,
+            AVSLUTTET_UTEN_UTBETALING
+        )
+        assertTilstander(
+            2.vedtaksperiode,
+            START,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
+            AVSLUTTET_UTEN_UTBETALING,
+            AVSLUTTET_UTEN_UTBETALING
+        )
         assertTilstander(
             3.vedtaksperiode,
             START,
@@ -122,8 +138,8 @@ internal class ManglendeVilkårsgrunnlagTest : AbstractEndToEndTest() {
             AVVENTER_VILKÅRSPRØVING
         )
 
-        assertTrue(person.personLogg.etterspurteBehov(1.vedtaksperiode).isEmpty())
-        assertTrue(person.personLogg.etterspurteBehov(2.vedtaksperiode).isEmpty())
+        assertEquals(1, person.personLogg.etterspurteBehov(1.vedtaksperiode).size)
+        assertEquals(1, person.personLogg.etterspurteBehov(2.vedtaksperiode).size)
         assertTrue(person.personLogg.etterspurteBehov(3.vedtaksperiode).map { it.type }
             .containsAll(listOf(InntekterForSammenligningsgrunnlag, Medlemskap, InntekterForSykepengegrunnlag, ArbeidsforholdV2)))
     }
