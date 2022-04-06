@@ -263,7 +263,7 @@ internal fun AbstractEndToEndTest.tilYtelser(
         orgnummer = orgnummer,
         refusjon = refusjon
     )
-    håndterYtelser(id, fnr = fnr, orgnummer = orgnummer)
+    håndterYtelser(id, fnr = fnr, orgnummer = orgnummer, besvart = LocalDate.EPOCH.atStartOfDay())
     håndterVilkårsgrunnlag(
         id,
         AbstractEndToEndTest.INNTEKT,
@@ -274,7 +274,7 @@ internal fun AbstractEndToEndTest.tilYtelser(
         ),
         inntektsvurderingForSykepengegrunnlag = inntektsvurderingForSykepengegrunnlag
     )
-    håndterYtelser(id, fnr = fnr, orgnummer = orgnummer)
+    håndterYtelser(id, fnr = fnr, orgnummer = orgnummer, besvart = LocalDate.EPOCH.atStartOfDay())
     return id
 }
 
