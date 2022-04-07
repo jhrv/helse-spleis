@@ -17,12 +17,7 @@ import no.nav.helse.januar
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
-import no.nav.helse.person.TilstandType.AVVENTER_SØKNAD_FERDIG_GAP
-import no.nav.helse.person.TilstandType.AVVENTER_SØKNAD_UFERDIG_GAP
 import no.nav.helse.person.TilstandType.AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER
-import no.nav.helse.person.TilstandType.AVVENTER_UFERDIG
-import no.nav.helse.person.TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP
-import no.nav.helse.person.TilstandType.MOTTATT_SYKMELDING_UFERDIG_GAP
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
@@ -289,20 +284,49 @@ internal class SøknadArbeidsgiverE2ETest : AbstractEndToEndTest() {
     @Test
     fun `hensyntar historikk fra infotrygd - får vite om det etter IM`() {
         håndterSykmelding(Sykmeldingsperiode(3.februar, 18.februar, 100.prosent))
-        håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), førsteFraværsdag = 3.februar)
+        val inntektsmeldingId = håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), førsteFraværsdag = 3.februar)
+        håndterSøknad(Sykdom(3.februar, 18.februar, 100.prosent))
+        håndterInntektsmeldingReplay(inntektsmeldingId, 1.vedtaksperiode.id(ORGNUMMER))
         håndterUtbetalingshistorikk(1.vedtaksperiode, ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 17.januar, 31.januar, 100.prosent, INNTEKT), inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 17.januar, INNTEKT, true)))
         håndterSøknad(Sykdom(3.februar, 18.februar, 100.prosent))
-        assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP, AVVENTER_HISTORIKK)
+        assertTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER, AVVENTER_HISTORIKK)
     }
 
     @Test
     fun `hensyntar historikk fra infotrygd - får vite om det etter IM - flere perioder`() {
         håndterSykmelding(Sykmeldingsperiode(2.februar, 2.februar, 100.prosent))
+        val inntektsmeldingId1 = håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), førsteFraværsdag = 2.februar)
+        håndterSøknad(Sykdom(2.februar, 2.februar, 100.prosent))
+        håndterInntektsmeldingReplay(inntektsmeldingId1, 1.vedtaksperiode.id(ORGNUMMER))
+        håndterUtbetalingshistorikk(
+            1.vedtaksperiode,
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 17.januar, 31.januar, 100.prosent, INNTEKT),
+            inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 17.januar, INNTEKT, true))
+        )
+
         håndterSykmelding(Sykmeldingsperiode(6.februar, 6.februar, 100.prosent))
-        håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), førsteFraværsdag = 6.februar)
-        håndterUtbetalingshistorikk(1.vedtaksperiode, ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 17.januar, 31.januar, 100.prosent, INNTEKT), inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 17.januar, INNTEKT, true)))
+        val inntektsmeldingId2 = håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), førsteFraværsdag = 6.februar)
         håndterSøknad(Sykdom(6.februar, 6.februar, 100.prosent))
-        assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_GAP, AVVENTER_SØKNAD_UFERDIG_GAP, AVVENTER_UFERDIG)
+        håndterInntektsmeldingReplay(inntektsmeldingId2, 2.vedtaksperiode.id(ORGNUMMER))
+        håndterUtbetalingshistorikk(
+            2.vedtaksperiode,
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 17.januar, 31.januar, 100.prosent, INNTEKT),
+            inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 17.januar, INNTEKT, true))
+        )
+
+        assertTilstander(
+            1.vedtaksperiode,
+            START,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
+            AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
+            AVVENTER_HISTORIKK
+        )
+        assertTilstander(
+            2.vedtaksperiode,
+            START,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
+            AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER
+        )
     }
 
     @Test
