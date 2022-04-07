@@ -1,10 +1,10 @@
 package no.nav.helse.spleis.e2e
 
 import no.nav.helse.assertForventetFeil
-import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype.Feriedag
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.januar
+import no.nav.helse.februar
 import no.nav.helse.mars
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVVENTER_ARBEIDSGIVERE_REVURDERING
