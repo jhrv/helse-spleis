@@ -160,73 +160,60 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `skal ikke gjenbruke et vilkårsgrunnlag som feiler pga 25 prosent avvik`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 17.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 17.januar, 100.prosent))
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
 
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode)
 
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
             INNTEKT,
             inntektsvurdering = Inntektsvurdering(
-                inntekter = listOf(
-                    sammenligningsgrunnlag(a1, 1.januar, (INNTEKT / 2).repeat(12)),
-                    sammenligningsgrunnlag(a2, 1.januar, (INNTEKT / 2).repeat(12))
-                ),
+                inntekter = listOf(sammenligningsgrunnlag(a1, 1.januar, (INNTEKT / 2).repeat(12))),
             ),
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                inntekter = listOf(
-                    grunnlag(a1, 1.januar, INNTEKT.repeat(3)),
-                    grunnlag(a2, 1.januar, INNTEKT.repeat(3))
-                ),
+                inntekter = listOf(grunnlag(a1, 1.januar, INNTEKT.repeat(3))),
                 arbeidsforhold = emptyList()
             ),
-            arbeidsforhold = listOf(
-                Vilkårsgrunnlag.Arbeidsforhold(a1, 1.desember(2017)),
-                Vilkårsgrunnlag.Arbeidsforhold(a2, 1.desember(2017))
-            ),
-            orgnummer = a1
+            arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(a1, 1.desember(2017)))
         )
+        assertError("Har mer enn 25 % avvik", 1.vedtaksperiode.filter())
 
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a2)
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a2)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a2)
+        håndterSykmelding(Sykmeldingsperiode(18.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(18.januar, 31.januar, 100.prosent))
+        håndterInntektsmelding(listOf(1.januar til 18.januar))
 
-        håndterYtelser(1.vedtaksperiode, orgnummer = a2)
+        håndterYtelser(2.vedtaksperiode)
         assertForventetFeil(
             forklaring = "https://trello.com/c/edYRnoPm",
-            nå = { assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING, orgnummer = a2) },
-            ønsket = { assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD, orgnummer = a2) }
+            nå = { assertSisteTilstand(2.vedtaksperiode, AVVENTER_SIMULERING) },
+            ønsket = { assertSisteTilstand(2.vedtaksperiode, TIL_INFOTRYGD) }
         )
     }
 
     @Test
     fun `skal ikke gjenbruke et vilkårsgrunnlag som feiler pga frilanser arbeidsforhold`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 17.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 17.januar, 100.prosent))
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
 
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode)
 
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
             INNTEKT,
             inntektsvurdering = Inntektsvurdering(
-                inntekter = listOf(
-                    sammenligningsgrunnlag(a1, 1.januar, INNTEKT.repeat(12)),
-                    sammenligningsgrunnlag(a2, 1.januar, INNTEKT.repeat(12))
-                ),
+                inntekter = listOf(sammenligningsgrunnlag(a1, 1.januar, INNTEKT.repeat(12))),
             ),
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
                 inntekter = listOf(
                     grunnlag(a1, 1.januar, INNTEKT.repeat(3)),
-                    grunnlag(a2, 1.januar, INNTEKT.repeat(3)),
-                    grunnlag(a3, 1.januar, INNTEKT.repeat(1))
+                    grunnlag(a2, 1.januar, INNTEKT.repeat(1))
                 ),
                 arbeidsforhold = listOf(
                     InntektForSykepengegrunnlag.Arbeidsforhold(
-                        orgnummer = a3,
+                        orgnummer = a2,
                         månedligeArbeidsforhold = listOf(
                             InntektForSykepengegrunnlag.MånedligArbeidsforhold(
                                 yearMonth = YearMonth.of(2017, 12),
@@ -239,20 +226,20 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
             arbeidsforhold = listOf(
                 Vilkårsgrunnlag.Arbeidsforhold(a1, 1.desember(2017)),
                 Vilkårsgrunnlag.Arbeidsforhold(a2, 1.desember(2017))
-            ),
-            orgnummer = a1,
+            )
         )
+        assertError("Fant frilanserinntekt på en arbeidsgiver de siste 3 månedene", 1.vedtaksperiode.filter())
 
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a2)
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a2)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a2)
+        håndterSykmelding(Sykmeldingsperiode(18.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(18.januar, 31.januar, 100.prosent))
+        håndterInntektsmelding(listOf(1.januar til 18.januar))
 
-        håndterYtelser(1.vedtaksperiode, orgnummer = a2)
+        håndterYtelser(2.vedtaksperiode)
 
         assertForventetFeil(
             forklaring = "https://trello.com/c/edYRnoPm",
-            nå = { assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING, orgnummer = a2) },
-            ønsket = { assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD, orgnummer = a2) }
+            nå = { assertSisteTilstand(2.vedtaksperiode, AVVENTER_SIMULERING) },
+            ønsket = { assertSisteTilstand(2.vedtaksperiode, TIL_INFOTRYGD) }
         )
     }
 }
