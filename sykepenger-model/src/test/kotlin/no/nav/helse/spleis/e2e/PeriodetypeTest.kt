@@ -271,4 +271,55 @@ internal class PeriodetypeTest : AbstractEndToEndTest() {
         assertEquals(OVERGANG_FRA_IT, inspektør.periodetype(1.vedtaksperiode))
         assertEquals(INFOTRYGDFORLENGELSE, inspektør.periodetype(2.vedtaksperiode))
     }
+
+    @Test
+    fun `overgang fra infotrygd hvor januar-periode er splittet inn i to utbetalingsperioder i IT - skal markeres som overgang`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+
+        person.invaliderAllePerioder(hendelselogg, null)
+
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
+
+        håndterUtbetalingshistorikk(
+            2.vedtaksperiode,
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 16.januar, 100.prosent, INNTEKT),
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 17.januar, 31.januar, 50.prosent, INNTEKT),
+            inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 1.januar, INNTEKT, true))
+        )
+
+        assertForventetFeil(
+            forklaring = "Periodetype blir satt feil",
+            nå = { assertEquals(INFOTRYGDFORLENGELSE, inspektør.periodetype(2.vedtaksperiode)) },
+            ønsket = { assertEquals(OVERGANG_FRA_IT, inspektør.periodetype(2.vedtaksperiode)) }
+        )
+    }
+
+    @Test
+    fun `overgang fra infotrygd hvor det er to forkastede vedtaksperioder som fører til to utbetalinger i IT - skal markeres som overgang`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
+
+        person.invaliderAllePerioder(hendelselogg, null)
+
+        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 50.prosent))
+        håndterSøknad(Sykdom(1.mars, 31.mars, 50.prosent))
+
+        håndterUtbetalingshistorikk(
+            3.vedtaksperiode,
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 31.januar, 100.prosent, INNTEKT),
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.februar, 28.februar, 50.prosent, INNTEKT),
+            inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 1.januar, INNTEKT, true))
+        )
+
+        assertForventetFeil(
+            forklaring = "Periodetype blir satt feil",
+            nå = { assertEquals(INFOTRYGDFORLENGELSE, inspektør.periodetype(3.vedtaksperiode)) },
+            ønsket = { assertEquals(OVERGANG_FRA_IT, inspektør.periodetype(3.vedtaksperiode)) }
+        )
+    }
 }
