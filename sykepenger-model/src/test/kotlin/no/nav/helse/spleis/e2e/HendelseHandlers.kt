@@ -47,15 +47,7 @@ import no.nav.helse.person.IdInnhenter
 import no.nav.helse.person.Person
 import no.nav.helse.person.PersonVisitor
 import no.nav.helse.person.TilstandType
-import no.nav.helse.person.TilstandType.AVSLUTTET
-import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
-import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
-import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
-import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
-import no.nav.helse.person.TilstandType.AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER
-import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
-import no.nav.helse.person.TilstandType.START
-import no.nav.helse.person.TilstandType.TIL_UTBETALING
+import no.nav.helse.person.TilstandType.*
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.serde.reflection.Utbetalingstatus
@@ -520,6 +512,7 @@ internal fun AbstractEndToEndTest.håndterUtbetalingshistorikk(
     vararg utbetalinger: Infotrygdperiode,
     inntektshistorikk: List<Inntektsopplysning> = emptyList(),
     orgnummer: String = AbstractPersonTest.ORGNUMMER,
+    statslønn: Boolean = false,
     besvart: LocalDateTime = LocalDateTime.now()
 ) {
     val bedtOmSykepengehistorikk = person.personLogg.etterspurteBehov(vedtaksperiodeIdInnhenter, Behovtype.Sykepengehistorikk, orgnummer)
@@ -529,6 +522,7 @@ internal fun AbstractEndToEndTest.håndterUtbetalingshistorikk(
         utbetalinger = utbetalinger.toList(),
         inntektshistorikk = inntektshistorikk,
         orgnummer = orgnummer,
+        harStatslønn = statslønn,
         besvart = besvart
     ).håndter(Person::håndter)
 }
