@@ -43,8 +43,8 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
         assertUtbetalingTilstander(0, "IKKE_UTBETALT", "GODKJENT", "SENDT", "OVERFØRT", "UTBETALT")
         assertTilstander(
             0,
-            "MOTTATT_SYKMELDING_FERDIG_GAP",
-            "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP",
+            "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK",
+            "AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER",
             "AVVENTER_HISTORIKK",
             "AVVENTER_VILKÅRSPRØVING",
             "AVVENTER_HISTORIKK",
@@ -65,8 +65,7 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
         sendInntektsmelding(0, listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
         assertTilstander(
             0,
-            "MOTTATT_SYKMELDING_FERDIG_GAP",
-            "AVSLUTTET_UTEN_UTBETALING",
+            "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK",
             "AVSLUTTET_UTEN_UTBETALING"
         )
     }
@@ -81,8 +80,7 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
         sendInntektsmelding(0, listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
         assertTilstander(
             0,
-            "MOTTATT_SYKMELDING_FERDIG_GAP",
-            "AVSLUTTET_UTEN_UTBETALING",
+            "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK",
             "AVSLUTTET_UTEN_UTBETALING"
         )
     }
@@ -100,8 +98,8 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
         assertUtbetalingTilstander(0, "IKKE_UTBETALT", "IKKE_GODKJENT")
         assertTilstander(
             0,
-            "MOTTATT_SYKMELDING_FERDIG_GAP",
-            "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP",
+            "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK",
+            "AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER",
             "AVVENTER_HISTORIKK",
             "AVVENTER_VILKÅRSPRØVING",
             "AVVENTER_HISTORIKK",
@@ -134,8 +132,8 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
         assertEquals(ORGNUMMER, annulleringsmelding.path("organisasjonsnummer").asText())
         assertTilstander(
             0,
-            "MOTTATT_SYKMELDING_FERDIG_GAP",
-            "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP",
+            "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK",
+            "AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER",
             "AVVENTER_HISTORIKK",
             "AVVENTER_VILKÅRSPRØVING",
             "AVVENTER_HISTORIKK",
@@ -160,8 +158,8 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
         assertUtbetalingTilstander(0, "IKKE_UTBETALT", "FORKASTET")
         assertTilstander(
             0,
-            "MOTTATT_SYKMELDING_FERDIG_GAP",
-            "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP",
+            "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK",
+            "AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER",
             "AVVENTER_HISTORIKK",
             "AVVENTER_VILKÅRSPRØVING",
             "AVVENTER_HISTORIKK",
@@ -188,8 +186,8 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
         assertUtbetalingTilstander(1, "IKKE_UTBETALT", "GODKJENT", "SENDT")
         assertTilstander(
             0,
-            "MOTTATT_SYKMELDING_FERDIG_GAP",
-            "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP",
+            "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK",
+            "AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER",
             "AVVENTER_HISTORIKK",
             "AVVENTER_VILKÅRSPRØVING",
             "AVVENTER_HISTORIKK",
@@ -221,8 +219,8 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
         assertUtbetalingTilstander(1, "IKKE_UTBETALT", "GODKJENT", "SENDT")
         assertTilstander(
             0,
-            "MOTTATT_SYKMELDING_FERDIG_GAP",
-            "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP",
+            "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK",
+            "AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER",
             "AVVENTER_HISTORIKK",
             "AVVENTER_VILKÅRSPRØVING",
             "AVVENTER_HISTORIKK",
@@ -255,8 +253,7 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
 
         assertForkastedeTilstander(
             0,
-            "MOTTATT_SYKMELDING_FERDIG_GAP",
-            "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP",
+            "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK",
             "TIL_INFOTRYGD"
         )
     }
@@ -272,8 +269,8 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
         sendSimulering(0, SimuleringMessage.Simuleringstatus.TEKNISK_FEIL)
         assertTilstander(
             0,
-            "MOTTATT_SYKMELDING_FERDIG_GAP",
-            "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP",
+            "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK",
+            "AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER",
             "AVVENTER_HISTORIKK",
             "AVVENTER_VILKÅRSPRØVING",
             "AVVENTER_HISTORIKK",
@@ -287,7 +284,11 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
         sendNySøknad(SoknadsperiodeDTO(fom = 1.januar, tom = 20.januar, sykmeldingsgrad = 100))
         sendSøknad(listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 20.januar, sykmeldingsgrad = 100)))
 
-        assertTilstander(0, "MOTTATT_SYKMELDING_FERDIG_GAP", "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP", "AVVENTER_HISTORIKK")
+        assertTilstander(
+            0,
+            "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK",
+            "AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER",
+            "AVVENTER_HISTORIKK")
     }
 
     @Test
@@ -304,8 +305,8 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
         sendUtbetaling()
         assertTilstander(
             0,
-            "MOTTATT_SYKMELDING_FERDIG_GAP",
-            "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP",
+            "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK",
+            "AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER",
             "AVVENTER_HISTORIKK",
             "AVVENTER_VILKÅRSPRØVING",
             "AVVENTER_HISTORIKK",
@@ -327,8 +328,7 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
         sendInntektsmelding(0, listOf(Periode(fom = 1.januar, tom = 16.januar)), førsteFraværsdag = 1.januar)
         assertTilstander(
             0,
-            "MOTTATT_SYKMELDING_FERDIG_GAP",
-            "AVSLUTTET_UTEN_UTBETALING",
+            "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK",
             "AVSLUTTET_UTEN_UTBETALING"
         )
 
@@ -425,8 +425,8 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
         assertEquals(2, testRapid.inspektør.alleEtterspurteBehov(Utbetaling).size)
         assertTilstander(
             0,
-            "MOTTATT_SYKMELDING_FERDIG_GAP",
-            "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP",
+            "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK",
+            "AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER",
             "AVVENTER_HISTORIKK",
             "AVVENTER_VILKÅRSPRØVING",
             "AVVENTER_HISTORIKK",
