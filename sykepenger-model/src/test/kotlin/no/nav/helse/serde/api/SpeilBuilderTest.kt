@@ -15,7 +15,6 @@ import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Sykmeldingsperiode
-import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Arbeid
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Permisjon
@@ -1074,7 +1073,8 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
     @Test
     fun `arbeidsgivere uten vedtaksperioder som skal vises i speil, filtreres bort`() {
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
-        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), andreInntektskilder = listOf(Søknad.Inntektskilde(true, "ANNET")))
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
+        person.invaliderAllePerioder(hendelselogg, null)
         assertTrue(serializePersonForSpeil(person).arbeidsgivere.isEmpty())
     }
 
