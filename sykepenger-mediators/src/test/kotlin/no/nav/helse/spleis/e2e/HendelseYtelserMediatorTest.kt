@@ -23,8 +23,8 @@ internal class HendelseYtelserMediatorTest : AbstractEndToEndMediatorTest() {
 
         assertTilstander(
             0,
-            "MOTTATT_SYKMELDING_FERDIG_GAP",
-            "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP",
+            "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK",
+            "AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER",
             "AVVENTER_HISTORIKK",
             "TIL_INFOTRYGD"
         )
@@ -42,8 +42,8 @@ internal class HendelseYtelserMediatorTest : AbstractEndToEndMediatorTest() {
 
         assertTilstander(
             0,
-            "MOTTATT_SYKMELDING_FERDIG_GAP",
-            "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP",
+            "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK",
+            "AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER",
             "AVVENTER_HISTORIKK",
             "TIL_INFOTRYGD"
         )
@@ -58,8 +58,8 @@ internal class HendelseYtelserMediatorTest : AbstractEndToEndMediatorTest() {
 
         assertTilstander(
             0,
-            "MOTTATT_SYKMELDING_FERDIG_GAP",
-            "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP",
+            "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK",
+            "AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER",
             "AVVENTER_HISTORIKK",
             "TIL_INFOTRYGD"
         )
@@ -84,8 +84,8 @@ internal class HendelseYtelserMediatorTest : AbstractEndToEndMediatorTest() {
 
         assertTilstander(
             0,
-            "MOTTATT_SYKMELDING_FERDIG_GAP",
-            "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP",
+            "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK",
+            "AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER",
             "AVVENTER_HISTORIKK",
             "TIL_INFOTRYGD"
         )
@@ -125,8 +125,8 @@ internal class HendelseYtelserMediatorTest : AbstractEndToEndMediatorTest() {
 
         assertTilstander(
             0,
-            "MOTTATT_SYKMELDING_FERDIG_GAP",
-            "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP",
+            "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK",
+            "AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER",
             "AVVENTER_HISTORIKK",
             "TIL_INFOTRYGD"
         )
@@ -171,8 +171,8 @@ internal class HendelseYtelserMediatorTest : AbstractEndToEndMediatorTest() {
 
         assertTilstander(
             0,
-            "MOTTATT_SYKMELDING_FERDIG_GAP",
-            "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP",
+            "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK",
+            "AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER",
             "AVVENTER_HISTORIKK",
             "AVVENTER_SIMULERING"
         )
@@ -197,8 +197,8 @@ internal class HendelseYtelserMediatorTest : AbstractEndToEndMediatorTest() {
 
         assertTilstander(
             0,
-            "MOTTATT_SYKMELDING_FERDIG_GAP",
-            "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP",
+            "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK",
+            "AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER",
             "AVVENTER_HISTORIKK",
             "AVVENTER_VILKÅRSPRØVING",
             "AVVENTER_HISTORIKK",
@@ -240,8 +240,8 @@ internal class HendelseYtelserMediatorTest : AbstractEndToEndMediatorTest() {
 
         assertTilstander(
             0,
-            "MOTTATT_SYKMELDING_FERDIG_GAP",
-            "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP",
+            "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK",
+            "AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER",
             "AVVENTER_HISTORIKK",
             "TIL_INFOTRYGD"
         )
@@ -297,8 +297,8 @@ internal class HendelseYtelserMediatorTest : AbstractEndToEndMediatorTest() {
 
         assertTilstander(
             0,
-            "MOTTATT_SYKMELDING_FERDIG_GAP",
-            "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP",
+            "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK",
+            "AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER",
             "AVVENTER_HISTORIKK",
             "AVVENTER_VILKÅRSPRØVING"
         )
