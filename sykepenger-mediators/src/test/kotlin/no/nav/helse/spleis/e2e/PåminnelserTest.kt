@@ -24,9 +24,10 @@ internal class PåminnelserTest : AbstractEndToEndMediatorTest() {
     @Test
     fun `påminnelse når vedtaksperiode ikke finnes`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
+        sendSøknad(listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
         val id = sendNyPåminnelse()
-        assertEquals(2, testRapid.inspektør.antall())
-        val melding = testRapid.inspektør.melding(1)
+        assertEquals(4, testRapid.inspektør.antall())
+        val melding = testRapid.inspektør.melding(3)
         assertEquals("vedtaksperiode_ikke_funnet", melding.path("@event_name").asText())
         assertEquals("$id", melding.path("vedtaksperiodeId").asText())
     }
@@ -34,9 +35,10 @@ internal class PåminnelserTest : AbstractEndToEndMediatorTest() {
     @Test
     fun `påminnelse for feil tilstand`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
+        sendSøknad(listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
         sendNyPåminnelse(0)
-        assertEquals("vedtaksperiode_ikke_påminnet", testRapid.inspektør.melding(1).path("@event_name").asText())
-        assertEquals("MOTTATT_SYKMELDING_FERDIG_GAP", testRapid.inspektør.melding(1).path("tilstand").asText())
+        assertEquals("vedtaksperiode_ikke_påminnet", testRapid.inspektør.melding(3).path("@event_name").asText())
+        assertEquals("AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK", testRapid.inspektør.melding(3).path("tilstand").asText())
     }
 
     @Test
