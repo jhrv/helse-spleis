@@ -289,7 +289,26 @@ internal class SøknadArbeidsgiverE2ETest : AbstractEndToEndTest() {
         håndterInntektsmeldingReplay(inntektsmeldingId, 1.vedtaksperiode.id(ORGNUMMER))
         håndterUtbetalingshistorikk(1.vedtaksperiode, ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 17.januar, 31.januar, 100.prosent, INNTEKT), inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 17.januar, INNTEKT, true)))
         håndterSøknad(Sykdom(3.februar, 18.februar, 100.prosent))
-        assertTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER, AVVENTER_HISTORIKK)
+        assertForventetFeil(
+            forklaring = "Vi får ikke inntektshistorikk før etter vi har kjørt replay av IM, så vi finner ikke ut at vi er en forlengelse. Dette kan bare skje om spleis aldri har fått vite om søknaden",
+            nå = {
+                assertTilstander(
+                    1.vedtaksperiode,
+                    START,
+                    AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
+                    AVSLUTTET_UTEN_UTBETALING
+                )
+            },
+            ønsket = {
+                assertTilstander(
+                    1.vedtaksperiode,
+                    START,
+                    AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
+                    AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
+                    AVVENTER_HISTORIKK
+                )
+            }
+        )
     }
 
     @Test
@@ -314,18 +333,37 @@ internal class SøknadArbeidsgiverE2ETest : AbstractEndToEndTest() {
             inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 17.januar, INNTEKT, true))
         )
 
-        assertTilstander(
-            1.vedtaksperiode,
-            START,
-            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
-            AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
-            AVVENTER_HISTORIKK
-        )
-        assertTilstander(
-            2.vedtaksperiode,
-            START,
-            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
-            AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER
+        assertForventetFeil(
+            forklaring = "Vi får ikke inntektshistorikk før etter vi har kjørt replay av IM, så vi finner ikke ut at vi er en forlengelse. Dette kan bare skje om spleis aldri har fått vite om søknaden",
+            nå = {
+                assertTilstander(
+                    1.vedtaksperiode,
+                    START,
+                    AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
+                    AVSLUTTET_UTEN_UTBETALING
+                )
+                assertTilstander(
+                    2.vedtaksperiode,
+                    START,
+                    AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
+                    AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
+                    AVVENTER_HISTORIKK
+                )
+            },
+            ønsket = {
+                assertTilstander(
+                    1.vedtaksperiode,
+                    START,
+                    AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
+                    AVVENTER_HISTORIKK
+                )
+                assertTilstander(
+                    2.vedtaksperiode,
+                    START,
+                    AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
+                    AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER
+                )
+            }
         )
     }
 
