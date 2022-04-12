@@ -112,7 +112,6 @@ internal abstract class AbstractEndToEndMediatorTest {
     }
 
     protected fun sendSøknad(
-        vedtaksperiodeIndeks: Int,
         perioder: List<SoknadsperiodeDTO>,
         fravær: List<FravarDTO> = emptyList(),
         egenmeldinger: List<PeriodeDTO> = emptyList(),
@@ -120,8 +119,6 @@ internal abstract class AbstractEndToEndMediatorTest {
         sendtNav: LocalDateTime? = perioder.maxOfOrNull { it.tom!! }?.atStartOfDay(),
         orgnummer: String = ORGNUMMER
     ) {
-        assertFalse(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Foreldrepenger))
-
         val (_, message) = meldingsfabrikk.lagSøknadNav(
                 perioder = perioder,
                 fravær = fravær,

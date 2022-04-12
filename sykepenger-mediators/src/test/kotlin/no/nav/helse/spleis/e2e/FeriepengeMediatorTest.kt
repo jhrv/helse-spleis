@@ -23,7 +23,7 @@ internal class FeriepengeMediatorTest : AbstractEndToEndMediatorTest() {
     @Test
     fun `Beregner feriepenger korrekt for enkel spleisperiode med en utbetaling i infotrygd`() = Toggle.SendFeriepengeOppdrag.enable {
         sendNySøknad(SoknadsperiodeDTO(fom = 1.juni(2020), tom = 30.juni(2020), sykmeldingsgrad = 100))
-        sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 1.juni(2020), tom = 30.juni(2020), sykmeldingsgrad = 100)))
+        sendSøknad(listOf(SoknadsperiodeDTO(fom = 1.juni(2020), tom = 30.juni(2020), sykmeldingsgrad = 100)))
         sendInntektsmelding(
             0,
             listOf(Periode(fom = 1.juni(2020), tom = 16.juni(2020))),
@@ -86,7 +86,7 @@ internal class FeriepengeMediatorTest : AbstractEndToEndMediatorTest() {
     @Test
     fun `Ser bort fra perioder med arbeidskategori som ikke gir rett til feriepenger`() = Toggle.SendFeriepengeOppdrag.enable {
         sendNySøknad(SoknadsperiodeDTO(fom = 1.juni(2020), tom = 30.juni(2020), sykmeldingsgrad = 100))
-        sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 1.juni(2020), tom = 30.juni(2020), sykmeldingsgrad = 100)))
+        sendSøknad(listOf(SoknadsperiodeDTO(fom = 1.juni(2020), tom = 30.juni(2020), sykmeldingsgrad = 100)))
         sendInntektsmelding(
             0,
             listOf(Periode(fom = 1.juni(2020), tom = 16.juni(2020))),
@@ -163,7 +163,7 @@ internal class FeriepengeMediatorTest : AbstractEndToEndMediatorTest() {
     @Test
     fun `Ukjent arbeidskategorikode tolkes som tom`() = Toggle.SendFeriepengeOppdrag.enable {
         sendNySøknad(SoknadsperiodeDTO(fom = 1.juni(2020), tom = 30.juni(2020), sykmeldingsgrad = 100))
-        sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 1.juni(2020), tom = 30.juni(2020), sykmeldingsgrad = 100)))
+        sendSøknad(listOf(SoknadsperiodeDTO(fom = 1.juni(2020), tom = 30.juni(2020), sykmeldingsgrad = 100)))
         sendInntektsmelding(
             0,
             listOf(Periode(fom = 1.juni(2020), tom = 16.juni(2020))),
@@ -240,7 +240,7 @@ internal class FeriepengeMediatorTest : AbstractEndToEndMediatorTest() {
     @Test
     fun `Sjekker at orgnummer på utbetalingsbehov blir riktig med flere arbeidsgivere`() = Toggle.SendFeriepengeOppdrag.enable {
         sendNySøknad(SoknadsperiodeDTO(fom = 1.juni(2020), tom = 30.juni(2020), sykmeldingsgrad = 100))
-        sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 1.juni(2020), tom = 30.juni(2020), sykmeldingsgrad = 100)))
+        sendSøknad(listOf(SoknadsperiodeDTO(fom = 1.juni(2020), tom = 30.juni(2020), sykmeldingsgrad = 100)))
         sendInntektsmelding(
             0,
             listOf(Periode(fom = 1.juni(2020), tom = 16.juni(2020))),

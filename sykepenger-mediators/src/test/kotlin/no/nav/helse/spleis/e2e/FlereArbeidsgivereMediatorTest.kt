@@ -27,7 +27,6 @@ internal class FlereArbeidsgivereMediatorTest : AbstractEndToEndMediatorTest() {
             orgnummer = "orgnummer2"
         )
         sendSøknad(
-            vedtaksperiodeIndeks = 0,
             perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)),
             andreInntektskilder = listOf(InntektskildeDTO(InntektskildetypeDTO.ANDRE_ARBEIDSFORHOLD, true)),
             orgnummer = "orgnummer1"
@@ -40,7 +39,6 @@ internal class FlereArbeidsgivereMediatorTest : AbstractEndToEndMediatorTest() {
         )
 
         sendSøknad(
-            vedtaksperiodeIndeks = 1,
             perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)),
             andreInntektskilder = listOf(InntektskildeDTO(InntektskildetypeDTO.ANDRE_ARBEIDSFORHOLD, true)),
             orgnummer = "orgnummer2"
@@ -64,14 +62,12 @@ internal class FlereArbeidsgivereMediatorTest : AbstractEndToEndMediatorTest() {
             orgnummer = "orgnummer2"
         )
         sendSøknad(
-            vedtaksperiodeIndeks = 0,
             perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)),
             andreInntektskilder = listOf(InntektskildeDTO(InntektskildetypeDTO.ANDRE_ARBEIDSFORHOLD, true)),
             orgnummer = "orgnummer1"
         )
 
         sendSøknad(
-            vedtaksperiodeIndeks = 1,
             perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)),
             andreInntektskilder = listOf(InntektskildeDTO(InntektskildetypeDTO.JORDBRUKER_FISKER_REINDRIFTSUTOVER, true)),
             orgnummer = "orgnummer2"
@@ -101,14 +97,12 @@ internal class FlereArbeidsgivereMediatorTest : AbstractEndToEndMediatorTest() {
             orgnummer = "orgnummer2"
         )
         sendSøknad(
-            vedtaksperiodeIndeks = 0,
             perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)),
             andreInntektskilder = listOf(InntektskildeDTO(InntektskildetypeDTO.ANDRE_ARBEIDSFORHOLD, true)),
             orgnummer = "orgnummer1"
         )
 
         sendSøknad(
-            vedtaksperiodeIndeks = 1,
             perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)),
             andreInntektskilder = listOf(InntektskildeDTO(InntektskildetypeDTO.ANDRE_ARBEIDSFORHOLD, false)),
             orgnummer = "orgnummer2"
@@ -130,7 +124,6 @@ internal class FlereArbeidsgivereMediatorTest : AbstractEndToEndMediatorTest() {
     fun `tillater ikke søknader med ANDRE_ARBEIDSFORHOLD ved en periode`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         sendSøknad(
-            vedtaksperiodeIndeks = 0,
             perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)),
             andreInntektskilder = listOf(InntektskildeDTO(InntektskildetypeDTO.ANDRE_ARBEIDSFORHOLD, true))
         )
@@ -147,7 +140,6 @@ internal class FlereArbeidsgivereMediatorTest : AbstractEndToEndMediatorTest() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         sendInntektsmelding(0, listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
         sendSøknad(
-            vedtaksperiodeIndeks = 0,
             perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)),
             andreInntektskilder = listOf(InntektskildeDTO(InntektskildetypeDTO.ANDRE_ARBEIDSFORHOLD, true))
         )
@@ -164,13 +156,11 @@ internal class FlereArbeidsgivereMediatorTest : AbstractEndToEndMediatorTest() {
     fun `tillater ikke søknader med ANDRE_ARBEIDSFORHOLD ved en uferdig periode`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         sendSøknad(
-            vedtaksperiodeIndeks = 0,
             perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         )
 
         sendNySøknad(SoknadsperiodeDTO(fom = 30.januar, tom = 31.januar, sykmeldingsgrad = 100))
         sendSøknad(
-            vedtaksperiodeIndeks = 1,
             perioder = listOf(SoknadsperiodeDTO(fom = 30.januar, tom = 31.januar, sykmeldingsgrad = 100)),
             andreInntektskilder = listOf(InntektskildeDTO(InntektskildetypeDTO.ANDRE_ARBEIDSFORHOLD, true))
         )
@@ -200,7 +190,6 @@ internal class FlereArbeidsgivereMediatorTest : AbstractEndToEndMediatorTest() {
         )
 
         sendSøknad(
-            vedtaksperiodeIndeks = 1,
             perioder = listOf(SoknadsperiodeDTO(fom = 16.januar, tom = 20.januar, sykmeldingsgrad = 100)),
             andreInntektskilder = listOf(InntektskildeDTO(InntektskildetypeDTO.ANDRE_ARBEIDSFORHOLD, true))
         )
@@ -222,7 +211,7 @@ internal class FlereArbeidsgivereMediatorTest : AbstractEndToEndMediatorTest() {
     @Test
     fun `tillater ikke søknader med ANDRE_ARBEIDSFORHOLD ved en forlengelsesperiode`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
-        sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
+        sendSøknad(listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
         sendInntektsmelding(0, listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
         sendYtelser(0)
         sendVilkårsgrunnlag(0)
@@ -246,7 +235,6 @@ internal class FlereArbeidsgivereMediatorTest : AbstractEndToEndMediatorTest() {
 
         sendNySøknad(SoknadsperiodeDTO(fom = 27.januar, tom = 31.januar, sykmeldingsgrad = 100))
         sendSøknad(
-            vedtaksperiodeIndeks = 1,
             perioder = listOf(SoknadsperiodeDTO(fom = 27.januar, tom = 31.januar, sykmeldingsgrad = 100)),
             andreInntektskilder = listOf(InntektskildeDTO(InntektskildetypeDTO.ANDRE_ARBEIDSFORHOLD, true))
         )
@@ -261,7 +249,7 @@ internal class FlereArbeidsgivereMediatorTest : AbstractEndToEndMediatorTest() {
     @Test
     fun `tillater ikke søknader med ANDRE_ARBEIDSFORHOLD ved en uferdig forlengelsesperiode`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
-        sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
+        sendSøknad(listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
         sendInntektsmelding(0, listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
         sendYtelser(0)
         sendVilkårsgrunnlag(0)
@@ -270,7 +258,6 @@ internal class FlereArbeidsgivereMediatorTest : AbstractEndToEndMediatorTest() {
 
         sendNySøknad(SoknadsperiodeDTO(fom = 27.januar, tom = 31.januar, sykmeldingsgrad = 100))
         sendSøknad(
-            vedtaksperiodeIndeks = 1,
             perioder = listOf(SoknadsperiodeDTO(fom = 27.januar, tom = 31.januar, sykmeldingsgrad = 100)),
             andreInntektskilder = listOf(InntektskildeDTO(InntektskildetypeDTO.ANDRE_ARBEIDSFORHOLD, true))
         )
@@ -298,10 +285,9 @@ internal class FlereArbeidsgivereMediatorTest : AbstractEndToEndMediatorTest() {
         val a1 = "arbeidsgiver 1"
         val a2 = "arbeidsgiver 2"
         sendNySøknad(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100), orgnummer = a1)
-        sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100)), orgnummer = a1)
+        sendSøknad(listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100)), orgnummer = a1)
         sendNySøknad(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100), orgnummer = a2)
         sendSøknad(
-            1,
             listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100)),
             andreInntektskilder = listOf(InntektskildeDTO(InntektskildetypeDTO.FOSTERHJEMGODTGJORELSE, true)),
             sendtNav = LocalDateTime.MAX,
@@ -321,9 +307,9 @@ internal class FlereArbeidsgivereMediatorTest : AbstractEndToEndMediatorTest() {
         val a1 = "arbeidsgiver 1"
         val a2 = "arbeidsgiver 2"
         sendNySøknad(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100), orgnummer = a1)
-        sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100)), orgnummer = a1)
+        sendSøknad(listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100)), orgnummer = a1)
         sendNySøknad(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100), orgnummer = a2)
-        sendSøknad(1, listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100)), orgnummer = a2)
+        sendSøknad(listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100)), orgnummer = a2)
         sendNyPåminnelse(
             vedtaksperiodeIndeks = 0,
             orgnummer = a1,
@@ -344,7 +330,7 @@ internal class FlereArbeidsgivereMediatorTest : AbstractEndToEndMediatorTest() {
         val a1 = "ag1"
         val a2 = "ag2"
         sendNySøknad(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100), orgnummer = a1)
-        sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100)), orgnummer = a1)
+        sendSøknad(listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100)), orgnummer = a1)
         sendInntektsmelding(listOf(Periode(1.januar, 16.januar)), 1.januar, orgnummer = a1)
         sendYtelser(0, orgnummer = a1)
         sendVilkårsgrunnlag(
