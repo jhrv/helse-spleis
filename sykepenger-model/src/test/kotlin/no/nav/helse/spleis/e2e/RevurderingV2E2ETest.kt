@@ -625,8 +625,6 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
         håndterYtelser(id, orgnummer = a1)
-        håndterYtelser(id, orgnummer = a2)
-        håndterYtelser(id, orgnummer = a1)
         håndterSimulering(id, orgnummer = a1)
         håndterUtbetalingsgodkjenning(id, orgnummer = a1)
         håndterUtbetalt(orgnummer = a1)
