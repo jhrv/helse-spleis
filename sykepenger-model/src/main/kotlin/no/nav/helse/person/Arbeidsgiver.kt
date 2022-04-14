@@ -66,7 +66,6 @@ import no.nav.helse.utbetalingslinjer.Feriepengeutbetaling
 import no.nav.helse.utbetalingslinjer.Feriepengeutbetaling.Companion.gjelderFeriepengeutbetaling
 import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.Utbetaling
-import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.erSisteUtbetaling
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.harNærliggendeUtbetaling
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.utbetaltTidslinje
 import no.nav.helse.utbetalingslinjer.Utbetaling.Utbetalingtype
@@ -143,9 +142,6 @@ internal class Arbeidsgiver private constructor(
 
         internal fun List<Arbeidsgiver>.nesteRevurderingsperiode() =
             flatMap { it.vedtaksperioder }.nesteRevurderingsperiode(this)
-
-        internal fun List<Arbeidsgiver>.erSisteUtbetaling(utbetaling: Utbetaling) =
-            flatMap { it.utbetalinger }.erSisteUtbetaling(utbetaling)
 
         internal fun List<Arbeidsgiver>.harPeriodeSomBlokkererOverstyrArbeidsforhold(skjæringstidspunkt: LocalDate) = any { arbeidsgiver ->
             arbeidsgiver.vedtaksperioder
@@ -1206,8 +1202,6 @@ internal class Arbeidsgiver private constructor(
     internal fun build(filter: Utbetalingsfilter.Builder, inntektsmeldingId: UUID) {
         inntektshistorikk.build(filter, inntektsmeldingId)
     }
-
-    internal fun erSisteUtbetaling(utbetaling: Utbetaling) = person.erSisteUtbetaling(utbetaling)
 
     internal class JsonRestorer private constructor() {
         internal companion object {
