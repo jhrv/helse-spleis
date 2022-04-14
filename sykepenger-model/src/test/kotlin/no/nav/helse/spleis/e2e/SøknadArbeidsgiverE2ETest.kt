@@ -5,11 +5,31 @@ import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
-import no.nav.helse.hendelser.Søknad.Søknadsperiode.*
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Arbeid
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Papirsykmelding
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Permisjon
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Utdanning
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.søppelbøtte
 import no.nav.helse.januar
-import no.nav.helse.person.TilstandType.*
+import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
+import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
+import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP
+import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_FERDIG_FORLENGELSE
+import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE
+import no.nav.helse.person.TilstandType.AVVENTER_SØKNAD_FERDIG_FORLENGELSE
+import no.nav.helse.person.TilstandType.AVVENTER_SØKNAD_FERDIG_GAP
+import no.nav.helse.person.TilstandType.AVVENTER_SØKNAD_UFERDIG_FORLENGELSE
+import no.nav.helse.person.TilstandType.AVVENTER_SØKNAD_UFERDIG_GAP
+import no.nav.helse.person.TilstandType.AVVENTER_UFERDIG
+import no.nav.helse.person.TilstandType.MOTTATT_SYKMELDING_FERDIG_FORLENGELSE
+import no.nav.helse.person.TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP
+import no.nav.helse.person.TilstandType.MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE
+import no.nav.helse.person.TilstandType.MOTTATT_SYKMELDING_UFERDIG_GAP
+import no.nav.helse.person.TilstandType.START
+import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.utbetalingslinjer.Utbetaling
@@ -42,7 +62,7 @@ internal class SøknadArbeidsgiverE2ETest : AbstractEndToEndTest() {
         ), førsteFraværsdag = 13.januar)
         assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
         assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, AVVENTER_INNTEKTSMELDING_FERDIG_FORLENGELSE, AVSLUTTET_UTEN_UTBETALING)
-        assertTilstander(3.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE, AVVENTER_INNTEKTSMELDING_FERDIG_FORLENGELSE, AVSLUTTET_UTEN_UTBETALING)
+        assertTilstander(3.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE, AVSLUTTET_UTEN_UTBETALING)
     }
 
     @Test
@@ -59,7 +79,7 @@ internal class SøknadArbeidsgiverE2ETest : AbstractEndToEndTest() {
         ), førsteFraværsdag = 15.januar)
         assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
         assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, AVVENTER_INNTEKTSMELDING_FERDIG_FORLENGELSE, AVSLUTTET_UTEN_UTBETALING)
-        assertTilstander(3.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE, AVVENTER_INNTEKTSMELDING_FERDIG_FORLENGELSE, AVSLUTTET_UTEN_UTBETALING)
+        assertTilstander(3.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE, AVSLUTTET_UTEN_UTBETALING)
     }
 
     @Test

@@ -1,19 +1,56 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.*
-import no.nav.helse.hendelser.*
+import java.time.LocalDateTime
+import java.time.YearMonth
+import java.util.UUID
+import no.nav.helse.april
+import no.nav.helse.assertForventetFeil
+import no.nav.helse.desember
+import no.nav.helse.februar
+import no.nav.helse.hendelser.ArbeidsgiverInntekt
+import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsmelding.Companion.WARN_UENIGHET_ARBEIDSGIVERPERIODE
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon
+import no.nav.helse.hendelser.Inntektsvurdering
+import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
+import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.inspectors.personLogg
 import no.nav.helse.inspectors.søppelbøtte
+import no.nav.helse.januar
+import no.nav.helse.mai
+import no.nav.helse.mars
+import no.nav.helse.november
+import no.nav.helse.oktober
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Inntektshistorikk
-import no.nav.helse.person.TilstandType.*
+import no.nav.helse.person.TilstandType.AVSLUTTET
+import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
+import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
+import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
+import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP
+import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_FERDIG_FORLENGELSE
+import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE
+import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
+import no.nav.helse.person.TilstandType.AVVENTER_SØKNAD_FERDIG_FORLENGELSE
+import no.nav.helse.person.TilstandType.AVVENTER_SØKNAD_FERDIG_GAP
+import no.nav.helse.person.TilstandType.AVVENTER_SØKNAD_UFERDIG_FORLENGELSE
+import no.nav.helse.person.TilstandType.AVVENTER_SØKNAD_UFERDIG_GAP
+import no.nav.helse.person.TilstandType.AVVENTER_UFERDIG
+import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
+import no.nav.helse.person.TilstandType.MOTTATT_SYKMELDING_FERDIG_FORLENGELSE
+import no.nav.helse.person.TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP
+import no.nav.helse.person.TilstandType.MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE
+import no.nav.helse.person.TilstandType.MOTTATT_SYKMELDING_UFERDIG_GAP
+import no.nav.helse.person.TilstandType.START
+import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
+import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
+import no.nav.helse.sisteBehov
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
@@ -22,12 +59,14 @@ import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertInstanceOf
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
-import java.time.LocalDateTime
-import java.time.YearMonth
-import java.util.*
 
 internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
 
@@ -489,7 +528,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
             START,
             MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
             AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE,
-            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
+            AVVENTER_UFERDIG,
             AVVENTER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
@@ -543,7 +582,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
             START,
             MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
             AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE,
-            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
+            AVVENTER_UFERDIG,
             AVVENTER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
@@ -686,7 +725,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
             2.vedtaksperiode,
             START,
             MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
-            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVVENTER_SØKNAD_UFERDIG_GAP,
             AVVENTER_SØKNAD_FERDIG_GAP,
             AVVENTER_HISTORIKK
         )
