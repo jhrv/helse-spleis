@@ -863,5 +863,5 @@ class Person private constructor(
     }
 
     internal fun kanStarteRevurdering(vedtaksperiode: Vedtaksperiode) =
-        !skalGjenopptaBehandling && vedtaksperiode == arbeidsgivere.nesteRevurderingsperiode()
+        vedtaksperiode == arbeidsgivere.nesteRevurderingsperiode()
 }

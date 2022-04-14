@@ -1577,7 +1577,8 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, gjenopptaBehandling: IAktivitetslogg) {
-            if (!vedtaksperiode.utbetalinger.erAvsluttet()) return
+            if (Toggle.NyRevurdering.disabled && !vedtaksperiode.utbetalinger.erAvsluttet()) return
+            if (Toggle.NyRevurdering.enabled && vedtaksperiode.arbeidsgiver.avventerRevurdering()) return
             gjenopptaBehandling.info("Går til avsluttet fordi revurdering er fullført via en annen vedtaksperiode")
             vedtaksperiode.tilstand(gjenopptaBehandling, Avsluttet)
         }
@@ -3412,6 +3413,9 @@ internal class Vedtaksperiode private constructor(
         internal fun List<Vedtaksperiode>.nesteRevurderingsperiode(arbeidsgivere: List<Arbeidsgiver>) =
             sortedWith(compareBy({ it }, { arbeidsgivere.indexOf(it.arbeidsgiver) })).first { it.tilstand == AvventerRevurdering }
 
+        internal fun List<Vedtaksperiode>.avventerRevurdering() =
+            pågående() != null
+
         internal fun Map<Arbeidsgiver, List<Vedtaksperiode>>.startRevurdering(
             overstyrt: Vedtaksperiode,
             hendelse: IAktivitetslogg
@@ -3432,7 +3436,6 @@ internal class Vedtaksperiode private constructor(
         private fun List<Vedtaksperiode>.pågående() =
             firstOrNull {
                 it.tilstand in setOf(
-                    AvventerGjennomførtRevurdering,
                     AvventerHistorikkRevurdering,
                     AvventerSimuleringRevurdering,
                     AvventerGodkjenningRevurdering,
