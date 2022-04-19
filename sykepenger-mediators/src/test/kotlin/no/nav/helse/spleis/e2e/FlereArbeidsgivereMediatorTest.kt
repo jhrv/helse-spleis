@@ -34,8 +34,7 @@ internal class FlereArbeidsgivereMediatorTest : AbstractEndToEndMediatorTest() {
 
         assertTilstander(
             0,
-            "MOTTATT_SYKMELDING_FERDIG_GAP",
-            "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP"
+            "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK"
         )
 
         sendSøknad(
@@ -46,8 +45,7 @@ internal class FlereArbeidsgivereMediatorTest : AbstractEndToEndMediatorTest() {
 
         assertTilstander(
             1,
-            "MOTTATT_SYKMELDING_FERDIG_GAP",
-            "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP"
+            "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK"
         )
     }
 
@@ -75,13 +73,11 @@ internal class FlereArbeidsgivereMediatorTest : AbstractEndToEndMediatorTest() {
 
         assertTilstander(
             0,
-            "MOTTATT_SYKMELDING_FERDIG_GAP",
-            "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP",
+            "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK",
             "TIL_INFOTRYGD"
         )
         assertTilstander(
             1,
-            "MOTTATT_SYKMELDING_FERDIG_GAP",
             "TIL_INFOTRYGD"
         )
     }
@@ -110,13 +106,11 @@ internal class FlereArbeidsgivereMediatorTest : AbstractEndToEndMediatorTest() {
 
         assertTilstander(
             0,
-            "MOTTATT_SYKMELDING_FERDIG_GAP",
-            "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP",
+            "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK",
         )
         assertTilstander(
             1,
-            "MOTTATT_SYKMELDING_FERDIG_GAP",
-            "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP",
+            "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK",
         )
     }
 
@@ -201,8 +195,8 @@ internal class FlereArbeidsgivereMediatorTest : AbstractEndToEndMediatorTest() {
         sendSimulering(0, orgnummer = a1, status = SimuleringMessage.Simuleringstatus.OK)
         assertTilstander(
             0,
-            "MOTTATT_SYKMELDING_FERDIG_GAP",
-            "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP",
+            "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK",
+            "AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER",
             "AVVENTER_HISTORIKK",
             "AVVENTER_VILKÅRSPRØVING",
             "AVVENTER_HISTORIKK",
