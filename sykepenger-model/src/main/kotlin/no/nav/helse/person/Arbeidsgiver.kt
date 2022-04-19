@@ -150,6 +150,12 @@ internal class Arbeidsgiver private constructor(
                 .any { vedtaksperiode -> vedtaksperiode.blokkererOverstyring() }
         }
 
+        internal fun List<Arbeidsgiver>.nyPeriode(vedtaksperiode: Vedtaksperiode, sykmelding: Sykmelding) {
+            forEach { arbeidsgiver ->
+                arbeidsgiver.håndter(sykmelding) { nyPeriode(vedtaksperiode, sykmelding) }
+            }
+        }
+
         internal fun List<Arbeidsgiver>.håndter(overstyrArbeidsforhold: OverstyrArbeidsforhold): Boolean {
             forEach { arbeidsgiver ->
                 if (arbeidsgiver.håndter(overstyrArbeidsforhold)) return true
@@ -478,7 +484,8 @@ internal class Arbeidsgiver private constructor(
         registrerNyVedtaksperiode(vedtaksperiode)
         sykmelding.nyVedtaksperiode()
         vedtaksperiode.håndter(sykmelding)
-        håndter(sykmelding) { nyPeriode(vedtaksperiode, sykmelding) }
+        if (Toggle.NyRevurdering.disabled) return håndter(sykmelding) { nyPeriode(vedtaksperiode, sykmelding) }
+        person.nyPeriode(vedtaksperiode, sykmelding)
     }
 
     private fun harOverlappendeVedtaksperiode(hendelse: SykdomstidslinjeHendelse): Boolean {

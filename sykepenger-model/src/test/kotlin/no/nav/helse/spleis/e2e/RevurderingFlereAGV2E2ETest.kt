@@ -9,6 +9,7 @@ import no.nav.helse.hendelser.Dagtype.Feriedag
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
+import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.juni
 import no.nav.helse.mai
@@ -330,9 +331,8 @@ internal class RevurderingFlereAGV2E2ETest: AbstractEndToEndTest() {
     fun `revurdering av senere frittstående periode hos ag3 mens overlappende out of order hos ag1 og ag2 utbetales`() {
         nyttVedtak(1.april, 30.april, orgnummer = a3)
 
-        nyeVedtak(1.februar, 28.februar, a1, a2)
-        forlengelseTilGodkjenning(1.mars, 15.mars, a1, a2)
-        håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a1)
+        nyPeriode(1.februar til 28.februar, a1, a2)
+        nyPeriode(1.mars til 15.mars, a1, a2)
         nullstillTilstandsendringer()
 
         assertTilstander(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)

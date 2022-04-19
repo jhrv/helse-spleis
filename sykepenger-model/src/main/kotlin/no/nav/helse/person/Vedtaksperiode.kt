@@ -368,7 +368,8 @@ internal class Vedtaksperiode private constructor(
         håndterer: (Vedtaksperiodetilstand, Vedtaksperiode, Vedtaksperiode, Hendelse) -> Unit,
         hendelse: Hendelse
     ) {
-        if (ny etter this || ny == this) return
+        if (Toggle.NyRevurdering.disabled && (ny etter this || ny == this)) return
+        if (Toggle.NyRevurdering.enabled && (ny overlapperMed this || ny etter this || ny == this)) return
         kontekst(hendelse)
         håndterer(tilstand, this, ny, hendelse)
         if (hendelse.hasErrorsOrWorse()) return
@@ -400,6 +401,7 @@ internal class Vedtaksperiode private constructor(
     override fun compareTo(other: Vedtaksperiode) = this.periode.endInclusive.compareTo(other.periode.endInclusive)
     internal infix fun før(other: Vedtaksperiode) = this < other
     internal infix fun etter(other: Vedtaksperiode) = this > other
+    internal infix fun overlapperMed(other: Vedtaksperiode) = this.periode.overlapperMed(other.periode)
 
     internal fun erVedtaksperiodeRettFør(other: Vedtaksperiode) =
         this.sykdomstidslinje.erRettFør(other.sykdomstidslinje)
@@ -2744,7 +2746,7 @@ internal class Vedtaksperiode private constructor(
 
     // ny revurderingsflyt
     private fun startRevurdering(hendelse: IAktivitetslogg, overstyrt: Vedtaksperiode, pågående: Vedtaksperiode?) {
-        if (overstyrt > this) return
+        if (overstyrt etter this) return
         kontekst(hendelse)
         tilstand.startRevurdering(this, hendelse, overstyrt, pågående)
     }
@@ -3434,7 +3436,7 @@ internal class Vedtaksperiode private constructor(
 
             val skjæringstidspunkt = overstyrt.skjæringstidspunkt
             val siste = this.getValue(overstyrt.arbeidsgiver).lastOrNull {
-                    it.tilstand == AvventerGjennomførtRevurdering && skjæringstidspunkt == it.skjæringstidspunkt
+                    it.tilstand in setOf(AvventerGjennomførtRevurdering, AvventerHistorikkRevurdering) && skjæringstidspunkt == it.skjæringstidspunkt
                 } ?: return
 
             siste.kontekst(hendelse)

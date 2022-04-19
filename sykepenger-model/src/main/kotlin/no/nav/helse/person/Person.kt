@@ -51,6 +51,7 @@ import no.nav.helse.person.Arbeidsgiver.Companion.håndter
 import no.nav.helse.person.Arbeidsgiver.Companion.kanOverstyreTidslinje
 import no.nav.helse.person.Arbeidsgiver.Companion.kanStarteRevurdering
 import no.nav.helse.person.Arbeidsgiver.Companion.minstEttSykepengegrunnlagSomIkkeKommerFraSkatt
+import no.nav.helse.person.Arbeidsgiver.Companion.nyPeriode
 import no.nav.helse.person.Arbeidsgiver.Companion.nåværendeVedtaksperioder
 import no.nav.helse.person.Arbeidsgiver.Companion.startRevurdering
 import no.nav.helse.person.Vedtaksperiode.Companion.ALLE
@@ -834,4 +835,8 @@ class Person private constructor(
 
     internal fun kanStarteRevurdering(vedtaksperiode: Vedtaksperiode) =
         arbeidsgivere.kanStarteRevurdering(vedtaksperiode)
+
+    internal fun nyPeriode(vedtaksperiode: Vedtaksperiode, sykmelding: Sykmelding) {
+        arbeidsgivere.nyPeriode(vedtaksperiode, sykmelding)
+    }
 }
