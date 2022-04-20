@@ -48,14 +48,12 @@ import no.nav.helse.person.Person
 import no.nav.helse.person.PersonVisitor
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.AVSLUTTET
-import no.nav.helse.person.TilstandType.AVVENTER_ARBEIDSGIVERE
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
-import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP
+import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
+import no.nav.helse.person.TilstandType.AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
-import no.nav.helse.person.TilstandType.MOTTATT_SYKMELDING_FERDIG_FORLENGELSE
-import no.nav.helse.person.TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
@@ -201,7 +199,7 @@ internal fun AbstractEndToEndTest.førstegangTilGodkjenning(
 internal fun AbstractEndToEndTest.forlengelseTilGodkjenning(fom: LocalDate, tom: LocalDate, vararg organisasjonsnumre: String) {
     require(organisasjonsnumre.isNotEmpty()) { "Må inneholde minst ett organisasjonsnummer" }
     nyPeriode(fom til tom, *organisasjonsnumre)
-    organisasjonsnumre.forEach { håndterYtelser(vedtaksperiodeIdInnhenter = observatør.sisteVedtaksperiode(), orgnummer = it) }
+    //organisasjonsnumre.forEach { håndterYtelser(vedtaksperiodeIdInnhenter = observatør.sisteVedtaksperiode(), orgnummer = it) }
     håndterYtelser(observatør.sisteVedtaksperiode(), orgnummer = organisasjonsnumre.first())
     håndterSimulering(observatør.sisteVedtaksperiode(), orgnummer = organisasjonsnumre.first())
 }
@@ -846,9 +844,8 @@ internal fun AbstractEndToEndTest.håndterFeriepengerUtbetalt(
 internal fun TIL_AVSLUTTET_FØRSTEGANGSBEHANDLING(førsteAG: Boolean = true): Array<out TilstandType> =
     if (førsteAG) arrayOf(
         START,
-        MOTTATT_SYKMELDING_FERDIG_GAP,
-        AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
-        AVVENTER_ARBEIDSGIVERE,
+        AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
+        AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
         AVVENTER_HISTORIKK,
         AVVENTER_VILKÅRSPRØVING,
         AVVENTER_HISTORIKK,
@@ -858,9 +855,8 @@ internal fun TIL_AVSLUTTET_FØRSTEGANGSBEHANDLING(førsteAG: Boolean = true): Ar
         AVSLUTTET
     ) else arrayOf(
         START,
-        MOTTATT_SYKMELDING_FERDIG_GAP,
-        AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
-        AVVENTER_ARBEIDSGIVERE,
+        AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
+        AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
         AVVENTER_HISTORIKK,
         AVVENTER_SIMULERING,
         AVVENTER_GODKJENNING,
@@ -871,9 +867,7 @@ internal fun TIL_AVSLUTTET_FØRSTEGANGSBEHANDLING(førsteAG: Boolean = true): Ar
 internal fun TIL_AVSLUTTET_FORLENGELSE(førsteAG: Boolean = true) =
     if (førsteAG) arrayOf(
         START,
-        MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
-        AVVENTER_HISTORIKK,
-        AVVENTER_ARBEIDSGIVERE,
+        AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
         AVVENTER_HISTORIKK,
         AVVENTER_SIMULERING,
         AVVENTER_GODKJENNING,
@@ -881,9 +875,7 @@ internal fun TIL_AVSLUTTET_FORLENGELSE(førsteAG: Boolean = true) =
         AVSLUTTET,
     ) else arrayOf(
         START,
-        MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
-        AVVENTER_HISTORIKK,
-        AVVENTER_ARBEIDSGIVERE,
+        AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
         AVVENTER_HISTORIKK,
         AVVENTER_SIMULERING,
         AVVENTER_GODKJENNING,
