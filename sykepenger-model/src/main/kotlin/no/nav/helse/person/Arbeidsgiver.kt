@@ -47,6 +47,7 @@ import no.nav.helse.person.Vedtaksperiode.Companion.avventerRevurdering
 import no.nav.helse.person.Vedtaksperiode.Companion.harNødvendigInntekt
 import no.nav.helse.person.Vedtaksperiode.Companion.harOverlappendeUtbetaltePerioder
 import no.nav.helse.person.Vedtaksperiode.Companion.harUtbetaling
+import no.nav.helse.person.Vedtaksperiode.Companion.håndterNyOverstyring
 import no.nav.helse.person.Vedtaksperiode.Companion.iderMedUtbetaling
 import no.nav.helse.person.Vedtaksperiode.Companion.kanStarteRevurdering
 import no.nav.helse.person.Vedtaksperiode.Companion.medSkjæringstidspunkt
@@ -839,7 +840,8 @@ internal class Arbeidsgiver private constructor(
 
     internal fun håndter(hendelse: OverstyrTidslinje) {
         hendelse.kontekst(this)
-        håndter(hendelse, Vedtaksperiode::håndter)
+        vedtaksperioder.håndterNyOverstyring(hendelse)
+        énHarHåndtert(hendelse, Vedtaksperiode::håndter)
     }
 
     internal fun håndter(hendelse: OverstyrInntekt) {

@@ -1,25 +1,21 @@
 package no.nav.helse.spleis.db
 
+import java.time.LocalDateTime
+import java.util.UUID
+import javax.sql.DataSource
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageProblems
-import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.somFødselsnummer
-import no.nav.helse.spleis.IMessageMediator
-import no.nav.helse.spleis.db.TestMessages.NySøknad
 import no.nav.helse.spleis.e2e.SpleisDataSource.migratedDb
 import no.nav.helse.spleis.e2e.resetDatabase
-import no.nav.helse.spleis.meldinger.SøknadRiver
-import no.nav.helse.spleis.meldinger.TestMessageMediator
-import no.nav.helse.spleis.meldinger.TestRapid
 import no.nav.helse.spleis.meldinger.model.NySøknadMessage
+import no.nav.helse.spleis.meldinger.model.OverstyrTidslinjeMessage
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import java.time.LocalDateTime
-import java.util.*
-import javax.sql.DataSource
 
 private val fnr = "01011012345".somFødselsnummer()
 // primært for å slutte å ha teite sql-feil
@@ -41,22 +37,40 @@ class HendelseRepositoryTest {
         val repo = HendelseRepository(dataSource)
         val ingenEvents = repo.hentAlleHendelser(fnr)
         assertEquals(0, ingenEvents.size)
-        repo.lagreMelding(NySøknad)
+        repo.lagreMelding(TestMessages.nySøknad())
         val singleEvent = repo.hentAlleHendelser(fnr)
         assertEquals(1, singleEvent.size)
+    }
+
+    @Test
+    fun `hente overstyring`() {
+        val repo = HendelseRepository(dataSource)
+        val ingenEvents = repo.hentAlleHendelser(fnr)
+        assertEquals(0, ingenEvents.size)
+        val overstyrTidslinjeMessage = TestMessages.overstyrTidslinje()
+        repo.lagreMelding(overstyrTidslinjeMessage)
+        val hentetFraDb = repo.finnOverstyring(fnr, overstyrTidslinjeMessage.id)
+        assertEquals(overstyrTidslinjeMessage.id, UUID.fromString(hentetFraDb?.get("@id")?.asText()))
+    }
+
+    @Test
+    fun `hente overstyring som ikke finnes`() {
+        val repo = HendelseRepository(dataSource)
+        val hentetFraDb = repo.finnOverstyring(fnr, UUID.randomUUID())
+        assertNull(hentetFraDb)
     }
 }
 
 private object TestMessages {
-    val now = LocalDateTime.now().toString()
-    val id = UUID.randomUUID()
-    val deceitfulRiver: FalskeNyeSøknaderRiver = FalskeNyeSøknaderRiver(TestRapid(), TestMessageMediator())
-    val NySøknad = deceitfulRiver.yossarian(JsonMessage("""
+    fun nySøknad() : NySøknadMessage {
+        val now = LocalDateTime.now()
+        val id = UUID.randomUUID()
+        val jsonMessage = JsonMessage("""
         {
             "@id": "$id",
             "@event_name": "ny_soknad",
             "@opprettet": "$now",
-            "fnr": "${fnr.toString()}",
+            "fnr": "$fnr",
             "aktorId": "aktorId",
             "sykmeldingSkrevet": "$now",
             "fom": "2020-01-01",
@@ -66,35 +80,49 @@ private object TestMessages {
             },
             "soknadsperioder": []
         }
-    """.trimIndent(), MessageProblems("")))
-
-}
-
-internal class FalskeNyeSøknaderRiver(
-    rapidsConnection: RapidsConnection,
-    messageMediator: IMessageMediator
-) : SøknadRiver(rapidsConnection, messageMediator) {
-    override val eventName = "ny_søknad"
-    override val riverName = "Ny søknad"
-
-    override fun validate(message: JsonMessage) {
-        message.requireKey("sykmeldingId")
-        message.requireValue("status", "NY")
+    """, MessageProblems("")).also { packet ->
+            packet.requireKey("@id")
+            packet.requireKey("@event_name")
+            packet.requireKey("@opprettet")
+            packet.requireKey("sykmeldingSkrevet")
+            packet.requireKey("fom")
+            packet.requireKey("tom")
+            packet.requireKey("fnr")
+            packet.requireKey("aktorId")
+            packet.requireKey("arbeidsgiver")
+            packet.requireKey("arbeidsgiver.orgnummer")
+            packet.requireKey("soknadsperioder")
+        }
+        return NySøknadMessage(jsonMessage)
     }
 
-    override fun createMessage(packet: JsonMessage) = NySøknadMessage(packet)
-    fun yossarian(packet: JsonMessage): NySøknadMessage {
-        packet.requireKey("@id")
-        packet.requireKey("@event_name")
-        packet.requireKey("@opprettet")
-        packet.requireKey("sykmeldingSkrevet")
-        packet.requireKey("fom")
-        packet.requireKey("tom")
-        packet.requireKey("fnr")
-        packet.requireKey("aktorId")
-        packet.requireKey("arbeidsgiver")
-        packet.requireKey("arbeidsgiver.orgnummer")
-        packet.requireKey("soknadsperioder")
-        return createMessage(packet)
+    fun overstyrTidslinje(): OverstyrTidslinjeMessage {
+        val now = LocalDateTime.now()
+        val id = UUID.randomUUID()
+        val json = """
+        {
+            "@id": "$id",
+            "@event_name": "overstyr_tidslinje",
+            "@opprettet": "$now",
+            "fødselsnummer": "$fnr",
+            "aktørId": "aktorId",
+            "organisasjonsnummer": "981312311",
+            "dager": [{
+                "type": "Feriedag",
+                "dato": "2018-01-01"
+            }]
+        }
+        """
+        val jsonMessage = JsonMessage(json, MessageProblems("")).also { packet ->
+            packet.requireKey("@id")
+            packet.requireKey("@event_name")
+            packet.requireKey("@opprettet")
+            packet.requireKey("fødselsnummer")
+            packet.requireKey("organisasjonsnummer")
+            packet.requireKey("aktørId")
+            packet.requireKey("dager", "dager.type", "dager.dato")
+            packet.interestedIn("dager.grad", "@replay")
+        }
+        return OverstyrTidslinjeMessage(jsonMessage)
     }
 }

@@ -73,7 +73,7 @@ import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.fail
 
 
@@ -445,9 +445,20 @@ internal fun AbstractEndToEndTest.håndterInntektsmeldingReplay(
     vedtaksperiodeId: UUID
 ) {
     val inntektsmeldinggenerator = inntektsmeldinger[inntektsmeldingId] ?: fail { "Fant ikke inntektsmelding med id $inntektsmeldingId" }
-    Assertions.assertTrue(observatør.bedtOmInntektsmeldingReplay(vedtaksperiodeId)) { "Vedtaksperioden har ikke bedt om replay av inntektsmelding" }
+    assertTrue(observatør.bedtOmInntektsmeldingReplay(vedtaksperiodeId)) { "Vedtaksperioden har ikke bedt om replay av inntektsmelding" }
     inntektsmeldingReplay(inntektsmeldinggenerator(), vedtaksperiodeId)
         .håndter(Person::håndter)
+}
+
+internal fun AbstractEndToEndTest.håndterOverstyringReplay(
+    hendelseId: UUID
+) {
+    val overstyring = overstyringer[hendelseId] ?: fail("Fant ingen overstyring med id $hendelseId")
+    assertTrue(observatør.bedtOmOverstyringReplay(hendelseId)) { "Det har ikke blitt bedt om replay av overstyring med id $hendelseId" }
+    when (overstyring) {
+        is OverstyrTidslinje -> person.håndter(overstyring)
+        else -> fail("Hendelsen $hendelseId er ikke en overstyringshendelse")
+    }
 }
 
 internal fun AbstractEndToEndTest.håndterVilkårsgrunnlag(
@@ -780,8 +791,8 @@ internal fun AbstractEndToEndTest.håndterOverstyrTidslinje(
     overstyringsdager: List<ManuellOverskrivingDag> = listOf(ManuellOverskrivingDag(17.januar, Dagtype.Feriedag, 100)),
     orgnummer: String = AbstractPersonTest.ORGNUMMER,
     meldingsreferanseId: UUID = UUID.randomUUID()
-) {
-    OverstyrTidslinje(
+): UUID {
+    val overstyrTidslinje = OverstyrTidslinje(
         meldingsreferanseId = meldingsreferanseId,
         fødselsnummer = AbstractPersonTest.UNG_PERSON_FNR_2018.toString(),
         aktørId = AbstractPersonTest.AKTØRID,
@@ -789,6 +800,8 @@ internal fun AbstractEndToEndTest.håndterOverstyrTidslinje(
         dager = overstyringsdager,
         opprettet = LocalDateTime.now()
     ).håndter(Person::håndter)
+    overstyringer[meldingsreferanseId] = overstyrTidslinje
+    return meldingsreferanseId
 }
 
 internal fun AbstractEndToEndTest.håndterOverstyrArbeidsforhold(

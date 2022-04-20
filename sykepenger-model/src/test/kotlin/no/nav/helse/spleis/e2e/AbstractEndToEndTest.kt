@@ -27,6 +27,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
     internal val søknader = mutableMapOf<UUID, Triple<LocalDate, List<Søknad.Inntektskilde>, Array<out Søknadsperiode>>>()
     internal val inntektsmeldinger = mutableMapOf<UUID, () -> Inntektsmelding>()
     internal val inntekter = mutableMapOf<UUID, Inntekt>()
+    internal val overstyringer = mutableMapOf<UUID, ArbeidstakerHendelse>()
 
     @BeforeEach
     internal fun abstractSetup() {

@@ -449,6 +449,7 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         skjæringstidspunktFraInfotrygd: LocalDate?,
         forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
         hendelseIder: Set<Dokumentsporing>,
+        uhåndterteOverstyringer: Set<UUID>,
         inntektsmeldingInfo: InntektsmeldingInfo?,
         inntektskilde: Inntektskilde
     ) {
@@ -465,6 +466,7 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
             skjæringstidspunktFraInfotrygd,
             forlengelseFraInfotrygd,
             hendelseIder,
+            uhåndterteOverstyringer,
             inntektsmeldingInfo,
             inntektskilde
         )
@@ -591,6 +593,7 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         skjæringstidspunktFraInfotrygd: LocalDate?,
         forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
         hendelseIder: Set<Dokumentsporing>,
+        uhåndterteOverstyringer: Set<UUID>,
         inntektsmeldingInfo: InntektsmeldingInfo?,
         inntektskilde: Inntektskilde
     ) {
@@ -607,6 +610,7 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
             skjæringstidspunktFraInfotrygd,
             forlengelseFraInfotrygd,
             hendelseIder,
+            uhåndterteOverstyringer,
             inntektsmeldingInfo,
             inntektskilde
         )

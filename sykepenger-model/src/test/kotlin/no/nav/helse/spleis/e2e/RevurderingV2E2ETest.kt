@@ -492,17 +492,11 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
     fun `periode til utbetaling blir overstyrt`() {
         tilGodkjent(1.januar, 31.januar, 100.prosent, 1.januar)
         nullstillTilstandsendringer()
-        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Feriedag)))
+        val hendelseId = håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Feriedag)))
         assertTilstander(1.vedtaksperiode, TIL_UTBETALING)
         håndterUtbetalt()
-        assertForventetFeil(
-            nå = {
-                assertTilstander(1.vedtaksperiode, TIL_UTBETALING, AVSLUTTET)
-            },
-            ønsket = {
-                assertTilstander(1.vedtaksperiode, TIL_UTBETALING, AVSLUTTET, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
-            }
-        )
+        håndterOverstyringReplay(hendelseId)
+        assertTilstander(1.vedtaksperiode, TIL_UTBETALING, AVSLUTTET, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
     }
 
     @Test
@@ -513,17 +507,10 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         nullstillTilstandsendringer()
-        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Feriedag)))
-
+        val hendelseId = håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Feriedag)))
         assertTilstander(1.vedtaksperiode, TIL_UTBETALING)
         håndterUtbetalt()
-        assertForventetFeil(
-            nå = {
-                assertTilstander(1.vedtaksperiode, TIL_UTBETALING, AVSLUTTET)
-            },
-            ønsket = {
-                assertTilstander(1.vedtaksperiode, TIL_UTBETALING, AVSLUTTET, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
-            }
-        )
+        håndterOverstyringReplay(hendelseId)
+        assertTilstander(1.vedtaksperiode, TIL_UTBETALING, AVSLUTTET, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
     }
 }

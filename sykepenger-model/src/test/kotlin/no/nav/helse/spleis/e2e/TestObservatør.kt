@@ -31,6 +31,7 @@ internal class TestObservatør : PersonObserver {
     val annulleringer = mutableListOf<PersonObserver.UtbetalingAnnullertEvent>()
     lateinit var avstemming: Map<String, Any>
     val inntektsmeldingReplayEventer = mutableListOf<UUID>()
+    val overstyringReplayEventer = mutableListOf<UUID>()
 
     val avvisteRevurderinger = mutableListOf<PersonObserver.RevurderingAvvistEvent>()
 
@@ -41,6 +42,7 @@ internal class TestObservatør : PersonObserver {
     fun vedtaksperiode(orgnummer: String, indeks: Int) = vedtaksperioder.getValue(orgnummer).toList()[indeks]
     fun vedtaksperiodeIndeks(orgnummer: String, id: UUID) = vedtaksperioder.getValue(orgnummer).indexOf(id)
     fun bedtOmInntektsmeldingReplay(vedtaksperiodeId: UUID) = vedtaksperiodeId in inntektsmeldingReplayEventer
+    fun bedtOmOverstyringReplay(hendelseId: UUID) = hendelseId in overstyringReplayEventer
 
     fun avbruttePerioder() = avbruttEventer.size
     fun avbrutt(vedtaksperiodeId: UUID) = avbruttEventer.getValue(vedtaksperiodeId)
@@ -94,6 +96,10 @@ internal class TestObservatør : PersonObserver {
 
     override fun inntektsmeldingReplay(fødselsnummer: Fødselsnummer, vedtaksperiodeId: UUID) {
         inntektsmeldingReplayEventer.add(vedtaksperiodeId)
+    }
+
+    override fun overstyringReplay(fødselsnummer: Fødselsnummer, hendelseId: UUID) {
+        overstyringReplayEventer.add(hendelseId)
     }
 
     override fun annullering(hendelseskontekst: Hendelseskontekst, event: PersonObserver.UtbetalingAnnullertEvent) {

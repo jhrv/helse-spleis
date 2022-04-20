@@ -238,6 +238,7 @@ internal class JsonBuilder : AbstractBuilder() {
             skjæringstidspunktFraInfotrygd: LocalDate?,
             forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
             hendelseIder: Set<Dokumentsporing>,
+            uhåndterteOverstyringer: Set<UUID>,
             inntektsmeldingInfo: InntektsmeldingInfo?,
             inntektskilde: Inntektskilde
         ) {
@@ -1108,6 +1109,7 @@ internal class JsonBuilder : AbstractBuilder() {
             skjæringstidspunktFraInfotrygd: LocalDate?,
             forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
             hendelseIder: Set<Dokumentsporing>,
+            uhåndterteOverstyringer: Set<UUID>,
             inntektsmeldingInfo: InntektsmeldingInfo?,
             inntektskilde: Inntektskilde
         ) {
@@ -1467,6 +1469,7 @@ internal class JsonBuilder : AbstractBuilder() {
             skjæringstidspunktFraInfotrygd: LocalDate?,
             forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
             hendelseIder: Set<Dokumentsporing>,
+            uhåndterteOverstyringer: Set<UUID>,
             inntektsmeldingInfo: InntektsmeldingInfo?,
             inntektskilde: Inntektskilde
         ) {
@@ -1477,6 +1480,7 @@ internal class JsonBuilder : AbstractBuilder() {
                 "sykmeldingFom" to opprinneligPeriode.start,
                 "sykmeldingTom" to opprinneligPeriode.endInclusive,
                 "hendelseIder" to hendelseIder.toMap(),
+                "uhåndterteOverstyringer" to uhåndterteOverstyringer.toSet(),
                 "periodetype" to periodetype(),
                 "inntektskilde" to inntektskilde,
                 "tilstand" to tilstand.type.name,

@@ -116,6 +116,7 @@ internal class Vedtaksperiode private constructor(
     private var skjæringstidspunktFraInfotrygd: LocalDate?,
     private var sykdomstidslinje: Sykdomstidslinje,
     private val hendelseIder: MutableSet<Dokumentsporing>,
+    private val uhåndterteOverstyringer: MutableSet<UUID>,
     private var inntektsmeldingInfo: InntektsmeldingInfo?,
     private var periode: Periode,
     private val sykmeldingsperiode: Periode,
@@ -148,6 +149,7 @@ internal class Vedtaksperiode private constructor(
         skjæringstidspunktFraInfotrygd = null,
         sykdomstidslinje = hendelse.sykdomstidslinje(),
         hendelseIder = mutableSetOf<Dokumentsporing>().also { hendelse.leggTil(it) },
+        uhåndterteOverstyringer = mutableSetOf(),
         inntektsmeldingInfo = null,
         periode = hendelse.periode(),
         sykmeldingsperiode = hendelse.periode(),
@@ -176,6 +178,7 @@ internal class Vedtaksperiode private constructor(
             skjæringstidspunktFraInfotrygd,
             forlengelseFraInfotrygd,
             hendelseIder,
+            uhåndterteOverstyringer,
             inntektsmeldingInfo,
             inntektskilde
         )
@@ -196,6 +199,7 @@ internal class Vedtaksperiode private constructor(
             skjæringstidspunktFraInfotrygd,
             forlengelseFraInfotrygd,
             hendelseIder,
+            uhåndterteOverstyringer,
             inntektsmeldingInfo,
             inntektskilde
         )
@@ -314,11 +318,7 @@ internal class Vedtaksperiode private constructor(
     internal fun håndter(hendelse: OverstyrTidslinje) = hendelse.erRelevant(periode).also { erRelevant ->
         if (!erRelevant) return IKKE_HÅNDTERT
         kontekst(hendelse)
-        hendelse.leggTil(hendelseIder)
-        if (!hendelse.alleredeHåndtert()) {
-            hendelse.markerHåndtert()
-            tilstand.håndter(this, hendelse)
-        }
+        tilstand.håndter(this, hendelse)
     }
 
     internal fun håndter(overstyrArbeidsforhold: OverstyrArbeidsforhold): Boolean {
@@ -420,6 +420,12 @@ internal class Vedtaksperiode private constructor(
         harInntektsmelding() || arbeidsgiver.grunnlagForSykepengegrunnlag(skjæringstidspunkt, periode.start) != null
 
     private fun harInntektsmelding() = arbeidsgiver.harInntektsmelding(skjæringstidspunkt)
+
+    private fun køOverstyringForReplay() {
+        val hendelseId = uhåndterteOverstyringer.firstOrNull() ?: return
+        uhåndterteOverstyringer.remove(hendelseId)
+        person.overstyringReplay(hendelseId)
+    }
 
     private fun låsOpp() = arbeidsgiver.låsOpp(periode)
     private fun lås() = arbeidsgiver.lås(periode)
@@ -2878,7 +2884,9 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrTidslinje) {
-            hendelse.info("Overstyrer ikke en vedtaksperiode som har gått til utbetaling")
+            if (Toggle.NyRevurdering.disabled) return hendelse.info("Overstyrer ikke en vedtaksperiode som har gått til utbetaling")
+            hendelse.info("Køer opp OverstyrTidslinje for senere replay")
+            vedtaksperiode.uhåndterteOverstyringer.add(hendelse.meldingsreferanseId())
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: UtbetalingHendelse) {
@@ -3110,6 +3118,7 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.person.gjenopptaBehandling(hendelse)
             if (Toggle.NyTilstandsflyt.enabled)
                 vedtaksperiode.person.gjenopptaBehandlingNy(hendelse)
+            vedtaksperiode.køOverstyringForReplay()
         }
 
         override fun leaving(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
@@ -3313,6 +3322,10 @@ internal class Vedtaksperiode private constructor(
 
         internal fun List<Vedtaksperiode>.senerePerioderPågående(vedtaksperiode: Vedtaksperiode) =
             this.pågående()?.let { it etter vedtaksperiode } ?: false
+
+        internal fun List<Vedtaksperiode>.håndterNyOverstyring(overstyrTidslinje: OverstyrTidslinje) {
+            filter { overstyrTidslinje.erRelevant(it.periode) }.forEach { overstyrTidslinje.leggTil(it.hendelseIder) }
+        }
 
         internal fun Iterable<Vedtaksperiode>.nåværendeVedtaksperiode(filter: VedtaksperiodeFilter) =
             firstOrNull(filter)

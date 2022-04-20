@@ -131,6 +131,14 @@ internal class HendelseRepository(private val dataSource: DataSource) {
         }
     }
 
+    internal fun finnOverstyring(fødselsnummer: Fødselsnummer, hendelseId: UUID): JsonNode? {
+        return sessionOf(dataSource).use { session ->
+            session.run(queryOf("SELECT data FROM melding WHERE fnr = ? AND melding_id = ?", fødselsnummer.toLong(), hendelseId.toString()).map {
+                objectMapper.readTree(it.string("data"))
+            }.asSingle)
+        }
+    }
+
     private enum class Meldingstype {
         NY_SØKNAD,
         SENDT_SØKNAD_ARBEIDSGIVER,

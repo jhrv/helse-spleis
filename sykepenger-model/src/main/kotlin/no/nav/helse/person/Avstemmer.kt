@@ -110,6 +110,7 @@ internal class Avstemmer(person: Person) {
             skjæringstidspunktFraInfotrygd: LocalDate?,
             forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
             hendelseIder: Set<Dokumentsporing>,
+            uhåndterteOverstyringer: Set<UUID>,
             inntektsmeldingInfo: InntektsmeldingInfo?,
             inntektskilde: Inntektskilde
         ) {

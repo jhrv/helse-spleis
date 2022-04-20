@@ -103,7 +103,14 @@ internal class PersonMediator(
         }
     }
 
-    private fun createReplayMessage(message: JsonNode, extraFields: Map<String, Any>) {
+    override fun overstyringReplay(fødselsnummer: Fødselsnummer, hendelseId: UUID) {
+        val overstyring = hendelseRepository.finnOverstyring(fødselsnummer, hendelseId)
+            ?: return sikkerLogg.warn("Ønsket å replaye $hendelseId for $fødselsnummer, men fant ikke hendelsen i databasen")
+
+        createReplayMessage(overstyring)
+    }
+
+    private fun createReplayMessage(message: JsonNode, extraFields: Map<String, Any> = emptyMap()) {
         message as ObjectNode
         message.put("@replay", true)
         extraFields.forEach { (key, value), -> message.replace(key, objectMapper.convertValue<JsonNode>(value)) }

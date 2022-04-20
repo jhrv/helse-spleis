@@ -11,6 +11,7 @@ import no.nav.helse.spleis.IHendelseMediator
 internal class OverstyrTidslinjeMessage(val packet: JsonMessage) : HendelseMessage(packet) {
 
     override val fødselsnummer: String = packet["fødselsnummer"].asText()
+    override val skalDuplikatsjekkes = !packet["@replay"].asBoolean()
     private val organisasjonsnummer = packet["organisasjonsnummer"].asText()
     private val aktørId = packet["aktørId"].asText()
     private val dager = packet["dager"]

@@ -404,6 +404,12 @@ class Person private constructor(
         }
     }
 
+    internal fun overstyringReplay(hendelseId: UUID) {
+        observers.forEach {
+            it.overstyringReplay(fødselsnummer, hendelseId)
+        }
+    }
+
     internal fun trengerInntektsmelding(hendelseskontekst: Hendelseskontekst, orgnr: String, event: PersonObserver.ManglendeInntektsmeldingEvent) {
         observers.forEach { it.manglerInntektsmelding(hendelseskontekst, orgnr, event) }
     }

@@ -25,6 +25,7 @@ internal class VedtaksperioderBuilder(private val byggerForkastedePerioder: Bool
         skjæringstidspunktFraInfotrygd: LocalDate?,
         forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
         hendelseIder: Set<Dokumentsporing>,
+        uhåndterteOverstyringer: Set<UUID>,
         inntektsmeldingInfo: InntektsmeldingInfo?,
         inntektskilde: Inntektskilde
     ) {
