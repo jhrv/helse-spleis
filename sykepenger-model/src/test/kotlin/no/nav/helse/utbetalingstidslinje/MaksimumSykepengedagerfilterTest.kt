@@ -1,26 +1,23 @@
 package no.nav.helse.utbetalingstidslinje
 
-import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.til
-import no.nav.helse.hentErrors
-import no.nav.helse.inspectors.inspektør
-import no.nav.helse.person.Aktivitetslogg
-import no.nav.helse.person.etterlevelse.MaskinellJurist
-import no.nav.helse.sykdomstidslinje.erHelg
-import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import no.nav.helse.april
 import no.nav.helse.desember
 import no.nav.helse.februar
+import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.til
+import no.nav.helse.hentErrors
 import no.nav.helse.hentInfo
+import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.juli
 import no.nav.helse.juni
 import no.nav.helse.mars
 import no.nav.helse.oktober
+import no.nav.helse.person.Aktivitetslogg
+import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.somFødselsnummer
+import no.nav.helse.sykdomstidslinje.erHelg
 import no.nav.helse.testhelpers.AP
 import no.nav.helse.testhelpers.ARB
 import no.nav.helse.testhelpers.FRI
@@ -30,9 +27,12 @@ import no.nav.helse.testhelpers.NAVDAGER
 import no.nav.helse.testhelpers.UTELATE
 import no.nav.helse.testhelpers.Utbetalingsdager
 import no.nav.helse.testhelpers.tidslinjeOf
+import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 
 internal class MaksimumSykepengedagerfilterTest {
     private companion object {
@@ -497,7 +497,7 @@ internal class MaksimumSykepengedagerfilterTest {
             assertEquals(listOf(Begrunnelse.SykepengedagerOppbrukt), tidslinje.inspektør.begrunnelse(dato))
         }
         assertFalse(aktivitetslogg.hasErrorsOrWorse())
-        assertFalse(tidslinje.last().dato.erHelg())
+        assertFalse(tidslinje.utbetalingsdager.last().dato.erHelg())
     }
 
     // No 26 week gap with base of 246 NAV days

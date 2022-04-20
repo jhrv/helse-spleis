@@ -1,16 +1,26 @@
 package no.nav.helse.spleis.e2e
 
+import java.time.LocalDate
+import java.util.UUID
 import no.nav.helse.Fødselsnummer
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.inspectors.TestArbeidsgiverInspektør
 import no.nav.helse.inspectors.personLogg
-import no.nav.helse.person.*
+import no.nav.helse.person.AbstractPersonTest
+import no.nav.helse.person.Aktivitetslogg
+import no.nav.helse.person.AktivitetsloggVisitor
+import no.nav.helse.person.ArbeidstakerHendelse
+import no.nav.helse.person.IdInnhenter
+import no.nav.helse.person.Inntektskilde
+import no.nav.helse.person.Person
+import no.nav.helse.person.SpesifikkKontekst
+import no.nav.helse.person.TilstandType
 import no.nav.helse.sykdomstidslinje.erHelg
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt
-import org.junit.jupiter.api.Assertions.*
-import java.time.LocalDate
-import java.util.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertTrue
 import kotlin.reflect.KClass
 
 
@@ -64,7 +74,7 @@ internal fun AbstractEndToEndTest.assertUtbetalingsbeløp(
 ) {
     val utbetalingstidslinje = inspektør(orgnummer).utbetalingstidslinjer(vedtaksperiodeIdInnhenter).let { subset?.let(it::subset) ?: it }
 
-    utbetalingstidslinje.filterNot { it.dato.erHelg() }.forEach {
+    utbetalingstidslinje.utbetalingsdager.filterNot { it.dato.erHelg() }.forEach {
         it.økonomi.medAvrundetData { _, arbeidsgiverRefusjonsbeløp, _, _, _, _, arbeidsgiverbeløp, personbeløp, _ ->
             assertEquals(forventetArbeidsgiverbeløp, arbeidsgiverbeløp)
             assertEquals(forventetArbeidsgiverRefusjonsbeløp, arbeidsgiverRefusjonsbeløp)

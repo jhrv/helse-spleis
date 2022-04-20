@@ -1,17 +1,37 @@
 package no.nav.helse.utbetalingslinjer
 
-import no.nav.helse.*
+import java.time.LocalDate
+import java.util.UUID
+import no.nav.helse.august
+import no.nav.helse.desember
+import no.nav.helse.februar
 import no.nav.helse.hendelser.til
+import no.nav.helse.januar
+import no.nav.helse.juli
+import no.nav.helse.juni
+import no.nav.helse.mars
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.serde.reflection.ReflectInstance.Companion.get
-import no.nav.helse.utbetalingslinjer.Endringskode.*
+import no.nav.helse.spleis.e2e.first
+import no.nav.helse.spleis.e2e.forEach
+import no.nav.helse.spleis.e2e.get
+import no.nav.helse.spleis.e2e.last
+import no.nav.helse.spleis.e2e.size
+import no.nav.helse.spleis.e2e.zip
+import no.nav.helse.spleis.e2e.zipWithNext
+import no.nav.helse.utbetalingslinjer.Endringskode.ENDR
+import no.nav.helse.utbetalingslinjer.Endringskode.NY
+import no.nav.helse.utbetalingslinjer.Endringskode.UEND
 import no.nav.helse.utbetalingslinjer.Fagområde.SykepengerRefusjon
 import no.nav.helse.utbetalingstidslinje.genererUtbetalingsreferanse
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertNotEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
-import java.util.*
 import kotlin.math.roundToInt
 
 internal class UtbetalingslinjeForskjellTest {
@@ -999,7 +1019,7 @@ internal class UtbetalingslinjeForskjellTest {
 
     private fun assertUtbetalinger(expected: Oppdrag, actual: Oppdrag) {
         assertEquals(expected.size, actual.size, "Utbetalingslinjer er i forskjellige størrelser")
-        (expected zip actual).forEach { (a, b) ->
+        (expected.zip(actual)).forEach { (a, b) ->
             assertEquals(a.fom, b.fom, "fom stemmer ikke overens")
             assertEquals(a.tom, b.tom, "tom stemmer ikke overens")
             assertEquals(a.beløp, b.beløp, "dagsats stemmer ikke overens")

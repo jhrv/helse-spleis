@@ -1,5 +1,8 @@
 package no.nav.helse.person.filter
 
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.UUID
 import no.nav.helse.hentErrors
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Inntektskilde.EN_ARBEIDSGIVER
@@ -10,12 +13,11 @@ import no.nav.helse.testhelpers.tidslinjeOf
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingstidslinje.MaksimumUtbetaling
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.UUID
 
 internal class UtbetalingsfilterTest {
 
@@ -113,7 +115,7 @@ internal class UtbetalingsfilterTest {
         MaksimumUtbetaling(
             listOf(tidslinje),
             aktivitetslogg,
-            tidslinje.first().dato
+            tidslinje.utbetalingsdager.first().dato
         ).betal()
 
         return Utbetaling.lagUtbetaling(
@@ -122,7 +124,7 @@ internal class UtbetalingsfilterTest {
             UUID.randomUUID(),
             "orgnr",
             tidslinje,
-            tidslinje.last().dato,
+            tidslinje.utbetalingsdager.last().dato,
             aktivitetslogg,
             LocalDate.MAX,
             0,

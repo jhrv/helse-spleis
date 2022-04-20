@@ -1,12 +1,12 @@
 package no.nav.helse.utbetalingstidslinje
 
+import java.time.LocalDate
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
-import java.time.LocalDate
 
 internal class ArbeidsgiverUtbetalinger(
     private val regler: ArbeidsgiverRegler,
@@ -27,7 +27,7 @@ internal class ArbeidsgiverUtbetalinger(
     ) {
         val tidslinjer = arbeidsgivere
             .mapValues { (arbeidsgiver, builder) -> arbeidsgiver.build(subsumsjonObserver, infotrygdhistorikk, builder, periode) }
-            .filterValues { it.isNotEmpty() }
+            .filterValues { it.utbetalingsdager.isNotEmpty() }
         filtrer(aktivitetslogg, tidslinjer, periode, virkningsdato)
         tidslinjer.forEach { (arbeidsgiver, utbetalingstidslinje) ->
             arbeidsgiver.lagreUtbetalingstidslinjeberegning(organisasjonsnummer, utbetalingstidslinje, vilkårsgrunnlagHistorikk)

@@ -545,7 +545,7 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
         assertTrue(person.personLogg.etterspurteBehov(2.vedtaksperiode, Aktivitetslogg.Aktivitet.Behov.Behovtype.Simulering))
         inspektør.apply {
             assertTrue(
-                utbetalingstidslinjer(1.vedtaksperiode)
+                utbetalingstidslinjer(1.vedtaksperiode).utbetalingsdager
                     .filterIsInstance<ArbeidsgiverperiodeDag>().isEmpty()
             )
         }
@@ -603,11 +603,11 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
         assertTrue(person.personLogg.etterspurteBehov(1.vedtaksperiode, Aktivitetslogg.Aktivitet.Behov.Behovtype.Simulering))
         inspektør.apply {
             assertTrue(
-                utbetalingstidslinjer(2.vedtaksperiode)
+                utbetalingstidslinjer(2.vedtaksperiode).utbetalingsdager
                     .filterIsInstance<ArbeidsgiverperiodeDag>().isEmpty()
             )
             assertTrue(
-                utbetalingstidslinjer(1.vedtaksperiode)
+                utbetalingstidslinjer(1.vedtaksperiode).utbetalingsdager
                     .filterIsInstance<ArbeidsgiverperiodeDag>().isNotEmpty()
             )
         }
@@ -650,8 +650,8 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
 
     private fun assertAlleDager(utbetalingstidslinje: Utbetalingstidslinje, periode: Periode, vararg dager: KClass<out Utbetalingstidslinje.Utbetalingsdag>) {
         utbetalingstidslinje.subset(periode).also { tidslinje ->
-            assertTrue(tidslinje.all { it::class in dager }) {
-                val ulikeDager = tidslinje.filter { it::class !in dager }
+            assertTrue(tidslinje.utbetalingsdager.all { it::class in dager }) {
+                val ulikeDager = tidslinje.utbetalingsdager.filter { it::class !in dager }
                 "Forventet at alle dager skal være en av: ${dager.joinToString { it.simpleName ?: "UKJENT" }}.\n" +
                     ulikeDager.joinToString(prefix = "  - ", separator = "\n  - ", postfix = "\n") {
                         "${it.dato} er ${it::class.simpleName}"

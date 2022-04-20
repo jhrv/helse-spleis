@@ -679,7 +679,7 @@ internal class Arbeidsgiver private constructor(
     ): Utbetalingstidslinje {
         val arbeidsgivertidslinjer = arbeidsgivere
             .map { it to it.utbetalinger.utbetaltTidslinje() }
-            .filter { it.second.isNotEmpty() }
+            .filter { it.second.utbetalingsdager.isNotEmpty() }
             .toMap()
 
         MaksimumUtbetaling(arbeidsgivertidslinjer.values.toList(), aktivitetslogg, periode.endInclusive).betal()

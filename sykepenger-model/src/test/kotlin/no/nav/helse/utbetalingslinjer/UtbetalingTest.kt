@@ -1,29 +1,49 @@
 package no.nav.helse.utbetalingslinjer
 
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.UUID
 import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.til
-import no.nav.helse.hendelser.utbetaling.*
+import no.nav.helse.hendelser.utbetaling.AnnullerUtbetaling
+import no.nav.helse.hendelser.utbetaling.Grunnbeløpsregulering
+import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
+import no.nav.helse.hendelser.utbetaling.UtbetalingOverført
+import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
+import no.nav.helse.spleis.e2e.get
+import no.nav.helse.spleis.e2e.isEmpty
+import no.nav.helse.spleis.e2e.isNotEmpty
+import no.nav.helse.spleis.e2e.last
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
-import no.nav.helse.testhelpers.*
-import no.nav.helse.utbetalingslinjer.Oppdragstatus.*
+import no.nav.helse.testhelpers.AP
+import no.nav.helse.testhelpers.ARB
+import no.nav.helse.testhelpers.FRI
+import no.nav.helse.testhelpers.NAV
+import no.nav.helse.testhelpers.tidslinjeOf
+import no.nav.helse.utbetalingslinjer.Oppdragstatus.AKSEPTERT
+import no.nav.helse.utbetalingslinjer.Oppdragstatus.AVVIST
+import no.nav.helse.utbetalingslinjer.Oppdragstatus.OVERFØRT
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.aktive
 import no.nav.helse.utbetalingstidslinje.MaksimumUtbetaling
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertNotEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.*
 
 internal class UtbetalingTest {
 

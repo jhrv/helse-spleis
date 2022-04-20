@@ -246,7 +246,7 @@ internal class InfotrygdhistorikkTest {
 
     @Test
     fun `tom utbetalingstidslinje`() {
-        assertTrue(historikk.utbetalingstidslinje().isEmpty())
+        assertTrue(historikk.utbetalingstidslinje().utbetalingsdager.isEmpty())
     }
 
     @Test

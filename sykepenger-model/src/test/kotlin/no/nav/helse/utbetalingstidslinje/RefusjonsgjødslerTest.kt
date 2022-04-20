@@ -1,30 +1,42 @@
 package no.nav.helse.utbetalingstidslinje
 
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.UUID
 import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mars
-import no.nav.helse.person.*
+import no.nav.helse.person.Aktivitetslogg
+import no.nav.helse.person.AktivitetsloggVisitor
+import no.nav.helse.person.Inntektshistorikk
+import no.nav.helse.person.Refusjonshistorikk
+import no.nav.helse.person.SpesifikkKontekst
+import no.nav.helse.person.SykdomstidslinjeVisitor
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.person.infotrygdhistorikk.PersonUtbetalingsperiode
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
-import no.nav.helse.testhelpers.*
+import no.nav.helse.testhelpers.A
+import no.nav.helse.testhelpers.S
+import no.nav.helse.testhelpers.U
+import no.nav.helse.testhelpers.opphold
+import no.nav.helse.testhelpers.resetSeed
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import no.nav.helse.økonomi.Økonomi
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertDoesNotThrow
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.*
 
 internal class RefusjonsgjødslerTest {
 
@@ -40,7 +52,7 @@ internal class RefusjonsgjødslerTest {
         val refusjonsgjødsler = refusjonsgjødsler(utbetalingstidslinje, refusjonshistorikk)
         val aktivitetslogg = Aktivitetslogg()
         refusjonsgjødsler.gjødsle(aktivitetslogg, 1.januar til 26.januar)
-        assertRefusjonArbeidsgiver(utbetalingstidslinje, 1431.0)
+        assertRefusjonArbeidsgiver(utbetalingstidslinje.utbetalingsdager, 1431.0)
         assertFalse(aktivitetslogg.hasWarningsOrWorse())
     }
 
@@ -50,7 +62,7 @@ internal class RefusjonsgjødslerTest {
         val refusjonsgjødsler = refusjonsgjødsler(utbetalingstidslinje, refusjonshistorikk(refusjon(1.januar, null)))
         val aktivitetslogg = Aktivitetslogg()
         refusjonsgjødsler.gjødsle(aktivitetslogg, 1.januar til 26.januar)
-        assertRefusjonArbeidsgiver(utbetalingstidslinje, 0.0)
+        assertRefusjonArbeidsgiver(utbetalingstidslinje.utbetalingsdager, 0.0)
         assertFalse(aktivitetslogg.hasWarningsOrWorse())
     }
 
@@ -62,7 +74,7 @@ internal class RefusjonsgjødslerTest {
         val refusjonsgjødsler = refusjonsgjødsler(utbetalingstidslinje, refusjonshistorikk(refusjon(1.februar, 1154.daglig)))
         val aktivitetslogg = Aktivitetslogg()
         refusjonsgjødsler.gjødsle(aktivitetslogg, 1.februar til 26.februar)
-        assertRefusjonArbeidsgiver(utbetalingstidslinje, 1154.0)
+        assertRefusjonArbeidsgiver(utbetalingstidslinje.utbetalingsdager, 1154.0)
         assertFalse(aktivitetslogg.hasWarningsOrWorse())
     }
 
@@ -74,11 +86,11 @@ internal class RefusjonsgjødslerTest {
         val aktivitetslogg = Aktivitetslogg()
         refusjonsgjødsler.gjødsle(aktivitetslogg, 1.februar til 26.februar)
         // Helger i arbeidsgiverperioden har inntekt
-        assertRefusjonArbeidsgiver(utbetalingstidslinje[1.februar til 16.februar], 2308.0)
-        assertRefusjonArbeidsgiver(utbetalingstidslinje[17.februar til 18.februar], 0.0)
-        assertRefusjonArbeidsgiver(utbetalingstidslinje[19.februar til 23.februar], 2308.0)
-        assertRefusjonArbeidsgiver(utbetalingstidslinje[24.februar til 25.februar], 0.0)
-        assertRefusjonArbeidsgiver(utbetalingstidslinje[26.februar til 26.februar], 2308.0)
+        assertRefusjonArbeidsgiver(utbetalingstidslinje.utbetalingsdager[1.februar til 16.februar], 2308.0)
+        assertRefusjonArbeidsgiver(utbetalingstidslinje.utbetalingsdager[17.februar til 18.februar], 0.0)
+        assertRefusjonArbeidsgiver(utbetalingstidslinje.utbetalingsdager[19.februar til 23.februar], 2308.0)
+        assertRefusjonArbeidsgiver(utbetalingstidslinje.utbetalingsdager[24.februar til 25.februar], 0.0)
+        assertRefusjonArbeidsgiver(utbetalingstidslinje.utbetalingsdager[26.februar til 26.februar], 2308.0)
         assertTrue(aktivitetslogg.hasWarningsOrWorse())
     }
 
@@ -91,9 +103,9 @@ internal class RefusjonsgjødslerTest {
         val refusjonsgjødsler = refusjonsgjødsler(utbetalingstidslinje, refusjonshistorikk(refusjon(1.februar, 2308.daglig), refusjon(1.mars, 2500.daglig)))
         val aktivitetslogg = Aktivitetslogg()
         refusjonsgjødsler.gjødsle(aktivitetslogg, 1.mars til 10.mars)
-        assertRefusjonArbeidsgiver(utbetalingstidslinje[1.februar til 26.februar], 2308.0)
-        assertRefusjonArbeidsgiver(utbetalingstidslinje[27.februar til 28.februar], 0.0)
-        assertRefusjonArbeidsgiver(utbetalingstidslinje[1.mars til 10.mars], 2500.0)
+        assertRefusjonArbeidsgiver(utbetalingstidslinje.utbetalingsdager[1.februar til 26.februar], 2308.0)
+        assertRefusjonArbeidsgiver(utbetalingstidslinje.utbetalingsdager[27.februar til 28.februar], 0.0)
+        assertRefusjonArbeidsgiver(utbetalingstidslinje.utbetalingsdager[1.mars til 10.mars], 2500.0)
         assertFalse(aktivitetslogg.hasWarningsOrWorse())
     }
 
@@ -114,8 +126,8 @@ internal class RefusjonsgjødslerTest {
         )
         val aktivitetslogg = Aktivitetslogg()
         refusjonsgjødsler.gjødsle(aktivitetslogg, 1.februar til 28.februar)
-        assertRefusjonArbeidsgiver(utbetalingstidslinje[1.februar til 18.februar], 0.0)
-        assertRefusjonArbeidsgiver(utbetalingstidslinje[19.februar til 28.februar], 2308.0)
+        assertRefusjonArbeidsgiver(utbetalingstidslinje.utbetalingsdager[1.februar til 18.februar], 0.0)
+        assertRefusjonArbeidsgiver(utbetalingstidslinje.utbetalingsdager[19.februar til 28.februar], 2308.0)
         assertFalse(aktivitetslogg.hasWarningsOrWorse())
     }
 
@@ -364,7 +376,7 @@ internal class RefusjonsgjødslerTest {
         }
 
         private fun verifiserRekkefølge(tidslinje: Utbetalingstidslinje) {
-            tidslinje.windowed(2).forEach { (forrige, neste) ->
+            tidslinje.utbetalingsdager.windowed(2).forEach { (forrige, neste) ->
                 assertTrue(neste.dato > forrige.dato) { "Rekkefølgen er ikke riktig: ${neste.dato} skal være nyere enn ${forrige.dato}" }
             }
         }

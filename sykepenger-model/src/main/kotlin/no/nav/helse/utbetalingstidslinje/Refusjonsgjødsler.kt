@@ -23,7 +23,7 @@ internal class Refusjonsgjødsler(
                 }
             }
 
-            utbetalingsperiode.forEach { utbetalingsdag -> utbetalingsdag.gjødsle(refusjon) }
+            utbetalingsperiode.utbetalingsdager.forEach { utbetalingsdag -> utbetalingsdag.gjødsle(refusjon) }
         }
     }
 

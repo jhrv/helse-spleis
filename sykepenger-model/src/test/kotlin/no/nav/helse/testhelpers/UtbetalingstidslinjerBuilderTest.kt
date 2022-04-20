@@ -26,10 +26,10 @@ internal class UtbetalingstidslinjerBuilderTest {
     @Test
     fun `utelate dager`() {
         val tidslinje = tidslinjeOf(1.NAV, 6.UTELATE, 1.NAV)
-        assertEquals(2, tidslinje.size)
+        assertEquals(2, tidslinje.utbetalingsdager.size)
         assertEquals(2, tidslinje.inspektør.navDagTeller)
-        assertEquals(1.januar, tidslinje.first().dato)
-        assertEquals(8.januar, tidslinje.last().dato)
+        assertEquals(1.januar, tidslinje.utbetalingsdager.first().dato)
+        assertEquals(8.januar, tidslinje.utbetalingsdager.last().dato)
     }
 
     @Test
@@ -76,6 +76,6 @@ internal class UtbetalingstidslinjerBuilderTest {
     }
 
     private fun assertRekkefølge(tidslinje: Utbetalingstidslinje) {
-        tidslinje.zipWithNext { left, right -> assertEquals(left.dato.plusDays(1L), right.dato)}
+        tidslinje.utbetalingsdager.zipWithNext { left, right -> assertEquals(left.dato.plusDays(1L), right.dato)}
     }
 }

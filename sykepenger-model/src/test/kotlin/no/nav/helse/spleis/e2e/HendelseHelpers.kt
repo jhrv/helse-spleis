@@ -1,21 +1,32 @@
 package no.nav.helse.spleis.e2e
 
 
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.UUID
 import no.nav.helse.desember
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode
-import no.nav.helse.person.*
+import no.nav.helse.person.Aktivitetslogg
+import no.nav.helse.person.Arbeidsforholdhistorikk
+import no.nav.helse.person.Arbeidsgiver
+import no.nav.helse.person.IdInnhenter
+import no.nav.helse.person.OppdragVisitor
+import no.nav.helse.person.PersonVisitor
+import no.nav.helse.person.TilstandType
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.serde.api.serializePersonForSpeil
 import no.nav.helse.serde.api.v2.HendelseDTO
 import no.nav.helse.serde.api.v2.InntektsmeldingDTO
 import no.nav.helse.serde.api.v2.SykmeldingDTO
 import no.nav.helse.serde.api.v2.SøknadNavDTO
+import no.nav.helse.utbetalingslinjer.Endringskode
+import no.nav.helse.utbetalingslinjer.Klassekode
+import no.nav.helse.utbetalingslinjer.Oppdrag
+import no.nav.helse.utbetalingslinjer.Satstype
+import no.nav.helse.utbetalingslinjer.Utbetalingslinje
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.*
 
 internal class EtterspurtBehov(
     private val type: Aktivitetslogg.Aktivitet.Behov.Behovtype,
@@ -160,4 +171,43 @@ private val AbstractEndToEndTest.inntektsmeldingDTOer get() = inntektsmeldinger.
         mottattDato = LocalDateTime.now(),
         beregnetInntekt = inntekter.getValue(id).reflection { årlig, _, _, _ -> årlig }
     )
+}
+
+internal fun Oppdrag.first() = linjer().first()
+internal fun Oppdrag.last() = linjer().last()
+internal fun Oppdrag.single() = linjer().single()
+internal operator fun Oppdrag.get(index: Int) = linjer().get(index)
+internal val Oppdrag.size get() = linjer().size
+internal fun Oppdrag.isEmpty() = linjer().isEmpty()
+internal fun Oppdrag.isNotEmpty() = linjer().isNotEmpty()
+internal fun Oppdrag.forEach(callback: (Utbetalingslinje) -> Unit) = linjer().forEach(callback)
+internal fun Oppdrag.zip(other: Oppdrag) = linjer().zip(other.linjer())
+internal fun Oppdrag.sumOf(callback: (Utbetalingslinje) -> Int) = linjer().sumOf(callback)
+internal fun <R> Oppdrag.zipWithNext(callback: (a: Utbetalingslinje, b: Utbetalingslinje) -> R) = linjer().zipWithNext(callback)
+
+internal fun Oppdrag.linjer(): List<Utbetalingslinje> {
+    val linjer = mutableListOf<Utbetalingslinje>()
+    accept(object : OppdragVisitor {
+        override fun visitUtbetalingslinje(
+            linje: Utbetalingslinje,
+            fom: LocalDate,
+            tom: LocalDate,
+            stønadsdager: Int,
+            totalbeløp: Int,
+            satstype: Satstype,
+            beløp: Int?,
+            aktuellDagsinntekt: Int?,
+            grad: Int?,
+            delytelseId: Int,
+            refDelytelseId: Int?,
+            refFagsystemId: String?,
+            endringskode: Endringskode,
+            datoStatusFom: LocalDate?,
+            statuskode: String?,
+            klassekode: Klassekode
+        ) {
+            linjer.add(linje)
+        }
+    })
+    return linjer
 }

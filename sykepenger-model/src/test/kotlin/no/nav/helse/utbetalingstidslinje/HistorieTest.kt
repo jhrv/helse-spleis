@@ -1,5 +1,9 @@
 package no.nav.helse.utbetalingstidslinje
 
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.temporal.ChronoUnit
+import java.util.UUID
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.person.etterlevelse.MaskinellJurist
@@ -11,7 +15,13 @@ import no.nav.helse.sykdomstidslinje.Dag.Companion.replace
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse.Hendelseskilde
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse.Hendelseskilde.Companion.INGEN
-import no.nav.helse.testhelpers.*
+import no.nav.helse.testhelpers.ARB
+import no.nav.helse.testhelpers.AVV
+import no.nav.helse.testhelpers.FOR
+import no.nav.helse.testhelpers.FRI
+import no.nav.helse.testhelpers.NAV
+import no.nav.helse.testhelpers.resetSeed
+import no.nav.helse.testhelpers.tidslinjeOf
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
@@ -21,10 +31,6 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.temporal.ChronoUnit
-import java.util.*
 import kotlin.reflect.KClass
 
 internal abstract class HistorieTest {
@@ -123,8 +129,8 @@ internal abstract class HistorieTest {
 
     protected fun assertAlleDager(utbetalingstidslinje: Utbetalingstidslinje, periode: Periode, vararg dager: KClass<out Utbetalingstidslinje.Utbetalingsdag>) {
         utbetalingstidslinje.subset(periode).also { tidslinje ->
-            assertTrue(tidslinje.all { it::class in dager }) {
-                val ulikeDager = tidslinje.filter { it::class !in dager }
+            assertTrue(tidslinje.utbetalingsdager.all { it::class in dager }) {
+                val ulikeDager = tidslinje.utbetalingsdager.filter { it::class !in dager }
                 "Forventet at alle dager skal være en av: ${dager.joinToString { it.simpleName ?: "UKJENT" }}.\n" +
                     ulikeDager.joinToString(prefix = "  - ", separator = "\n  - ", postfix = "\n") {
                         "${it.dato} er ${it::class.simpleName}"
@@ -135,10 +141,10 @@ internal abstract class HistorieTest {
 
     protected fun assertSkjæringstidspunkt(utbetalingstidslinje: Utbetalingstidslinje, periode: Periode, forventetSkjæringstidspunkt: LocalDate?) {
         utbetalingstidslinje.subset(periode).also { tidslinje ->
-            assertTrue(tidslinje.all { it.økonomi.medData { _, _, _, skjæringstidspunkt, _, _, _, _, _ ->
+            assertTrue(tidslinje.utbetalingsdager.all { it.økonomi.medData { _, _, _, skjæringstidspunkt, _, _, _, _, _ ->
                 skjæringstidspunkt == forventetSkjæringstidspunkt
             } }) {
-                val ulikeDager = tidslinje.filter {
+                val ulikeDager = tidslinje.utbetalingsdager.filter {
                     it.økonomi.medData { _, _, _, skjæringstidspunkt, _, _, _, _, _ ->
                         skjæringstidspunkt != forventetSkjæringstidspunkt
                     }

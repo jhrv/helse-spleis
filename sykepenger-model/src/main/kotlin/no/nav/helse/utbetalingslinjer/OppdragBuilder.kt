@@ -1,14 +1,21 @@
 package no.nav.helse.utbetalingslinjer
 
+import java.time.LocalDate
+import java.util.UUID
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.UtbetalingsdagVisitor
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.Arbeidsdag
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDag
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.AvvistDag
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.ForeldetDag
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.Fridag
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavDag
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavHelgDag
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.UkjentDag
 import no.nav.helse.utbetalingstidslinje.genererUtbetalingsreferanse
 import no.nav.helse.økonomi.Økonomi
-import java.time.LocalDate
-import java.util.*
 
 internal class OppdragBuilder(
     private val tidslinje: Utbetalingstidslinje,
@@ -33,7 +40,7 @@ internal class OppdragBuilder(
             else -> oppdrag.minus(tidligere, aktivitetslogg)
         }.also {
             aktivitetslogg.info(
-                if (it.isEmpty()) "Ingen utbetalingslinjer bygget"
+                if (it.erTomt()) "Ingen utbetalingslinjer bygget"
                 else "Utbetalingslinjer bygget vellykket"
             )
         }

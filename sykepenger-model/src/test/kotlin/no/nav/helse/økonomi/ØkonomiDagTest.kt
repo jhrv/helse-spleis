@@ -1,7 +1,11 @@
 package no.nav.helse.økonomi
 
-import no.nav.helse.*
+import no.nav.helse.Grunnbeløp
+import no.nav.helse.april
+import no.nav.helse.januar
+import no.nav.helse.mai
 import no.nav.helse.person.Aktivitetslogg
+import no.nav.helse.september
 import no.nav.helse.testhelpers.ARB
 import no.nav.helse.testhelpers.AVV
 import no.nav.helse.testhelpers.NAV
@@ -93,7 +97,7 @@ internal class ØkonomiDagTest {
         val a = tidslinjeOf(2.NAV(1200))
         val b = tidslinjeOf(2.NAV(1200))
         val c = tidslinjeOf(2.NAV(1200))
-            .onEach { it.avvis(listOf(Begrunnelse.MinimumInntekt)) }
+        c.utbetalingsdager.forEach { it.avvis(listOf(Begrunnelse.MinimumInntekt)) }
         MaksimumUtbetaling(listOf(a, b, c), Aktivitetslogg(), 1.januar).betal()
         assertØkonomi(a, 721.0)
         assertØkonomi(b, 720.0)
@@ -116,7 +120,7 @@ internal class ØkonomiDagTest {
         val a = tidslinjeOf(2.NAV(1200))
         val b = tidslinjeOf(2.NAV(1200))
         val c = tidslinjeOf(2.AVV(1200, 100))
-            .onEach { (it as AvvistDag).navDag() }
+        c.utbetalingsdager.forEach { (it as AvvistDag).navDag() }
         MaksimumUtbetaling(listOf(a, b, c), Aktivitetslogg(), 1.januar).betal()
         assertØkonomi(a, 721.0)
         assertØkonomi(b, 720.0)
@@ -124,7 +128,7 @@ internal class ØkonomiDagTest {
     }
 
     private fun assertØkonomi(tidslinje: Utbetalingstidslinje, arbeidsgiverbeløp: Double, personbeløp: Double = 0.0) {
-        tidslinje.forEach {
+        tidslinje.utbetalingsdager.forEach {
             it.økonomi.medData {
                     _,
                     _,

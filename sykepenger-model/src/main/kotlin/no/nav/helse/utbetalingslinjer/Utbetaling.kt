@@ -33,7 +33,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 // Understands related payment activities for an Arbeidsgiver
-internal class Utbetaling private constructor(
+class Utbetaling private constructor(
     private val id: UUID,
     private val korrelasjonsId: UUID,
     private val beregningId: UUID,
@@ -137,7 +137,7 @@ internal class Utbetaling private constructor(
     }
 
     internal fun harNærliggendeUtbetaling(other: Periode): Boolean {
-        if (arbeidsgiverOppdrag.isEmpty() && personOppdrag.isEmpty()) return false
+        if (arbeidsgiverOppdrag.erTomt() && personOppdrag.erTomt()) return false
         return periode.overlapperMed(other.oppdaterFom(other.start.minusDays(16)))
     }
 

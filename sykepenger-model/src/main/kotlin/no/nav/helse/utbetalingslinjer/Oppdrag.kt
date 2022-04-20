@@ -1,5 +1,9 @@
 package no.nav.helse.utbetalingslinjer
 
+import java.time.LocalDate
+import java.time.LocalDate.MIN
+import java.time.LocalDateTime
+import java.util.*
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
@@ -9,10 +13,6 @@ import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.utbetalingslinjer.Oppdragstatus.AVVIST
 import no.nav.helse.utbetalingslinjer.Oppdragstatus.FEIL
 import no.nav.helse.utbetalingstidslinje.genererUtbetalingsreferanse
-import java.time.LocalDate
-import java.time.LocalDate.MIN
-import java.time.LocalDateTime
-import java.util.*
 
 internal const val WARN_FORLENGER_OPPHØRT_OPPDRAG = "Utbetalingen forlenger et tidligere oppdrag som opphørte alle utbetalte dager. Sjekk simuleringen."
 internal const val WARN_OPPDRAG_FOM_ENDRET = "Utbetaling fra og med dato er endret. Kontroller simuleringen"
@@ -31,17 +31,17 @@ internal class Oppdrag private constructor(
     private val tidsstempel: LocalDateTime,
     private var erSimulert: Boolean = false,
     private var simuleringsResultat: Simulering.SimuleringResultat? = null
-) : MutableList<Utbetalingslinje> by linjer, Aktivitetskontekst {
+) : Aktivitetskontekst {
     internal companion object {
         internal fun periode(vararg oppdrag: Oppdrag): Periode? {
             return oppdrag
-                .filter(Oppdrag::isNotEmpty)
+                .filter { it.linjer.isNotEmpty() }
                 .takeIf(List<*>::isNotEmpty)
                 ?.let { liste -> Periode(liste.minOf { it.førstedato }, liste.maxOf { it.sistedato }) }
         }
 
         internal fun stønadsdager(vararg oppdrag: Oppdrag): Int {
-            return Utbetalingslinje.stønadsdager(oppdrag.toList().flatten())
+            return Utbetalingslinje.stønadsdager(oppdrag.toList().flatMap { it.linjer })
         }
 
         internal fun synkronisert(vararg oppdrag: Oppdrag): Boolean {
@@ -150,7 +150,7 @@ internal class Oppdrag private constructor(
         return mutableMapOf(
             "mottaker" to mottaker,
             "fagområde" to "$fagområde",
-            "linjer" to kopierKunLinjerMedEndring().map(Utbetalingslinje::toHendelseMap),
+            "linjer" to kopierKunLinjerMedEndring().linjer.map(Utbetalingslinje::toHendelseMap),
             "fagsystemId" to fagsystemId,
             "endringskode" to "$endringskode",
             "saksbehandler" to saksbehandler
@@ -162,7 +162,7 @@ internal class Oppdrag private constructor(
     }
 
     internal fun totalbeløp() = linjerUtenOpphør().sumOf { it.totalbeløp() }
-    internal fun stønadsdager() = sumOf { it.stønadsdager() }
+    internal fun stønadsdager() = linjer.sumOf { it.stønadsdager() }
 
     internal fun nettoBeløp() = nettoBeløp
 
@@ -170,7 +170,7 @@ internal class Oppdrag private constructor(
         nettoBeløp = this.totalbeløp() - tidligere.totalbeløp()
     }
 
-    internal fun harUtbetalinger() = any(Utbetalingslinje::erForskjell)
+    internal fun harUtbetalinger() = linjer.any(Utbetalingslinje::erForskjell)
 
     internal fun erRelevant(fagsystemId: String, fagområde: Fagområde) =
         this.fagsystemId == fagsystemId && this.fagområde == fagområde
@@ -178,11 +178,11 @@ internal class Oppdrag private constructor(
     internal fun valider(simulering: Simulering) =
         simulering.valider(this)
 
-    private fun kopierKunLinjerMedEndring() = kopierMed(filter(Utbetalingslinje::erForskjell))
+    private fun kopierKunLinjerMedEndring() = kopierMed(linjer.filter(Utbetalingslinje::erForskjell))
 
     private fun kopierUtenOpphørslinjer() = kopierMed(linjerUtenOpphør())
 
-    internal fun linjerUtenOpphør() = filter { !it.erOpphør() }
+    internal fun linjerUtenOpphør() = linjer.filter { !it.erOpphør() }
 
     internal fun annuller(aktivitetslogg: IAktivitetslogg): Oppdrag {
         return tomtOppdrag().minus(this, aktivitetslogg)
@@ -227,7 +227,7 @@ internal class Oppdrag private constructor(
 
     private fun ingenUtbetalteDager() = linjerUtenOpphør().isEmpty()
 
-    private fun erTomt() = this.isEmpty()
+    internal fun erTomt() = linjer.isEmpty()
 
     // Vi har oppdaget utbetalingsdager tidligere i tidslinjen
     private fun fomHarFlyttetSegBakover(eldre: Oppdrag) = this.førstedato < eldre.førstedato
@@ -238,7 +238,7 @@ internal class Oppdrag private constructor(
     // man opphører (annullerer) et annet oppdrag ved å lage en opphørslinje som dekker hele perioden som er utbetalt
     private fun annulleringsoppdrag(tidligere: Oppdrag) = this.also { nåværende ->
         nåværende.kobleTil(tidligere)
-        linjer.add(tidligere.last().opphørslinje(tidligere.first().fom))
+        linjer.add(tidligere.linjer.last().opphørslinje(tidligere.linjer.first().fom))
     }
 
     // når man oppretter en NY linje med dato-intervall "(a, b)" vil oppdragsystemet
@@ -250,8 +250,8 @@ internal class Oppdrag private constructor(
     // Fordi linje "1. januar - 10. januar" opprettes som NY, medfører dette at oppdragsystemet opphører 11. januar til 31. januar automatisk
     private fun kjørFrem(tidligere: Oppdrag) = this.also { nåværende ->
         nåværende.kobleTil(tidligere)
-        nåværende.first().kobleTil(tidligere.last())
-        nåværende.zipWithNext { a, b -> b.kobleTil(a) }
+        nåværende.linjer.first().kobleTil(tidligere.linjer.last())
+        nåværende.linjer.zipWithNext { a, b -> b.kobleTil(a) }
     }
     private lateinit var tilstand: Tilstand
     private lateinit var sisteLinjeITidligereOppdrag: Utbetalingslinje
@@ -265,11 +265,11 @@ internal class Oppdrag private constructor(
     //    ved å sende NY linjer
     private fun endre(avtroppendeOppdrag: Oppdrag, aktivitetslogg: IAktivitetslogg) =
         this.also { påtroppendeOppdrag ->
-            this.linkTo = avtroppendeOppdrag.last()
+            this.linkTo = avtroppendeOppdrag.linjer.last()
             påtroppendeOppdrag.kobleTil(avtroppendeOppdrag)
             påtroppendeOppdrag.kopierLikeLinjer(avtroppendeOppdrag, aktivitetslogg)
             påtroppendeOppdrag.håndterLengreNåværende(avtroppendeOppdrag)
-            if (!påtroppendeOppdrag.last().erForskjell()) påtroppendeOppdrag.endringskode = Endringskode.UEND
+            if (!påtroppendeOppdrag.linjer.last().erForskjell()) påtroppendeOppdrag.endringskode = Endringskode.UEND
         }
 
     // når man oppretter en NY linje vil Oppdragsystemet IKKE ta stilling til periodene FØR.
@@ -278,19 +278,19 @@ internal class Oppdrag private constructor(
     private fun returførOgKjørFrem(tidligere: Oppdrag) = this.also { nåværende ->
         val deletion = nåværende.opphørOppdrag(tidligere)
         nåværende.kjørFrem(tidligere)
-        nåværende.add(0, deletion)
+        nåværende.linjer.add(0, deletion)
     }
 
     private fun opphørTidligereLinjeOgOpprettNy(nåværende: Utbetalingslinje, tidligere: Utbetalingslinje, aktivitetslogg: IAktivitetslogg) {
         linkTo = tidligere
-        add(this.indexOf(nåværende), tidligere.opphørslinje(tidligere.fom))
+        linjer.add(linjer.indexOf(nåværende), tidligere.opphørslinje(tidligere.fom))
         nåværende.kobleTil(linkTo)
         tilstand = Ny()
         aktivitetslogg.warn("Endrer tidligere oppdrag. Kontroller simuleringen.")
     }
 
     private fun opphørOppdrag(tidligere: Oppdrag) =
-        tidligere.last().opphørslinje(tidligere.førstedato)
+        tidligere.linjer.last().opphørslinje(tidligere.førstedato)
 
     private fun kopierMed(linjer: List<Utbetalingslinje>) = Oppdrag(
         mottaker,
@@ -307,21 +307,21 @@ internal class Oppdrag private constructor(
 
     private fun kopierLikeLinjer(tidligere: Oppdrag, aktivitetslogg: IAktivitetslogg) {
         tilstand = if (tidligere.sistedato > this.sistedato) Slett() else Identisk()
-        sisteLinjeITidligereOppdrag = tidligere.last()
-        this.zip(tidligere).forEach { (a, b) -> tilstand.håndterForskjell(a, b, aktivitetslogg) }
+        sisteLinjeITidligereOppdrag = tidligere.linjer.last()
+        linjer.zip(tidligere.linjer).forEach { (a, b) -> tilstand.håndterForskjell(a, b, aktivitetslogg) }
     }
 
     private fun håndterLengreNåværende(tidligere: Oppdrag) {
-        if (this.size <= tidligere.size) return
-        this[tidligere.size].kobleTil(linkTo)
-        this
-            .subList(tidligere.size, this.size)
+        if (linjer.size <= tidligere.linjer.size) return
+        linjer[tidligere.linjer.size].kobleTil(linkTo)
+        linjer
+            .subList(tidligere.linjer.size, linjer.size)
             .zipWithNext { a, b -> b.kobleTil(a) }
     }
 
     private fun kobleTil(tidligere: Oppdrag) {
         this.fagsystemId = tidligere.fagsystemId
-        this.forEach { it.refFagsystemId = tidligere.fagsystemId }
+        linjer.forEach { it.refFagsystemId = tidligere.fagsystemId }
         this.endringskode = Endringskode.ENDR
     }
 
@@ -342,7 +342,7 @@ internal class Oppdrag private constructor(
     internal fun toHendelseMap() = mapOf(
         "mottaker" to mottaker,
         "fagområde" to "$fagområde",
-        "linjer" to map(Utbetalingslinje::toHendelseMap),
+        "linjer" to linjer.map(Utbetalingslinje::toHendelseMap),
         "fagsystemId" to fagsystemId,
         "endringskode" to "$endringskode",
         "sisteArbeidsgiverdag" to sisteArbeidsgiverdag,
@@ -393,7 +393,7 @@ internal class Oppdrag private constructor(
     private inner class Slett : Tilstand {
         override fun håndterForskjell(nåværende: Utbetalingslinje, tidligere: Utbetalingslinje, aktivitetslogg: IAktivitetslogg) {
             if (nåværende == tidligere) {
-                if (nåværende == last()) return nåværende.kobleTil(linkTo)
+                if (nåværende == linjer.last()) return nåværende.kobleTil(linkTo)
                 return nåværende.markerUendret(tidligere)
             }
             håndterUlikhet(nåværende, tidligere, aktivitetslogg)

@@ -1,5 +1,6 @@
 package no.nav.helse.utbetalingslinjer
 
+import java.time.LocalDate
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.somPeriode
@@ -9,16 +10,32 @@ import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.serde.reflection.ReflectInstance.Companion.get
-import no.nav.helse.testhelpers.*
-import no.nav.helse.utbetalingslinjer.Endringskode.*
+import no.nav.helse.spleis.e2e.first
+import no.nav.helse.spleis.e2e.get
+import no.nav.helse.spleis.e2e.last
+import no.nav.helse.spleis.e2e.size
+import no.nav.helse.spleis.e2e.sumOf
+import no.nav.helse.testhelpers.AP
+import no.nav.helse.testhelpers.ARB
+import no.nav.helse.testhelpers.AVV
+import no.nav.helse.testhelpers.FOR
+import no.nav.helse.testhelpers.FRI
+import no.nav.helse.testhelpers.HELG
+import no.nav.helse.testhelpers.NAV
+import no.nav.helse.testhelpers.Utbetalingsdager
+import no.nav.helse.testhelpers.tidslinjeOf
+import no.nav.helse.utbetalingslinjer.Endringskode.ENDR
+import no.nav.helse.utbetalingslinjer.Endringskode.NY
+import no.nav.helse.utbetalingslinjer.Endringskode.UEND
 import no.nav.helse.utbetalingslinjer.Fagområde.SykepengerRefusjon
 import no.nav.helse.utbetalingslinjer.OppdragBuilderTest.Dagtype
 import no.nav.helse.utbetalingstidslinje.MaksimumUtbetaling
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavDag
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavHelgDag
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.UkjentDag
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
 
 internal class OppdragBuilderTest {
 

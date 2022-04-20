@@ -1,19 +1,19 @@
 package no.nav.helse.person
 
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.UUID
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.serde.reflection.Utbetalingstatus
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetaling.Utbetalingtype
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.*
 
 internal class Avstemmer(person: Person) {
     private val tilstander = mutableListOf<PersonVisitor>(Initiell())
     private val arbeidsgivere = mutableListOf<Map<String, Any>>()
 
     init {
-        person.accept(DelegatedPersonVisitor(tilstander::first))
+        person.accept(DelegatedPersonVisitor { tilstander.first() })
     }
 
     fun toMap(): Map<String, Any> = mapOf(

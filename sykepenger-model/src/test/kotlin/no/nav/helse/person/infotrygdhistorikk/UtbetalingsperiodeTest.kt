@@ -10,7 +10,9 @@ import no.nav.helse.testhelpers.TestEvent
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class UtbetalingsperiodeTest {
@@ -81,7 +83,7 @@ internal class UtbetalingsperiodeTest {
     @Test
     fun `utbetalingstidslinje - ukjent`() {
         val ferie = UkjentInfotrygdperiode(1.januar, 10.januar)
-        assertEquals(0, ferie.utbetalingstidslinje().size)
+        assertEquals(0, ferie.utbetalingstidslinje().utbetalingsdager.size)
     }
 
     @Test
