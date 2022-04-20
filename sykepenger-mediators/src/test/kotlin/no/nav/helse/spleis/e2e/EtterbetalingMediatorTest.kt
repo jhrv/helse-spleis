@@ -16,7 +16,6 @@ internal class EtterbetalingMediatorTest : AbstractEndToEndMediatorTest() {
         sendSøknad(listOf(SoknadsperiodeDTO(fom = 1.mai(2020), tom = 31.mai(2020), sykmeldingsgrad = 100)))
         val merEnn6GInntekt = 60000.0
         sendInntektsmelding(
-            0,
             listOf(Periode(fom = 1.mai(2020), tom = 16.mai(2020))),
             førsteFraværsdag = 1.mai(2020),
             beregnetInntekt = merEnn6GInntekt

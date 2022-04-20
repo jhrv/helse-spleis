@@ -25,7 +25,6 @@ internal class FeriepengeMediatorTest : AbstractEndToEndMediatorTest() {
         sendNySøknad(SoknadsperiodeDTO(fom = 1.juni(2020), tom = 30.juni(2020), sykmeldingsgrad = 100))
         sendSøknad(listOf(SoknadsperiodeDTO(fom = 1.juni(2020), tom = 30.juni(2020), sykmeldingsgrad = 100)))
         sendInntektsmelding(
-            0,
             listOf(Periode(fom = 1.juni(2020), tom = 16.juni(2020))),
             førsteFraværsdag = 1.juni(2020)
         )
@@ -88,7 +87,6 @@ internal class FeriepengeMediatorTest : AbstractEndToEndMediatorTest() {
         sendNySøknad(SoknadsperiodeDTO(fom = 1.juni(2020), tom = 30.juni(2020), sykmeldingsgrad = 100))
         sendSøknad(listOf(SoknadsperiodeDTO(fom = 1.juni(2020), tom = 30.juni(2020), sykmeldingsgrad = 100)))
         sendInntektsmelding(
-            0,
             listOf(Periode(fom = 1.juni(2020), tom = 16.juni(2020))),
             førsteFraværsdag = 1.juni(2020)
         )
@@ -165,7 +163,6 @@ internal class FeriepengeMediatorTest : AbstractEndToEndMediatorTest() {
         sendNySøknad(SoknadsperiodeDTO(fom = 1.juni(2020), tom = 30.juni(2020), sykmeldingsgrad = 100))
         sendSøknad(listOf(SoknadsperiodeDTO(fom = 1.juni(2020), tom = 30.juni(2020), sykmeldingsgrad = 100)))
         sendInntektsmelding(
-            0,
             listOf(Periode(fom = 1.juni(2020), tom = 16.juni(2020))),
             førsteFraværsdag = 1.juni(2020)
         )
@@ -242,7 +239,6 @@ internal class FeriepengeMediatorTest : AbstractEndToEndMediatorTest() {
         sendNySøknad(SoknadsperiodeDTO(fom = 1.juni(2020), tom = 30.juni(2020), sykmeldingsgrad = 100))
         sendSøknad(listOf(SoknadsperiodeDTO(fom = 1.juni(2020), tom = 30.juni(2020), sykmeldingsgrad = 100)))
         sendInntektsmelding(
-            0,
             listOf(Periode(fom = 1.juni(2020), tom = 16.juni(2020))),
             førsteFraværsdag = 1.juni(2020)
         )

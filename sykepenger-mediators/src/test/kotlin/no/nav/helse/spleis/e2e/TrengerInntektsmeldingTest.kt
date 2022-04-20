@@ -21,7 +21,6 @@ internal class TrengerInntektsmeldingTest : AbstractEndToEndMediatorTest() {
         sendSøknad(listOf(SoknadsperiodeDTO(fom = 21.juli(2021), tom = 4.august(2021), sykmeldingsgrad = 100)))
         sendUtbetalingshistorikk(0)
         sendInntektsmelding(
-            0,
             listOf(Periode(fom = 21.juli(2021), tom =  5.august(2021))),
             førsteFraværsdag = 21.juli(2021)
         )
@@ -76,7 +75,7 @@ internal class TrengerInntektsmeldingTest : AbstractEndToEndMediatorTest() {
     fun `sender ikke trenger_inntektsmelding hvor inntektsmelding har førsteFraværsdag i perioden, men arbeidsgiverperioden er før`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 17.januar, tom = 16.februar, sykmeldingsgrad = 100))
         sendSøknad(listOf(SoknadsperiodeDTO(fom = 17.januar, tom = 16.februar, sykmeldingsgrad = 100)))
-        sendInntektsmelding(0, listOf(Periode(fom = 1.januar, tom = 16.januar)), førsteFraværsdag = 17.januar)
+        sendInntektsmelding(listOf(Periode(fom = 1.januar, tom = 16.januar)), førsteFraværsdag = 17.januar)
         sendYtelser(0)
         sendVilkårsgrunnlag(0)
         sendYtelserUtenSykepengehistorikk(0)
@@ -114,7 +113,7 @@ internal class TrengerInntektsmeldingTest : AbstractEndToEndMediatorTest() {
     fun `trenger_inntektsmelding håndterer korrigerende sykmelding som forkorter perioden`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 1.januar, tom = 26.januar, sykmeldingsgrad = 100))
         sendSøknad(listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 26.januar, sykmeldingsgrad = 100)))
-        sendInntektsmelding(0, listOf(Periode(fom = 1.januar, tom = 16.januar)), førsteFraværsdag = 1.januar)
+        sendInntektsmelding(listOf(Periode(fom = 1.januar, tom = 16.januar)), førsteFraværsdag = 1.januar)
         sendYtelser(0)
         sendVilkårsgrunnlag(0)
         sendYtelserUtenSykepengehistorikk(0)
@@ -133,7 +132,7 @@ internal class TrengerInntektsmeldingTest : AbstractEndToEndMediatorTest() {
     fun `håndterer trenger_inntektsmelding isolert per arbeidsgiver`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 1.januar, tom = 20.januar, sykmeldingsgrad = 100))
         sendSøknad(listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 20.januar, sykmeldingsgrad = 100)))
-        sendInntektsmelding(0, listOf(Periode(fom = 1.januar, tom = 16.januar)), førsteFraværsdag = 1.januar)
+        sendInntektsmelding(listOf(Periode(fom = 1.januar, tom = 16.januar)), førsteFraværsdag = 1.januar)
 
         val annenArbeidsgiver = "999999999"
         sendNySøknad(
