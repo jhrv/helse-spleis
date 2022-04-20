@@ -169,17 +169,6 @@ internal abstract class AbstractEndToEndMediatorTest {
         førsteFraværsdag: LocalDate,
         opphørAvNaturalytelser: List<OpphoerAvNaturalytelse> = emptyList(),
         beregnetInntekt: Double = INNTEKT,
-        orgnummer: String = ORGNUMMER,
-        opphørsdatoForRefusjon: LocalDate? = null
-    ): Pair<UUID, String> {
-        return sendInntektsmelding(arbeidsgiverperiode, førsteFraværsdag, opphørAvNaturalytelser, beregnetInntekt, opphørsdatoForRefusjon, orgnummer)
-    }
-
-    protected fun sendInntektsmelding(
-        arbeidsgiverperiode: List<Periode>,
-        førsteFraværsdag: LocalDate,
-        opphørAvNaturalytelser: List<OpphoerAvNaturalytelse> = emptyList(),
-        beregnetInntekt: Double = INNTEKT,
         opphørsdatoForRefusjon: LocalDate? = null,
         meldingId: String = UUID.randomUUID().toString(),
         orgnummer: String = ORGNUMMER
