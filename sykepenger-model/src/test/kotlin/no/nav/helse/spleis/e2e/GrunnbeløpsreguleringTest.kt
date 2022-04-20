@@ -1,23 +1,37 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.*
+import java.time.LocalDate
+import no.nav.helse.Grunnbeløp
+import no.nav.helse.april
+import no.nav.helse.august
+import no.nav.helse.desember
+import no.nav.helse.februar
 import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
-import no.nav.helse.person.TilstandType
-import no.nav.helse.testhelpers.*
+import no.nav.helse.januar
+import no.nav.helse.juli
+import no.nav.helse.juni
+import no.nav.helse.mai
+import no.nav.helse.mars
+import no.nav.helse.november
+import no.nav.helse.oktober
+import no.nav.helse.september
+import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.utbetalingslinjer.Endringskode
 import no.nav.helse.utbetalingslinjer.Oppdragstatus.AKSEPTERT
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertNotEquals
+import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
-import java.time.LocalDateTime
 
 internal class GrunnbeløpsreguleringTest : AbstractEndToEndTest() {
     private companion object {
@@ -181,6 +195,7 @@ internal class GrunnbeløpsreguleringTest : AbstractEndToEndTest() {
             gyldighetsdato = GYLDIGHETSDATO_2020_GRUNNBELØP,
             fagsystemId = inspektør.utbetalinger.first().inspektør.arbeidsgiverOppdrag.fagsystemId()
         )
+        håndterUtbetalt()
         utbetaltForlengetVedtaksperiodeBegrensetAv6G(3, 1.august(2020), 31.august(2020))
         inspektør.utbetalinger.also { utbetalinger ->
             assertEquals(4, utbetalinger.size)

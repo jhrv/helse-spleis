@@ -983,11 +983,13 @@ internal class Vedtaksperiode private constructor(
         }
 
         fun nyPeriodeFør(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: Sykmelding) {
+            if (Toggle.RevurdereOutOfOrder.enabled) return
             hendelse.error("Mottatt sykmelding eller søknad out of order")
             vedtaksperiode.forkast(hendelse)
         }
 
         fun nyPeriodeFørMedNyFlyt(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: Søknad) {
+            if (Toggle.RevurdereOutOfOrder.enabled) return
             hendelse.error("Mottatt søknad out of order")
             vedtaksperiode.forkast(hendelse)
         }
@@ -1275,7 +1277,10 @@ internal class Vedtaksperiode private constructor(
         ): Vedtaksperiodetilstand {
             val periodeRettFør = vedtaksperiode.arbeidsgiver.finnVedtaksperiodeRettFør(vedtaksperiode)
             val forlengelse = periodeRettFør != null
-            val ferdig = vedtaksperiode.arbeidsgiver.tidligerePerioderFerdigBehandlet(vedtaksperiode)
+            val ferdig = when (Toggle.RevurdereOutOfOrder.enabled) {
+                true -> vedtaksperiode.arbeidsgiver.tidligerePerioderFerdigBehandlet(vedtaksperiode) && !vedtaksperiode.arbeidsgiver.senerePerioderPågående(vedtaksperiode)
+                false -> vedtaksperiode.arbeidsgiver.tidligerePerioderFerdigBehandlet(vedtaksperiode)
+            }
 
             return when {
                 forlengelse && ferdig -> ferdigForlengelse
@@ -1532,8 +1537,13 @@ internal class Vedtaksperiode private constructor(
             LocalDateTime.MAX
 
         override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, gjenopptaBehandling: IAktivitetslogg) {
+            if (!vedtaksperiode.person.kanStarteRevurdering(vedtaksperiode)) return
             vedtaksperiode.tilstand(gjenopptaBehandling, AvventerGjennomførtRevurdering)
             vedtaksperiode.arbeidsgiver.gjenopptaRevurdering(vedtaksperiode, gjenopptaBehandling)
+        }
+
+        override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrTidslinje) {
+            vedtaksperiode.oppdaterHistorikk(hendelse)
         }
 
         override fun håndterRevurderingFeilet(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
@@ -1572,7 +1582,8 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, gjenopptaBehandling: IAktivitetslogg) {
-            if (!vedtaksperiode.utbetalinger.erAvsluttet()) return
+            if (Toggle.NyRevurdering.disabled && !vedtaksperiode.utbetalinger.erAvsluttet()) return
+            if (Toggle.NyRevurdering.enabled && vedtaksperiode.arbeidsgiver.avventerRevurdering()) return
             gjenopptaBehandling.info("Går til avsluttet fordi revurdering er fullført via en annen vedtaksperiode")
             vedtaksperiode.tilstand(gjenopptaBehandling, Avsluttet)
         }
@@ -2548,6 +2559,15 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.tilstand(simulering, AvventerGodkjenningRevurdering)
         }
 
+        override fun startRevurdering(
+            vedtaksperiode: Vedtaksperiode,
+            hendelse: IAktivitetslogg,
+            overstyrt: Vedtaksperiode,
+            pågående: Vedtaksperiode?
+        ) {
+            vedtaksperiode.nesteRevurderingstilstand(hendelse, overstyrt, pågående)
+        }
+
         override fun håndterTidligereTilstøtendeUferdigPeriode(
             vedtaksperiode: Vedtaksperiode,
             tidligere: Vedtaksperiode,
@@ -2720,7 +2740,7 @@ internal class Vedtaksperiode private constructor(
 
     private fun nesteRevurderingstilstand(hendelse: IAktivitetslogg, overstyrt: Vedtaksperiode, pågående: Vedtaksperiode?) {
         if (utbetalinger.utbetales()) return
-        if (pågående?.utbetalinger?.utbetales() == true) return tilstand(hendelse, AvventerRevurdering)
+        if (pågående?.utbetalinger?.utbetales() == true || overstyrt.arbeidsgiver != this.arbeidsgiver) return tilstand(hendelse, AvventerRevurdering)
         if (skjæringstidspunkt != overstyrt.skjæringstidspunkt) return tilstand(hendelse, AvventerRevurdering)
         tilstand(hendelse, AvventerGjennomførtRevurdering)
     }
@@ -2797,6 +2817,15 @@ internal class Vedtaksperiode private constructor(
                     else -> Avsluttet
                 }
             )
+        }
+
+        override fun startRevurdering(
+            vedtaksperiode: Vedtaksperiode,
+            hendelse: IAktivitetslogg,
+            overstyrt: Vedtaksperiode,
+            pågående: Vedtaksperiode?
+        ) {
+            vedtaksperiode.nesteRevurderingstilstand(hendelse, overstyrt, pågående)
         }
 
         override fun håndterRevurderingFeilet(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
@@ -3083,6 +3112,10 @@ internal class Vedtaksperiode private constructor(
                 vedtaksperiode.person.gjenopptaBehandlingNy(hendelse)
         }
 
+        override fun leaving(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
+            vedtaksperiode.låsOpp()
+        }
+
         override fun håndter(
             person: Person,
             arbeidsgiver: Arbeidsgiver,
@@ -3099,9 +3132,9 @@ internal class Vedtaksperiode private constructor(
             overstyrt: Vedtaksperiode,
             pågående: Vedtaksperiode?
         ) {
-            if (overstyrt.skjæringstidspunkt != vedtaksperiode.skjæringstidspunkt && overstyrt < vedtaksperiode)
+            if (pågående?.utbetalinger?.utbetales() == true || overstyrt.arbeidsgiver != vedtaksperiode.arbeidsgiver)
                 return vedtaksperiode.tilstand(hendelse, AvventerRevurdering)
-            if (pågående?.utbetalinger?.utbetales() == true)
+            if (overstyrt.skjæringstidspunkt != vedtaksperiode.skjæringstidspunkt && overstyrt før vedtaksperiode)
                 return vedtaksperiode.tilstand(hendelse, AvventerRevurdering)
             vedtaksperiode.tilstand(hendelse, AvventerGjennomførtRevurdering)
         }
@@ -3113,6 +3146,7 @@ internal class Vedtaksperiode private constructor(
             )
             vedtaksperiode.låsOpp()
             vedtaksperiode.oppdaterHistorikk(hendelse)
+            vedtaksperiode.lås()
             vedtaksperiode.person.startRevurdering(vedtaksperiode, hendelse)
         }
 
@@ -3139,7 +3173,8 @@ internal class Vedtaksperiode private constructor(
             tidligere: Vedtaksperiode,
             hendelse: IAktivitetslogg
         ) {
-            vedtaksperiode.tilstand(hendelse, AvventerArbeidsgivereRevurdering)
+            if (Toggle.RevurdereOutOfOrder.disabled) return vedtaksperiode.tilstand(hendelse, AvventerArbeidsgivereRevurdering)
+            vedtaksperiode.tilstand(hendelse, AvventerRevurdering)
         }
 
         override fun håndterTidligereTilstøtendeUferdigPeriode(
@@ -3147,7 +3182,8 @@ internal class Vedtaksperiode private constructor(
             tidligere: Vedtaksperiode,
             hendelse: IAktivitetslogg
         ) {
-            vedtaksperiode.tilstand(hendelse, AvventerArbeidsgivereRevurdering)
+            if (Toggle.RevurdereOutOfOrder.disabled) return vedtaksperiode.tilstand(hendelse, AvventerArbeidsgivereRevurdering)
+            vedtaksperiode.tilstand(hendelse, AvventerRevurdering)
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {}
@@ -3272,10 +3308,11 @@ internal class Vedtaksperiode private constructor(
             return vedtaksperiode.person.aktivitetslogg.logg(*aktivitetskontekster.toTypedArray())
         }
 
-        internal fun tidligerePerioderFerdigBehandlet(perioder: List<Vedtaksperiode>, vedtaksperiode: Vedtaksperiode) =
-            perioder
-                .filter { it før vedtaksperiode }
-                .all { it.tilstand.erFerdigBehandlet }
+        internal fun List<Vedtaksperiode>.tidligerePerioderFerdigBehandlet(vedtaksperiode: Vedtaksperiode) =
+            filter { it før vedtaksperiode }.all { it.tilstand.erFerdigBehandlet }
+
+        internal fun List<Vedtaksperiode>.senerePerioderPågående(vedtaksperiode: Vedtaksperiode) =
+            this.pågående()?.let { it etter vedtaksperiode } ?: false
 
         internal fun Iterable<Vedtaksperiode>.nåværendeVedtaksperiode(filter: VedtaksperiodeFilter) =
             firstOrNull(filter)
@@ -3379,24 +3416,24 @@ internal class Vedtaksperiode private constructor(
             )
         }
 
+        internal fun List<Vedtaksperiode>.avventerRevurdering() = pågående() != null
+
         // Ny revurderingsflyt
+        // Finner eldste vedtaksperiode, foretrekker eldste arbeidsgiver ved likhet (ag1 før ag2)
+        internal fun List<Vedtaksperiode>.kanStarteRevurdering(arbeidsgivere: List<Arbeidsgiver>, vedtaksperiode: Vedtaksperiode): Boolean {
+            val pågående = pågående() ?: nesteRevurderingsperiode(arbeidsgivere, vedtaksperiode)
+            return vedtaksperiode == pågående
+        }
+
+        private fun List<Vedtaksperiode>.nesteRevurderingsperiode(arbeidsgivere: List<Arbeidsgiver>, other: Vedtaksperiode) =
+            sortedWith(compareBy({ it }, { arbeidsgivere.indexOf(it.arbeidsgiver) })).firstOrNull(IKKE_FERDIG_BEHANDLET) ?: other
+
         internal fun Map<Arbeidsgiver, List<Vedtaksperiode>>.startRevurdering(
             overstyrt: Vedtaksperiode,
             hendelse: IAktivitetslogg
         ) {
-
             val vedtaksperioder = this.values.flatten()
-            // TODO: bedre navn for pågående
-            val pågående = vedtaksperioder.firstOrNull {
-                it.tilstand in setOf(
-                    AvventerGjennomførtRevurdering,
-                    AvventerHistorikkRevurdering,
-                    AvventerSimuleringRevurdering,
-                    AvventerGodkjenningRevurdering,
-                    TilUtbetaling,
-                    UtbetalingFeilet
-                )
-            }
+            val pågående = vedtaksperioder.pågående()
             vedtaksperioder.forEach { it.startRevurdering(hendelse, overstyrt, pågående) }
 
             val skjæringstidspunkt = overstyrt.skjæringstidspunkt
@@ -3408,6 +3445,16 @@ internal class Vedtaksperiode private constructor(
             siste.tilstand(hendelse, AvventerHistorikkRevurdering)
         }
 
+        private fun List<Vedtaksperiode>.pågående() =
+            firstOrNull {
+                it.tilstand in setOf(
+                    AvventerHistorikkRevurdering,
+                    AvventerSimuleringRevurdering,
+                    AvventerGodkjenningRevurdering,
+                    TilUtbetaling,
+                    UtbetalingFeilet
+                )
+            }
 
         internal fun gjenopptaRevurdering(
             hendelse: IAktivitetslogg,

@@ -43,14 +43,18 @@ import no.nav.helse.person.Vedtaksperiode.Companion.IKKE_FERDIG_BEHANDLET
 import no.nav.helse.person.Vedtaksperiode.Companion.IKKE_FERDIG_REVURDERT
 import no.nav.helse.person.Vedtaksperiode.Companion.KLAR_TIL_BEHANDLING
 import no.nav.helse.person.Vedtaksperiode.Companion.REVURDERING_IGANGSATT
+import no.nav.helse.person.Vedtaksperiode.Companion.avventerRevurdering
 import no.nav.helse.person.Vedtaksperiode.Companion.harNødvendigInntekt
 import no.nav.helse.person.Vedtaksperiode.Companion.harOverlappendeUtbetaltePerioder
 import no.nav.helse.person.Vedtaksperiode.Companion.harUtbetaling
 import no.nav.helse.person.Vedtaksperiode.Companion.iderMedUtbetaling
+import no.nav.helse.person.Vedtaksperiode.Companion.kanStarteRevurdering
 import no.nav.helse.person.Vedtaksperiode.Companion.medSkjæringstidspunkt
 import no.nav.helse.person.Vedtaksperiode.Companion.nåværendeVedtaksperiode
 import no.nav.helse.person.Vedtaksperiode.Companion.periode
+import no.nav.helse.person.Vedtaksperiode.Companion.senerePerioderPågående
 import no.nav.helse.person.Vedtaksperiode.Companion.startRevurdering
+import no.nav.helse.person.Vedtaksperiode.Companion.tidligerePerioderFerdigBehandlet
 import no.nav.helse.person.builders.UtbetalingsdagerBuilder
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
@@ -138,6 +142,9 @@ internal class Arbeidsgiver private constructor(
         internal fun List<Arbeidsgiver>.startRevurdering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
             associateWith { it.vedtaksperioder.toList() }.startRevurdering(vedtaksperiode, hendelse)
         }
+
+        internal fun List<Arbeidsgiver>.kanStarteRevurdering(vedtaksperiode: Vedtaksperiode) =
+            flatMap { it.vedtaksperioder }.kanStarteRevurdering(this, vedtaksperiode)
 
         internal fun List<Arbeidsgiver>.harPeriodeSomBlokkererOverstyrArbeidsforhold(skjæringstidspunkt: LocalDate) = any { arbeidsgiver ->
             arbeidsgiver.vedtaksperioder
@@ -326,6 +333,8 @@ internal class Arbeidsgiver private constructor(
         )
     }
 
+    internal fun avventerRevurdering() = vedtaksperioder.avventerRevurdering()
+
     internal fun gjenopptaRevurdering(første: Vedtaksperiode, hendelse: IAktivitetslogg) {
         Vedtaksperiode.gjenopptaRevurdering(hendelse, vedtaksperioder, første, this)
     }
@@ -458,6 +467,10 @@ internal class Arbeidsgiver private constructor(
     }
 
     internal fun håndter(sykmelding: Sykmelding) {
+        if (Toggle.NyTilstandsflyt.enabled) {
+            sykmelding.validerAtSykmeldingIkkeErForGammel()
+            if (sykmelding.hasErrorsOrWorse()) return
+        }
         sykmeldingsperioder.lagre(sykmelding.sykdomstidslinje().periode()!!)
         if (Toggle.NyTilstandsflyt.enabled) return
         val vedtaksperiode = Vedtaksperiode(
@@ -501,7 +514,12 @@ internal class Arbeidsgiver private constructor(
             søknad.warn("Det er oppgitt ny informasjon om ferie i søknaden som det ikke har blitt opplyst om tidligere. Tidligere periode må revurderes.")
         }
         if (person.harOverlappendeVedtaksperiode(søknad)) return registrerForkastetVedtaksperiode(vedtaksperiode, søknad)
-        if (noenHarHåndtert(søknad, Vedtaksperiode::håndter)) return
+        if (noenHarHåndtert(søknad, Vedtaksperiode::håndter)) {
+            if (søknad.hasErrorsOrWorse()) {
+                person.emitHendelseIkkeHåndtert(søknad)
+            }
+            return
+        }
         registrerNyVedtaksperiode(vedtaksperiode)
         vedtaksperiode.håndter(søknad)
         håndter(søknad) { nyPeriodeMedNyFlyt(vedtaksperiode, søknad) }
@@ -1026,7 +1044,10 @@ internal class Arbeidsgiver private constructor(
         ForkastetVedtaksperiode.finnForkastetSykeperiodeRettFør(forkastede, vedtaksperiode)
 
     internal fun tidligerePerioderFerdigBehandlet(vedtaksperiode: Vedtaksperiode) =
-        Vedtaksperiode.tidligerePerioderFerdigBehandlet(vedtaksperioder, vedtaksperiode)
+        vedtaksperioder.tidligerePerioderFerdigBehandlet(vedtaksperiode)
+
+    internal fun senerePerioderPågående(vedtaksperiode: Vedtaksperiode) =
+        vedtaksperioder.senerePerioderPågående(vedtaksperiode)
 
     internal fun harNærliggendeUtbetaling(periode: Periode) =
         utbetalinger.harNærliggendeUtbetaling(periode)

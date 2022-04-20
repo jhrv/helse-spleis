@@ -49,6 +49,7 @@ import no.nav.helse.person.Arbeidsgiver.Companion.harUtbetaltPeriode
 import no.nav.helse.person.Arbeidsgiver.Companion.harVedtaksperiodeFor
 import no.nav.helse.person.Arbeidsgiver.Companion.håndter
 import no.nav.helse.person.Arbeidsgiver.Companion.kanOverstyreTidslinje
+import no.nav.helse.person.Arbeidsgiver.Companion.kanStarteRevurdering
 import no.nav.helse.person.Arbeidsgiver.Companion.minstEttSykepengegrunnlagSomIkkeKommerFraSkatt
 import no.nav.helse.person.Arbeidsgiver.Companion.nåværendeVedtaksperioder
 import no.nav.helse.person.Arbeidsgiver.Companion.startRevurdering
@@ -187,37 +188,6 @@ class Person private constructor(
         }
     }
 
-    internal fun arbeidsgiverperiodeFor(organisasjonsnummer: String, sykdomshistorikkId: UUID): List<Arbeidsgiverperiode>? {
-        return infotrygdhistorikk.arbeidsgiverperiodeFor(organisasjonsnummer, sykdomshistorikkId)
-    }
-
-    internal fun arbeidsgiverperiodeFor(orgnummer: String, sykdomshistorikkId: UUID, sykdomstidslinje: Sykdomstidslinje, periode: Periode, subsumsjonObserver: SubsumsjonObserver): List<Arbeidsgiverperiode> {
-        val periodebuilder = ArbeidsgiverperiodeBuilderBuilder()
-        infotrygdhistorikk.build(orgnummer, sykdomstidslinje, periodebuilder, subsumsjonObserver)
-        return periodebuilder.result().also {
-            infotrygdhistorikk.lagreResultat(orgnummer, sykdomshistorikkId, it)
-        }
-    }
-
-    private fun arbeidsgiverUtbetalinger(
-        regler: ArbeidsgiverRegler = NormalArbeidstaker,
-        subsumsjonObserver: SubsumsjonObserver
-    ): ArbeidsgiverUtbetalinger {
-        val skjæringstidspunkter = skjæringstidspunkter()
-        return ArbeidsgiverUtbetalinger(
-            regler = regler,
-            arbeidsgivere = arbeidsgivereMedSykdom().associateWith {
-                    it.builder(regler, skjæringstidspunkter, vilkårsgrunnlagHistorikk.inntektsopplysningPerSkjæringstidspunktPerArbeidsgiver(), subsumsjonObserver)
-            },
-            infotrygdhistorikk = infotrygdhistorikk,
-            alder = fødselsnummer.alder(),
-            dødsdato = dødsdato,
-            vilkårsgrunnlagHistorikk = vilkårsgrunnlagHistorikk,
-            subsumsjonObserver = subsumsjonObserver
-        )
-    }
-
-
     fun håndter(utbetalingsgodkjenning: Utbetalingsgodkjenning) {
         registrer(utbetalingsgodkjenning, "Behandler utbetalingsgodkjenning")
         finnArbeidsgiver(utbetalingsgodkjenning).håndter(utbetalingsgodkjenning)
@@ -312,11 +282,57 @@ class Person private constructor(
         }
     }
 
+    fun håndter(hendelse: AnnullerUtbetaling) {
+        hendelse.kontekst(this)
+        arbeidsgivere.finn(hendelse.organisasjonsnummer())?.håndter(hendelse)
+            ?: hendelse.error("Finner ikke arbeidsgiver")
+    }
+
+    fun håndter(hendelse: Grunnbeløpsregulering) {
+        hendelse.kontekst(this)
+        arbeidsgivere.finn(hendelse.organisasjonsnummer())?.håndter(arbeidsgivere, hendelse, vilkårsgrunnlagHistorikk)
+            ?: hendelse.error("Finner ikke arbeidsgiver")
+    }
+
+    fun addObserver(observer: PersonObserver) {
+        observers.add(observer)
+    }
+
+    internal fun arbeidsgiverperiodeFor(organisasjonsnummer: String, sykdomshistorikkId: UUID): List<Arbeidsgiverperiode>? {
+        return infotrygdhistorikk.arbeidsgiverperiodeFor(organisasjonsnummer, sykdomshistorikkId)
+    }
+
+    internal fun arbeidsgiverperiodeFor(orgnummer: String, sykdomshistorikkId: UUID, sykdomstidslinje: Sykdomstidslinje, periode: Periode, subsumsjonObserver: SubsumsjonObserver): List<Arbeidsgiverperiode> {
+        val periodebuilder = ArbeidsgiverperiodeBuilderBuilder()
+        infotrygdhistorikk.build(orgnummer, sykdomstidslinje, periodebuilder, subsumsjonObserver)
+        return periodebuilder.result().also {
+            infotrygdhistorikk.lagreResultat(orgnummer, sykdomshistorikkId, it)
+        }
+    }
+
+    private fun arbeidsgiverUtbetalinger(
+        regler: ArbeidsgiverRegler = NormalArbeidstaker,
+        subsumsjonObserver: SubsumsjonObserver
+    ): ArbeidsgiverUtbetalinger {
+        val skjæringstidspunkter = skjæringstidspunkter()
+        return ArbeidsgiverUtbetalinger(
+            regler = regler,
+            arbeidsgivere = arbeidsgivereMedSykdom().associateWith {
+                it.builder(regler, skjæringstidspunkter, vilkårsgrunnlagHistorikk.inntektsopplysningPerSkjæringstidspunktPerArbeidsgiver(), subsumsjonObserver)
+            },
+            infotrygdhistorikk = infotrygdhistorikk,
+            alder = fødselsnummer.alder(),
+            dødsdato = dødsdato,
+            vilkårsgrunnlagHistorikk = vilkårsgrunnlagHistorikk,
+            subsumsjonObserver = subsumsjonObserver
+        )
+    }
+
     internal fun gjenopptaBehandling(hendelse: IAktivitetslogg) {
         arbeidsgivere.gjenopptaBehandling(hendelse)
     }
 
-    fun annullert(hendelseskontekst: Hendelseskontekst, event: PersonObserver.UtbetalingAnnullertEvent) {
+    internal fun annullert(hendelseskontekst: Hendelseskontekst, event: PersonObserver.UtbetalingAnnullertEvent) {
         observers.forEach { it.annullering(hendelseskontekst, event) }
     }
 
@@ -355,44 +371,44 @@ class Person private constructor(
         vedtaksperiode.revurder(hendelse)
     }
 
-    fun vedtaksperiodePåminnet(påminnelse: Påminnelse) {
+    internal fun vedtaksperiodePåminnet(påminnelse: Påminnelse) {
         observers.forEach { it.vedtaksperiodePåminnet(påminnelse.hendelseskontekst(), påminnelse) }
     }
 
-    fun vedtaksperiodeIkkePåminnet(påminnelse: Påminnelse, tilstandType: TilstandType) {
+    internal fun vedtaksperiodeIkkePåminnet(påminnelse: Påminnelse, tilstandType: TilstandType) {
         observers.forEach { it.vedtaksperiodeIkkePåminnet(påminnelse.hendelseskontekst(), tilstandType) }
     }
 
-    fun opprettOppgaveForSpeilsaksbehandlere(aktivitetslogg: IAktivitetslogg, event: PersonObserver.OpprettOppgaveForSpeilsaksbehandlereEvent) {
+    internal fun opprettOppgaveForSpeilsaksbehandlere(aktivitetslogg: IAktivitetslogg, event: PersonObserver.OpprettOppgaveForSpeilsaksbehandlereEvent) {
         observers.forEach { it.opprettOppgaveForSpeilsaksbehandlere(aktivitetslogg.hendelseskontekst(), event) }
     }
 
-    fun opprettOppgave(aktivitetslogg: IAktivitetslogg, event: PersonObserver.OpprettOppgaveEvent) {
+    internal fun opprettOppgave(aktivitetslogg: IAktivitetslogg, event: PersonObserver.OpprettOppgaveEvent) {
         observers.forEach { it.opprettOppgave(aktivitetslogg.hendelseskontekst(), event) }
     }
 
-    fun vedtaksperiodeAvbrutt(aktivitetslogg: IAktivitetslogg, event: PersonObserver.VedtaksperiodeAvbruttEvent) {
+    internal fun vedtaksperiodeAvbrutt(aktivitetslogg: IAktivitetslogg, event: PersonObserver.VedtaksperiodeAvbruttEvent) {
         observers.forEach { it.vedtaksperiodeAvbrutt(aktivitetslogg.hendelseskontekst(), event) }
     }
 
-    fun vedtaksperiodeEndret(aktivitetslogg: IAktivitetslogg, event: PersonObserver.VedtaksperiodeEndretEvent) {
+    internal fun vedtaksperiodeEndret(aktivitetslogg: IAktivitetslogg, event: PersonObserver.VedtaksperiodeEndretEvent) {
         observers.forEach {
             it.vedtaksperiodeEndret(aktivitetslogg.hendelseskontekst(), event)
             it.personEndret(aktivitetslogg.hendelseskontekst())
         }
     }
 
-    fun inntektsmeldingReplay(vedtaksperiodeId: UUID) {
+    internal fun inntektsmeldingReplay(vedtaksperiodeId: UUID) {
         observers.forEach {
             it.inntektsmeldingReplay(fødselsnummer, vedtaksperiodeId)
         }
     }
 
-    fun trengerInntektsmelding(hendelseskontekst: Hendelseskontekst, orgnr: String, event: PersonObserver.ManglendeInntektsmeldingEvent) {
+    internal fun trengerInntektsmelding(hendelseskontekst: Hendelseskontekst, orgnr: String, event: PersonObserver.ManglendeInntektsmeldingEvent) {
         observers.forEach { it.manglerInntektsmelding(hendelseskontekst, orgnr, event) }
     }
 
-    fun trengerIkkeInntektsmelding(hendelseskontekst: Hendelseskontekst, event: PersonObserver.TrengerIkkeInntektsmeldingEvent) {
+    internal fun trengerIkkeInntektsmelding(hendelseskontekst: Hendelseskontekst, event: PersonObserver.TrengerIkkeInntektsmeldingEvent) {
         observers.forEach { it.trengerIkkeInntektsmelding(hendelseskontekst, event) }
     }
 
@@ -414,22 +430,6 @@ class Person private constructor(
 
     internal fun feriepengerUtbetalt(hendelseskontekst: Hendelseskontekst, feriepengerUtbetaltEvent: PersonObserver.FeriepengerUtbetaltEvent) {
         observers.forEach { it.feriepengerUtbetalt(hendelseskontekst, feriepengerUtbetaltEvent) }
-    }
-
-    fun håndter(hendelse: AnnullerUtbetaling) {
-        hendelse.kontekst(this)
-        arbeidsgivere.finn(hendelse.organisasjonsnummer())?.håndter(hendelse)
-            ?: hendelse.error("Finner ikke arbeidsgiver")
-    }
-
-    fun håndter(hendelse: Grunnbeløpsregulering) {
-        hendelse.kontekst(this)
-        arbeidsgivere.finn(hendelse.organisasjonsnummer())?.håndter(arbeidsgivere, hendelse, vilkårsgrunnlagHistorikk)
-            ?: hendelse.error("Finner ikke arbeidsgiver")
-    }
-
-    fun addObserver(observer: PersonObserver) {
-        observers.add(observer)
     }
 
     internal fun nyesteIdForVilkårsgrunnlagHistorikk() =
@@ -507,9 +507,6 @@ class Person private constructor(
             add(newValue)
             newValue
         }
-
-    internal fun tidligerePerioderFerdigBehandlet(vedtaksperiode: Vedtaksperiode) =
-        arbeidsgivere.all { it.tidligerePerioderFerdigBehandlet(vedtaksperiode) }
 
     internal fun nåværendeVedtaksperioder(filter: VedtaksperiodeFilter) = arbeidsgivere.nåværendeVedtaksperioder(filter).sorted()
 
@@ -831,4 +828,7 @@ class Person private constructor(
     internal fun startRevurdering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
         arbeidsgivere.startRevurdering(vedtaksperiode, hendelse)
     }
+
+    internal fun kanStarteRevurdering(vedtaksperiode: Vedtaksperiode) =
+        arbeidsgivere.kanStarteRevurdering(vedtaksperiode)
 }

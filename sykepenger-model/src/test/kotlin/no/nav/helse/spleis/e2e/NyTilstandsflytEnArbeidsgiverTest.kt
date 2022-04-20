@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e
 
+import no.nav.helse.EnableToggle
 import no.nav.helse.Toggle
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.februar
@@ -24,23 +25,16 @@ import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
+import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
+import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
+@EnableToggle(Toggle.NyTilstandsflyt::class)
 internal class NyTilstandsflytEnArbeidsgiverTest : AbstractEndToEndTest() {
-    @BeforeEach
-    fun setup() {
-        Toggle.NyTilstandsflyt.enable()
-    }
-
-    @AfterEach
-    fun tearDown() {
-        Toggle.NyTilstandsflyt.disable()
-    }
 
     @Test
     fun `drawio -- misc -- oppvarming`() {
@@ -558,6 +552,55 @@ internal class NyTilstandsflytEnArbeidsgiverTest : AbstractEndToEndTest() {
         person.invaliderAllePerioder(hendelselogg, null)
 
         assertForkastetPeriodeTilstander(2.vedtaksperiode, START, AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER, TIL_INFOTRYGD)
+    }
+
+    @Test
+    // TODO: https://trello.com/c/9qxVRTpM
+    fun `Infotrygdhistorikk fører til at en senere periode ikke trenger ny AGP - må vente på infotrygdhistorikk før vi bestemmer om vi skal til AUU`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        utbetalPeriode(1.vedtaksperiode)
+
+        val inntektsmeldingId = håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 20.februar)
+        håndterSykmelding(Sykmeldingsperiode(20.februar, 28.februar, 100.prosent))
+        håndterSøknad(Sykdom(20.februar, 28.februar, 100.prosent))
+        håndterInntektsmeldingReplay(inntektsmeldingId, 2.vedtaksperiode.id(ORGNUMMER))
+        håndterUtbetalingshistorikk(
+            2.vedtaksperiode,
+            utbetalinger = arrayOf(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.februar, 10.februar, 100.prosent, INNTEKT)),
+            inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 1.februar, INNTEKT, true))
+        )
+
+        assertForventetFeil(
+            forklaring = "Skal vente på infotrygdhistorikk før den går til AvsluttetUtenUtbetaling",
+            nå = {
+                assertTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+            },
+            ønsket = {
+                assertTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
+            }
+        )
+    }
+
+    @Test
+    fun `sender trenger_ikke_inntektsmelding ved forkastelse av vedtaksperiode`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+
+        person.invaliderAllePerioder(hendelselogg, null)
+        assertEquals(listOf(1.vedtaksperiode.id(ORGNUMMER)), observatør.trengerIkkeInntektsmeldingVedtaksperioder)
+    }
+
+    @Test
+    fun `sender hendelse_ikke_håndtert ved søknad som treffer utbetalt periode`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        utbetalPeriode(1.vedtaksperiode)
+
+        val søknadId = håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        assertNotNull(observatør.hendelseIkkeHåndtert(søknadId))
     }
 
     private fun utbetalPeriodeEtterVilkårsprøving(vedtaksperiode: IdInnhenter) {

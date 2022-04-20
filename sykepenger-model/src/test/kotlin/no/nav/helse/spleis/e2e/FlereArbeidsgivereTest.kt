@@ -43,6 +43,7 @@ import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertDoesNotThrow
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
@@ -1019,5 +1020,23 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         assertTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, orgnummer = a1)
         assertTilstand(1.vedtaksperiode, AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER, orgnummer = a2)
         assertTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, orgnummer = a2)
+    }
+
+    @Test
+    fun `Burde ikke kunne opprette vedtaksperiode før utbetalt periode ved flere AG`() {
+        nyttVedtak(1.mars, 31.mars, orgnummer = a2)
+
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+
+        assertForventetFeil(
+            forklaring = "Perioden blir ikke forkastet dersom en vedtaksperiode er utbetalt for en annen arbeidsgiver",
+            nå = {
+                assertFalse(inspektør(a1).periodeErForkastet(1.vedtaksperiode))
+            },
+            ønsket = {
+                assertTrue(inspektør(a1).periodeErForkastet(1.vedtaksperiode))
+            }
+        )
     }
 }
