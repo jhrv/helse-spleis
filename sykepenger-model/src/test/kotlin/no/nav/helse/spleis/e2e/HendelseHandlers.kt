@@ -199,7 +199,6 @@ internal fun AbstractEndToEndTest.førstegangTilGodkjenning(
 internal fun AbstractEndToEndTest.forlengelseTilGodkjenning(fom: LocalDate, tom: LocalDate, vararg organisasjonsnumre: String) {
     require(organisasjonsnumre.isNotEmpty()) { "Må inneholde minst ett organisasjonsnummer" }
     nyPeriode(fom til tom, *organisasjonsnumre)
-    //organisasjonsnumre.forEach { håndterYtelser(vedtaksperiodeIdInnhenter = observatør.sisteVedtaksperiode(), orgnummer = it) }
     håndterYtelser(observatør.sisteVedtaksperiode(), orgnummer = organisasjonsnumre.first())
     håndterSimulering(observatør.sisteVedtaksperiode(), orgnummer = organisasjonsnumre.first())
 }
