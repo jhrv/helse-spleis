@@ -61,6 +61,11 @@ internal class RutingAvGosysOppgaverTest : AbstractEndToEndTest() {
     @Test
     fun `søknad som har samme arbeidsgiverperiode som tidligere utbetaling`() {
         nyttVedtak(1.januar, 31.januar)
+
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 3.februar, 100.prosent))
+        håndterSøknad(Sykdom(1.februar, 3.februar, 100.prosent))
+        person.invaliderAllePerioder(hendelselogg, null)
+
         håndterSykmelding(Sykmeldingsperiode(17.februar, 20.februar, 80.prosent))
         val søknadId = håndterSøknad(Sykdom(17.februar, 20.februar, 80.prosent))
         person.invaliderAllePerioder(hendelselogg, null)

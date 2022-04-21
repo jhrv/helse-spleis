@@ -301,7 +301,7 @@ internal fun AbstractEndToEndTest.tilYtelser(
         ),
         inntektsvurderingForSykepengegrunnlag = inntektsvurderingForSykepengegrunnlag
     )
-    håndterYtelser(id, fnr = fnr, orgnummer = orgnummer)
+    håndterYtelser(id, fnr = fnr, orgnummer = orgnummer, besvart = LocalDate.EPOCH.atStartOfDay())
     return id
 }
 
