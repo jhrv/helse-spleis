@@ -1,6 +1,11 @@
 package no.nav.helse.serde.api.builders
 
-import no.nav.helse.person.*
+import java.time.LocalDateTime
+import java.util.UUID
+import no.nav.helse.person.Arbeidsgiver
+import no.nav.helse.person.ForkastetVedtaksperiode
+import no.nav.helse.person.Vedtaksperiode
+import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.serde.api.ArbeidsgiverDTO
 import no.nav.helse.serde.api.GhostPeriodeDTO
 import no.nav.helse.serde.api.v2.HendelseDTO
@@ -9,8 +14,6 @@ import no.nav.helse.serde.api.v2.buildere.IVilkårsgrunnlagHistorikk
 import no.nav.helse.somFødselsnummer
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.utbetalingslinjer.Utbetaling
-import java.time.LocalDateTime
-import java.util.*
 
 internal class ArbeidsgiverBuilder(
     private val arbeidsgiver: Arbeidsgiver,
@@ -51,6 +54,7 @@ internal class ArbeidsgiverBuilder(
             generasjoner = GenerasjonerBuilder(hendelser, fødselsnummer.somFødselsnummer(), vilkårsgrunnlagHistorikk, arbeidsgiver).build(),
             ghostPerioder = arbeidsgiver.ghostPerioder().map {
                 GhostPeriodeDTO(
+                    id = UUID.randomUUID(),
                     fom = it.fom.coerceAtLeast(it.skjæringstidspunkt),
                     tom = it.tom,
                     skjæringstidspunkt = it.skjæringstidspunkt,
