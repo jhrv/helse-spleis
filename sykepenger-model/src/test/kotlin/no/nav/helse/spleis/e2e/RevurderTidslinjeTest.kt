@@ -32,8 +32,8 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         nyttVedtak(1.januar, 31.januar)
         forlengTilGodkjentVedtak(1.februar, 28.februar)
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(31.januar, Dagtype.Feriedag)))
-        assertTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER, AVVENTER_HISTORIKK, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET)
-        assertTilstander(2.vedtaksperiode, START, AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING)
+        assertTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET)
+        assertTilstander(2.vedtaksperiode, START, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING)
     }
 
     @Test
@@ -42,8 +42,8 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         forlengTilGodkjentVedtak(1.februar, 28.februar)
         håndterUtbetalt(Oppdragstatus.FEIL)
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(31.januar, Dagtype.Feriedag)))
-        assertTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER, AVVENTER_HISTORIKK, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET)
-        assertTilstander(2.vedtaksperiode, START, AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, UTBETALING_FEILET)
+        assertTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET)
+        assertTilstander(2.vedtaksperiode, START, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, UTBETALING_FEILET)
     }
 
     @Test
@@ -73,8 +73,8 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         håndterUtbetalt(Oppdragstatus.AVVIST)
         håndterAnnullerUtbetaling(fagsystemId = inspektør.utbetaling(1).inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId())
         assertTrue(hendelselogg.hasErrorsOrWorse()) { "kan pt. ikke annullere når siste utbetaling har feilet" }
-        assertTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER, AVVENTER_HISTORIKK, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING)
-        assertTilstander(2.vedtaksperiode, START, AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET, AVVENTER_ARBEIDSGIVERE_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, TIL_UTBETALING, UTBETALING_FEILET)
+        assertTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING)
+        assertTilstander(2.vedtaksperiode, START, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET, AVVENTER_ARBEIDSGIVERE_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, TIL_UTBETALING, UTBETALING_FEILET)
     }
 
     @Test
@@ -102,8 +102,8 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, utbetalingGodkjent = false)
         håndterAnnullerUtbetaling(fagsystemId = inspektør.utbetaling(1).inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId())
-        assertForkastetPeriodeTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER, AVVENTER_HISTORIKK, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, REVURDERING_FEILET)
-        assertForkastetPeriodeTilstander(2.vedtaksperiode, START, AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET, AVVENTER_ARBEIDSGIVERE_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, REVURDERING_FEILET)
+        assertForkastetPeriodeTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, REVURDERING_FEILET)
+        assertForkastetPeriodeTilstander(2.vedtaksperiode, START, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET, AVVENTER_ARBEIDSGIVERE_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, REVURDERING_FEILET)
     }
 
     @Test
@@ -124,7 +124,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             1.vedtaksperiode,
             START,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
-            AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
+            AVVENTER_BLOKKERENDE_PERIODE,
             AVVENTER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
@@ -140,7 +140,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         assertTilstander(
             2.vedtaksperiode,
             START,
-            AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
+            AVVENTER_BLOKKERENDE_PERIODE,
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
@@ -189,7 +189,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             0,
             START,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
-            AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
+            AVVENTER_BLOKKERENDE_PERIODE,
             AVVENTER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
@@ -202,7 +202,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         assertTilstander(
             1,
             START,
-            AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
+            AVVENTER_BLOKKERENDE_PERIODE,
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
@@ -238,7 +238,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             0,
             START,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
-            AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
+            AVVENTER_BLOKKERENDE_PERIODE,
             AVVENTER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
@@ -251,7 +251,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         assertTilstander(
             1,
             START,
-            AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
+            AVVENTER_BLOKKERENDE_PERIODE,
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
@@ -281,7 +281,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             0,
             START,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
-            AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
+            AVVENTER_BLOKKERENDE_PERIODE,
             AVVENTER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
@@ -313,7 +313,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             1.vedtaksperiode,
             START,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
-            AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
+            AVVENTER_BLOKKERENDE_PERIODE,
             AVVENTER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
@@ -329,7 +329,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         assertTilstander(
             2.vedtaksperiode,
             START,
-            AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
+            AVVENTER_BLOKKERENDE_PERIODE,
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
@@ -361,7 +361,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             1.vedtaksperiode,
             START,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
-            AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
+            AVVENTER_BLOKKERENDE_PERIODE,
             AVVENTER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
@@ -379,7 +379,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         assertTilstander(
             2.vedtaksperiode,
             START,
-            AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
+            AVVENTER_BLOKKERENDE_PERIODE,
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
@@ -406,7 +406,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             1.vedtaksperiode,
             START,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
-            AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
+            AVVENTER_BLOKKERENDE_PERIODE,
             AVVENTER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
@@ -434,7 +434,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             1.vedtaksperiode,
             START,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
-            AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
+            AVVENTER_BLOKKERENDE_PERIODE,
             AVVENTER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
@@ -447,7 +447,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             2.vedtaksperiode,
             START,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
-            AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
+            AVVENTER_BLOKKERENDE_PERIODE,
             AVVENTER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
@@ -471,7 +471,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             1.vedtaksperiode,
             START,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
-            AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
+            AVVENTER_BLOKKERENDE_PERIODE,
             AVVENTER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
@@ -484,7 +484,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             2.vedtaksperiode,
             START,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
-            AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
+            AVVENTER_BLOKKERENDE_PERIODE,
             AVVENTER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
@@ -510,7 +510,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             1.vedtaksperiode,
             START,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
-            AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
+            AVVENTER_BLOKKERENDE_PERIODE,
             AVVENTER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
@@ -523,7 +523,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             2.vedtaksperiode,
             START,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
-            AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
+            AVVENTER_BLOKKERENDE_PERIODE,
             AVVENTER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
@@ -538,7 +538,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         assertTilstander(
             3.vedtaksperiode,
             START,
-            AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
+            AVVENTER_BLOKKERENDE_PERIODE,
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
@@ -569,7 +569,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             1.vedtaksperiode,
             START,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
-            AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
+            AVVENTER_BLOKKERENDE_PERIODE,
             AVVENTER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
@@ -582,7 +582,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             2.vedtaksperiode,
             START,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
-            AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
+            AVVENTER_BLOKKERENDE_PERIODE,
             AVVENTER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
@@ -594,7 +594,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         assertTilstander(
             3.vedtaksperiode,
             START,
-            AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
+            AVVENTER_BLOKKERENDE_PERIODE,
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
@@ -623,7 +623,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             1.vedtaksperiode,
             START,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
-            AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
+            AVVENTER_BLOKKERENDE_PERIODE,
             AVVENTER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
@@ -636,7 +636,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             2.vedtaksperiode,
             START,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
-            AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
+            AVVENTER_BLOKKERENDE_PERIODE,
             AVVENTER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
@@ -660,7 +660,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             1.vedtaksperiode,
             START,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
-            AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
+            AVVENTER_BLOKKERENDE_PERIODE,
             AVVENTER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
@@ -673,7 +673,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             2.vedtaksperiode,
             START,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
-            AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
+            AVVENTER_BLOKKERENDE_PERIODE,
             AVVENTER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
@@ -698,7 +698,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             0,
             START,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
-            AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
+            AVVENTER_BLOKKERENDE_PERIODE,
             AVVENTER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
@@ -741,7 +741,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             1.vedtaksperiode,
             START,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
-            AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
+            AVVENTER_BLOKKERENDE_PERIODE,
             AVVENTER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
@@ -778,7 +778,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             1.vedtaksperiode,
             START,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
-            AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
+            AVVENTER_BLOKKERENDE_PERIODE,
             AVVENTER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
@@ -818,7 +818,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             1.vedtaksperiode,
             START,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
-            AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
+            AVVENTER_BLOKKERENDE_PERIODE,
             AVVENTER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
@@ -845,7 +845,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             1.vedtaksperiode,
             START,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
-            AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
+            AVVENTER_BLOKKERENDE_PERIODE,
             AVVENTER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
@@ -874,7 +874,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         assertTilstander(
             2.vedtaksperiode,
             START,
-            AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
+            AVVENTER_BLOKKERENDE_PERIODE,
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
@@ -890,7 +890,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         assertTilstander(
             3.vedtaksperiode,
             START,
-            AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
+            AVVENTER_BLOKKERENDE_PERIODE,
             AVVENTER_HISTORIKK,
             AVVENTER_UFERDIG,
             AVVENTER_HISTORIKK
@@ -918,7 +918,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             1.vedtaksperiode,
             START,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
-            AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
+            AVVENTER_BLOKKERENDE_PERIODE,
             AVVENTER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
@@ -956,7 +956,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             1.vedtaksperiode,
             START,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
-            AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
+            AVVENTER_BLOKKERENDE_PERIODE,
             AVVENTER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
@@ -969,7 +969,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         assertTilstander(
             2.vedtaksperiode,
             START,
-            AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
+            AVVENTER_BLOKKERENDE_PERIODE,
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
@@ -981,7 +981,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         assertTilstander(
             3.vedtaksperiode,
             START,
-            AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
+            AVVENTER_BLOKKERENDE_PERIODE,
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
@@ -1009,7 +1009,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             1.vedtaksperiode,
             START,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
-            AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
+            AVVENTER_BLOKKERENDE_PERIODE,
             AVVENTER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
@@ -1022,7 +1022,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         assertTilstander(
             2.vedtaksperiode,
             START,
-            AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
+            AVVENTER_BLOKKERENDE_PERIODE,
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
@@ -1036,7 +1036,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         assertTilstander(
             3.vedtaksperiode,
             START,
-            AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
+            AVVENTER_BLOKKERENDE_PERIODE,
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
@@ -1081,7 +1081,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         assertTilstander(
             2.vedtaksperiode,
             START,
-            AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
+            AVVENTER_BLOKKERENDE_PERIODE,
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
@@ -1117,7 +1117,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             2.vedtaksperiode,
             START,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
-            AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
+            AVVENTER_BLOKKERENDE_PERIODE,
             AVVENTER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
@@ -1144,7 +1144,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         assertTilstander(
             2.vedtaksperiode,
             START,
-            AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER
+            AVVENTER_BLOKKERENDE_PERIODE
         )
     }
 
@@ -1165,7 +1165,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             1.vedtaksperiode,
             START,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
-            AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
+            AVVENTER_BLOKKERENDE_PERIODE,
             AVVENTER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
@@ -1194,7 +1194,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         assertTilstander(
             3.vedtaksperiode,
             START,
-            AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
+            AVVENTER_BLOKKERENDE_PERIODE,
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
@@ -1429,7 +1429,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             1.vedtaksperiode,
             START,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
-            AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
+            AVVENTER_BLOKKERENDE_PERIODE,
             AVVENTER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
@@ -1466,7 +1466,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             2.vedtaksperiode,
             START,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
-            AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
+            AVVENTER_BLOKKERENDE_PERIODE,
             AVVENTER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
@@ -1492,7 +1492,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         assertTilstander(
             2.vedtaksperiode,
             START,
-            AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
+            AVVENTER_BLOKKERENDE_PERIODE,
             AVVENTER_HISTORIKK,
             AVVENTER_GODKJENNING,
             AVSLUTTET,

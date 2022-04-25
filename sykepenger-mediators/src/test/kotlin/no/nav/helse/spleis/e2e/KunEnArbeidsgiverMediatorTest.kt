@@ -44,7 +44,7 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
         assertTilstander(
             0,
             "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK",
-            "AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER",
+            "AVVENTER_BLOKKERENDE_PERIODE",
             "AVVENTER_HISTORIKK",
             "AVVENTER_VILKÅRSPRØVING",
             "AVVENTER_HISTORIKK",
@@ -99,7 +99,7 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
         assertTilstander(
             0,
             "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK",
-            "AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER",
+            "AVVENTER_BLOKKERENDE_PERIODE",
             "AVVENTER_HISTORIKK",
             "AVVENTER_VILKÅRSPRØVING",
             "AVVENTER_HISTORIKK",
@@ -133,7 +133,7 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
         assertTilstander(
             0,
             "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK",
-            "AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER",
+            "AVVENTER_BLOKKERENDE_PERIODE",
             "AVVENTER_HISTORIKK",
             "AVVENTER_VILKÅRSPRØVING",
             "AVVENTER_HISTORIKK",
@@ -159,7 +159,7 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
         assertTilstander(
             0,
             "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK",
-            "AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER",
+            "AVVENTER_BLOKKERENDE_PERIODE",
             "AVVENTER_HISTORIKK",
             "AVVENTER_VILKÅRSPRØVING",
             "AVVENTER_HISTORIKK",
@@ -187,7 +187,7 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
         assertTilstander(
             0,
             "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK",
-            "AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER",
+            "AVVENTER_BLOKKERENDE_PERIODE",
             "AVVENTER_HISTORIKK",
             "AVVENTER_VILKÅRSPRØVING",
             "AVVENTER_HISTORIKK",
@@ -220,7 +220,7 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
         assertTilstander(
             0,
             "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK",
-            "AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER",
+            "AVVENTER_BLOKKERENDE_PERIODE",
             "AVVENTER_HISTORIKK",
             "AVVENTER_VILKÅRSPRØVING",
             "AVVENTER_HISTORIKK",
@@ -269,7 +269,7 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
         assertTilstander(
             0,
             "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK",
-            "AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER",
+            "AVVENTER_BLOKKERENDE_PERIODE",
             "AVVENTER_HISTORIKK",
             "AVVENTER_VILKÅRSPRØVING",
             "AVVENTER_HISTORIKK",
@@ -286,7 +286,7 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
         assertTilstander(
             0,
             "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK",
-            "AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER",
+            "AVVENTER_BLOKKERENDE_PERIODE",
             "AVVENTER_HISTORIKK")
     }
 
@@ -305,7 +305,7 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
         assertTilstander(
             0,
             "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK",
-            "AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER",
+            "AVVENTER_BLOKKERENDE_PERIODE",
             "AVVENTER_HISTORIKK",
             "AVVENTER_VILKÅRSPRØVING",
             "AVVENTER_HISTORIKK",
@@ -423,7 +423,7 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
         assertTilstander(
             0,
             "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK",
-            "AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER",
+            "AVVENTER_BLOKKERENDE_PERIODE",
             "AVVENTER_HISTORIKK",
             "AVVENTER_VILKÅRSPRØVING",
             "AVVENTER_HISTORIKK",

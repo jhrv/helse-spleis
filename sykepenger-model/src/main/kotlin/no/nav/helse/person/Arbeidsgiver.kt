@@ -31,6 +31,7 @@ import no.nav.helse.hendelser.utbetaling.Utbetalingpåminnelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
 import no.nav.helse.person.Arbeidsforholdhistorikk.Arbeidsforhold.Companion.MAKS_INNTEKT_GAP
 import no.nav.helse.person.ForkastetVedtaksperiode.Companion.harAvsluttedePerioder
+import no.nav.helse.person.ForkastetVedtaksperiode.Companion.håndterInntektsmeldingReplay
 import no.nav.helse.person.ForkastetVedtaksperiode.Companion.iderMedUtbetaling
 import no.nav.helse.person.Inntektshistorikk.IkkeRapportert
 import no.nav.helse.person.Vedtaksperiode.AvventerArbeidsgivere
@@ -520,6 +521,7 @@ internal class Arbeidsgiver private constructor(
         if (person.harOverlappendeVedtaksperiode(søknad)) return registrerForkastetVedtaksperiode(vedtaksperiode, søknad)
         if (noenHarHåndtert(søknad, Vedtaksperiode::håndter)) {
             if (søknad.hasErrorsOrWorse()) {
+                person.sendOppgaveEvent(søknad)
                 person.emitHendelseIkkeHåndtert(søknad)
             }
             return
@@ -527,6 +529,11 @@ internal class Arbeidsgiver private constructor(
         registrerNyVedtaksperiode(vedtaksperiode)
         håndter(søknad) { nyPeriodeMedNyFlyt(vedtaksperiode, søknad) }
         vedtaksperiode.håndter(søknad)
+        if (søknad.hasErrorsOrWorse()) {
+            søknad.info("Forsøkte å opprette en ny vedtaksperiode, men den ble forkastet før den rakk å spørre om inntektsmeldingReplay. " +
+                    "Ber om inntektsmeldingReplay så vi kan opprette gosys-oppgaver for inntektsmeldinger som ville ha truffet denne vedtaksperioden")
+            vedtaksperiode.trengerInntektsmeldingReplay()
+        }
     }
 
     fun finnVedtaksperiodeOgHåndter(søknad: Søknad) {
@@ -535,9 +542,7 @@ internal class Arbeidsgiver private constructor(
         }
         noenHarHåndtert(søknad, Vedtaksperiode::håndter, "Forventet ikke ${søknad.kilde}. Har nok ikke mottatt sykmelding")
         if (søknad.hasErrorsOrWorse()) {
-            val søknadsperiode = søknad.sykdomstidslinje().periode()
-            val harNærliggendeUtbetaling = søknadsperiode?.let { person.harNærliggendeUtbetaling(it) } ?: false
-            if (harNærliggendeUtbetaling) person.emitOpprettOppgaveForSpeilsaksbehandlereEvent(søknad) else person.emitOpprettOppgaveEvent(søknad)
+            person.sendOppgaveEvent(søknad)
             person.emitHendelseIkkeHåndtert(søknad)
         }
     }
@@ -552,7 +557,12 @@ internal class Arbeidsgiver private constructor(
         inntektsmelding.cacheRefusjon(refusjonshistorikk)
         if (vedtaksperiodeId != null) inntektsmelding.info("Replayer inntektsmelding til påfølgende perioder som overlapper.")
         if (!noenHarHåndtert(inntektsmelding) { håndter(inntektsmelding, vedtaksperiodeId, vedtaksperioder.toList()) }) {
-            if (vedtaksperiodeId != null) return inntektsmelding.info("Vedtaksperiode overlapper ikke med replayet Inntektsmelding")
+            if (vedtaksperiodeId != null) {
+                if (!forkastede.håndterInntektsmeldingReplay(person, inntektsmelding, vedtaksperiodeId)) {
+                    inntektsmelding.info("Vedtaksperiode overlapper ikke med replayet Inntektsmelding")
+                }
+                return
+            }
             if (Toggle.NyTilstandsflyt.enabled && sykmeldingsperioder.blirTruffetAv(inntektsmelding)) {
                 person.emitUtsettOppgaveEvent(inntektsmelding)
             }

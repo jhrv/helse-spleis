@@ -77,7 +77,7 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
             1.vedtaksperiode,
             START,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
-            AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
+            AVVENTER_BLOKKERENDE_PERIODE,
             AVVENTER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING,
             TIL_INFOTRYGD
@@ -87,7 +87,7 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
             2.vedtaksperiode,
             START,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
-            AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
+            AVVENTER_BLOKKERENDE_PERIODE,
             TIL_INFOTRYGD
         )
     }
@@ -125,7 +125,7 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
             1.vedtaksperiode,
             START,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
-            AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
+            AVVENTER_BLOKKERENDE_PERIODE,
             AVVENTER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
@@ -134,7 +134,7 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
         assertTilstander(
             2.vedtaksperiode,
             START,
-            AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER
+            AVVENTER_BLOKKERENDE_PERIODE
         )
     }
 

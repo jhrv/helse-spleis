@@ -28,7 +28,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
-import no.nav.helse.person.TilstandType.AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER
+import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
@@ -124,7 +124,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
             1.vedtaksperiode,
             START,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
-            AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
+            AVVENTER_BLOKKERENDE_PERIODE,
             AVVENTER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING,
             TIL_INFOTRYGD
@@ -205,16 +205,16 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, orgnummer = a2)
 
         håndterInntektsmelding(listOf(1.januar(2021) til 16.januar(2021)), førsteFraværsdag = 1.januar(2021), orgnummer = a1)
-        assertSisteTilstand(1.vedtaksperiode, AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a1)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, orgnummer = a2)
 
         håndterInntektsmelding(listOf(1.januar(2021) til 16.januar(2021)), førsteFraværsdag = 1.januar(2021), orgnummer = a2)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a1)
-        assertSisteTilstand(1.vedtaksperiode, AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER, orgnummer = a2)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
 
         håndterYtelser(1.vedtaksperiode, inntektshistorikk = emptyList(), orgnummer = a1)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING, orgnummer = a1)
-        assertSisteTilstand(1.vedtaksperiode, AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER, orgnummer = a2)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
 
         håndterVilkårsgrunnlag(1.vedtaksperiode, orgnummer = a1, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
@@ -225,17 +225,17 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
             }
         ))
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a1)
-        assertSisteTilstand(1.vedtaksperiode, AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER, orgnummer = a2)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
         håndterYtelser(1.vedtaksperiode, inntektshistorikk = emptyList(), orgnummer = a1)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING, orgnummer = a1)
-        assertSisteTilstand(1.vedtaksperiode, AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER, orgnummer = a2)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING, orgnummer = a1)
-        assertSisteTilstand(1.vedtaksperiode, AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER, orgnummer = a2)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
 
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true, orgnummer = a1)
         assertSisteTilstand(1.vedtaksperiode, TIL_UTBETALING, orgnummer = a1)
-        assertSisteTilstand(1.vedtaksperiode, AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER, orgnummer = a2)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
         håndterUtbetalt(orgnummer = a1)
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a2)
@@ -274,7 +274,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
             førsteFraværsdag = 1.januar(2021),
             orgnummer = a1
         )
-        assertSisteTilstand(1.vedtaksperiode, AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a1)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, orgnummer = a2)
 
         håndterInntektsmelding(
@@ -284,7 +284,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
             orgnummer = a2
         )
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a1)
-        assertSisteTilstand(1.vedtaksperiode, AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER, orgnummer = a2)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
         håndterYtelser(1.vedtaksperiode, inntektshistorikk = emptyList(), orgnummer = a1)
         håndterVilkårsgrunnlag(1.vedtaksperiode, orgnummer = a1, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
@@ -296,7 +296,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         ))
         håndterYtelser(1.vedtaksperiode, inntektshistorikk = emptyList(), orgnummer = a1)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING, orgnummer = a1)
-        assertSisteTilstand(1.vedtaksperiode, AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER, orgnummer = a2)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
     }
 
     @Test
@@ -320,7 +320,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
             førsteFraværsdag = 31.desember(2020),
             orgnummer = a1
         )
-        assertSisteTilstand(1.vedtaksperiode, AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a1)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, orgnummer = a2)
 
         håndterInntektsmelding(
@@ -330,7 +330,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
             orgnummer = a2
         )
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a1)
-        assertSisteTilstand(1.vedtaksperiode, AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER, orgnummer = a2)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
         håndterYtelser(1.vedtaksperiode, inntektshistorikk = emptyList(), orgnummer = a1)
         håndterVilkårsgrunnlag(1.vedtaksperiode, orgnummer = a1, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
@@ -392,7 +392,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
             orgnummer = a1
         )
 
-        assertSisteTilstand(2.vedtaksperiode, AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER, orgnummer = a1)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a1)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, orgnummer = a2)
 
         håndterInntektsmelding(
@@ -402,7 +402,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         )
 
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a1)
-        assertSisteTilstand(2.vedtaksperiode, AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER, orgnummer = a2)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
 
         håndterYtelser(2.vedtaksperiode, inntektshistorikk = emptyList(), orgnummer = a1)
 
@@ -471,7 +471,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         historikk(a1)
 
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING, orgnummer = a1)
-        assertSisteTilstand(1.vedtaksperiode, AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER, orgnummer = a2)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
 
         assertTrue(person.personLogg.hasWarningsOrWorse())
         inspektør(a1).also {
@@ -636,7 +636,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
                 1.vedtaksperiode,
                 START,
                 AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
-                AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
+                AVVENTER_BLOKKERENDE_PERIODE,
                 AVVENTER_HISTORIKK,
                 AVVENTER_VILKÅRSPRØVING,
                 AVVENTER_HISTORIKK,
@@ -648,7 +648,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
             assertTilstander(
                 2.vedtaksperiode,
                 START,
-                AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
+                AVVENTER_BLOKKERENDE_PERIODE,
                 AVVENTER_HISTORIKK,
                 AVVENTER_SIMULERING,
                 AVVENTER_GODKJENNING,
@@ -667,7 +667,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
                 1.vedtaksperiode,
                 START,
                 AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
-                AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
+                AVVENTER_BLOKKERENDE_PERIODE,
                 AVVENTER_HISTORIKK,
                 AVVENTER_SIMULERING,
                 AVVENTER_GODKJENNING,
@@ -677,7 +677,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
             assertTilstander(
                 2.vedtaksperiode,
                 START,
-                AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
+                AVVENTER_BLOKKERENDE_PERIODE,
                 AVVENTER_HISTORIKK,
                 AVVENTER_SIMULERING,
                 AVVENTER_GODKJENNING
@@ -748,13 +748,13 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
             1.vedtaksperiode,
             START,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
-            AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
+            AVVENTER_BLOKKERENDE_PERIODE,
             orgnummer = a1
         )
     }
 
     @Test
-    fun `Siste arbeidsgiver som går til AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER sparker første tilbake til AVVENTER_HISTORIKK når inntektsmelding kommer før søknad`() {
+    fun `Siste arbeidsgiver som går til AVVENTER_BLOKKERENDE_PERIODE sparker første tilbake til AVVENTER_HISTORIKK når inntektsmelding kommer før søknad`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a2)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
@@ -766,7 +766,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
             1.vedtaksperiode,
             START,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
-            AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
+            AVVENTER_BLOKKERENDE_PERIODE,
             AVVENTER_HISTORIKK,
             orgnummer = a1
         )
@@ -774,7 +774,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
             1.vedtaksperiode,
             START,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
-            AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
+            AVVENTER_BLOKKERENDE_PERIODE,
             orgnummer = a2
         )
     }
@@ -864,7 +864,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         håndterUtbetalt(orgnummer = a2)
 
         assertTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer=a1)
-        assertTilstand(2.vedtaksperiode, AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER, orgnummer=a2)
+        assertTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer=a2)
     }
 
     @Test
@@ -916,7 +916,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `går til AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER ved IM dersom vi har vedtaksperioder som ikke overlapper, men har samme skjæringstidspunkt som nåværende`() {
+    fun `går til AVVENTER_BLOKKERENDE_PERIODE ved IM dersom vi har vedtaksperioder som ikke overlapper, men har samme skjæringstidspunkt som nåværende`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a2)
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent), orgnummer = a3)
@@ -934,11 +934,11 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
                 "Vi burde forsikre oss om at alle vedtaksperioder som har samme skjæringstidspunkt har inntekt i stedet.",
             nå = {
                 assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a1)
-                assertTilstand(1.vedtaksperiode, AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER, orgnummer = a2)
+                assertTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
             },
             ønsket = {
-                assertTilstand(1.vedtaksperiode, AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER, orgnummer = a1)
-                assertTilstand(1.vedtaksperiode, AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER, orgnummer = a2)
+                assertTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a1)
+                assertTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
             }
         )
         // TODO: Utvid testen med IM og utbetaling for AG3
@@ -960,7 +960,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         assertTilstander(
             2.vedtaksperiode,
             START,
-            AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
+            AVVENTER_BLOKKERENDE_PERIODE,
             orgnummer = a2
         )
     }
@@ -988,7 +988,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         håndterYtelser(2.vedtaksperiode, orgnummer = a1)
         håndterSimulering(2.vedtaksperiode, orgnummer = a1)
         assertTilstand(2.vedtaksperiode, AVVENTER_GODKJENNING, orgnummer = a1)
-        assertTilstand(1.vedtaksperiode, AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER, orgnummer = a2)
+        assertTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
 
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a1)
         håndterUtbetalt(orgnummer = a1)
@@ -1018,7 +1018,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
 
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a2)
         assertTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, orgnummer = a1)
-        assertTilstand(1.vedtaksperiode, AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER, orgnummer = a2)
+        assertTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
         assertTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, orgnummer = a2)
     }
 

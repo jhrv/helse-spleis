@@ -75,7 +75,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_SØKNAD_FERDIG_FORLENGELSE
 import no.nav.helse.person.TilstandType.AVVENTER_SØKNAD_FERDIG_GAP
 import no.nav.helse.person.TilstandType.AVVENTER_SØKNAD_UFERDIG_FORLENGELSE
 import no.nav.helse.person.TilstandType.AVVENTER_SØKNAD_UFERDIG_GAP
-import no.nav.helse.person.TilstandType.AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER
+import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_UFERDIG
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING_REVURDERING
@@ -206,6 +206,8 @@ internal class Vedtaksperiode private constructor(
     }
 
     internal fun jurist() = jurist.medVedtaksperiode(id, hendelseIder.toSet(), sykmeldingsperiode)
+
+    internal fun harId(vedtaksperiodeId: UUID) = id == vedtaksperiodeId
 
     internal fun hendelseIder() = hendelseIder.ider()
 
@@ -690,6 +692,10 @@ internal class Vedtaksperiode private constructor(
         )
     }
 
+    internal fun trengerInntektsmeldingReplay() {
+        person.inntektsmeldingReplay(id)
+    }
+
     private fun emitVedtaksperiodeEndret(
         aktivitetslogg: IAktivitetslogg,
         previousState: Vedtaksperiodetilstand = tilstand
@@ -736,7 +742,7 @@ internal class Vedtaksperiode private constructor(
     private fun alleAndreAvventerArbeidsgivere() = overlappendeVedtaksperioder().all {
         it == this
                 || it.tilstand == AvventerArbeidsgivere
-                || it.tilstand == AvventerTidligereEllerOverlappendePerioder
+                || it.tilstand == AvventerBlokkerendePeriode
     }
 
     private fun forberedMuligUtbetaling(vilkårsgrunnlag: Vilkårsgrunnlag) {
@@ -903,10 +909,6 @@ internal class Vedtaksperiode private constructor(
                 }
             }
         }
-    }
-
-    private fun harNærliggendeUtbetaling(): Boolean {
-        return person.harNærliggendeUtbetaling(periode)
     }
 
     private fun mottaUtbetalingTilRevurdering(hendelse: ArbeidstakerHendelse, utbetaling: Utbetaling) {
@@ -1258,9 +1260,9 @@ internal class Vedtaksperiode private constructor(
 
             vedtaksperiode.håndterSøknad(søknad) {
                 when {
-                    forlengelseFraInfotrygd == JA -> AvventerTidligereEllerOverlappendePerioder
+                    forlengelseFraInfotrygd == JA -> AvventerBlokkerendePeriode
                     vedtaksperiode.harInntektsmelding() && vedtaksperiode.ingenUtbetaling() -> AvsluttetUtenUtbetaling
-                    vedtaksperiode.harInntektsmelding() -> AvventerTidligereEllerOverlappendePerioder
+                    vedtaksperiode.harInntektsmelding() -> AvventerBlokkerendePeriode
                     else -> AvventerInntektsmeldingEllerHistorikk
                 }
             }
@@ -1855,7 +1857,7 @@ internal class Vedtaksperiode private constructor(
         override val type = AVVENTER_INNTEKTSMELDING_FERDIG_FORLENGELSE
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
-            vedtaksperiode.person.inntektsmeldingReplay(vedtaksperiode.id)
+            vedtaksperiode.trengerInntektsmeldingReplay()
         }
 
         override fun nyPeriodeFør(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: Sykmelding) {}
@@ -2047,7 +2049,7 @@ internal class Vedtaksperiode private constructor(
         override val type = AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
-            vedtaksperiode.person.inntektsmeldingReplay(vedtaksperiode.id)
+            vedtaksperiode.trengerInntektsmeldingReplay()
             if (vedtaksperiode.arbeidsgiver.finnForkastetSykeperiodeRettFør(vedtaksperiode) == null) {
                 vedtaksperiode.trengerInntektsmelding(hendelse.hendelseskontekst())
             }
@@ -2128,7 +2130,7 @@ internal class Vedtaksperiode private constructor(
         override val type: TilstandType = AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
-            vedtaksperiode.person.inntektsmeldingReplay(vedtaksperiode.id)
+            vedtaksperiode.trengerInntektsmeldingReplay()
             if (vedtaksperiode.arbeidsgiver.finnForkastetSykeperiodeRettFør(vedtaksperiode) == null) {
                 vedtaksperiode.trengerInntektsmelding(hendelse.hendelseskontekst())
             }
@@ -2141,7 +2143,7 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
             vedtaksperiode.forlengelseFraInfotrygd = NEI
-            vedtaksperiode.håndterInntektsmelding(inntektsmelding, AvventerTidligereEllerOverlappendePerioder)
+            vedtaksperiode.håndterInntektsmelding(inntektsmelding, AvventerBlokkerendePeriode)
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
@@ -2172,7 +2174,7 @@ internal class Vedtaksperiode private constructor(
                     if (vedtaksperiode.forlengelseFraInfotrygd()) {
                         info("Oppdaget at perioden startet i infotrygd")
                         vedtaksperiode.forlengelseFraInfotrygd = JA
-                        return@onSuccess vedtaksperiode.tilstand(hendelse, AvventerTidligereEllerOverlappendePerioder)
+                        return@onSuccess vedtaksperiode.tilstand(hendelse, AvventerBlokkerendePeriode)
                             .also {
                                 arbeidsgiver.finnVedtaksperiodeRettEtter(vedtaksperiode)
                                     ?.håndterInfotrygdforlengelse(hendelse)
@@ -2190,15 +2192,15 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndterInfotrygdforlengelse(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
-            vedtaksperiode.tilstand(hendelse, AvventerTidligereEllerOverlappendePerioder)
+            vedtaksperiode.tilstand(hendelse, AvventerBlokkerendePeriode)
             vedtaksperiode.forlengelseFraInfotrygd = JA
             vedtaksperiode.arbeidsgiver.finnVedtaksperiodeRettEtter(vedtaksperiode)
                 ?.håndterInfotrygdforlengelse(hendelse)
         }
     }
 
-    internal object AvventerTidligereEllerOverlappendePerioder : Vedtaksperiodetilstand {
-        override val type: TilstandType = AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER
+    internal object AvventerBlokkerendePeriode : Vedtaksperiodetilstand {
+        override val type: TilstandType = AVVENTER_BLOKKERENDE_PERIODE
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
             vedtaksperiode.person.gjenopptaBehandlingNy(hendelse)
@@ -2233,7 +2235,7 @@ internal class Vedtaksperiode private constructor(
         override fun nyPeriodeFør(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: Sykmelding) {}
 
         override fun nyPeriodeFørMedNyFlyt(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: Søknad) {
-            vedtaksperiode.tilstand(hendelse, AvventerTidligereEllerOverlappendePerioder)
+            vedtaksperiode.tilstand(hendelse, AvventerBlokkerendePeriode)
         }
 
         override fun håndterTidligereUferdigPeriode(
@@ -2317,7 +2319,7 @@ internal class Vedtaksperiode private constructor(
         override fun nyPeriodeFør(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: Sykmelding) {}
 
         override fun nyPeriodeFørMedNyFlyt(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: Søknad) {
-            vedtaksperiode.tilstand(hendelse, AvventerTidligereEllerOverlappendePerioder)
+            vedtaksperiode.tilstand(hendelse, AvventerBlokkerendePeriode)
         }
 
         override fun håndterTidligereUferdigPeriode(
@@ -2496,7 +2498,7 @@ internal class Vedtaksperiode private constructor(
         override fun nyPeriodeFør(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: Sykmelding) {}
 
         override fun nyPeriodeFørMedNyFlyt(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: Søknad) {
-            vedtaksperiode.tilstand(hendelse, AvventerTidligereEllerOverlappendePerioder)
+            vedtaksperiode.tilstand(hendelse, AvventerBlokkerendePeriode)
         }
 
         override fun håndterTidligereUferdigPeriode(
@@ -2606,7 +2608,7 @@ internal class Vedtaksperiode private constructor(
         override fun nyPeriodeFør(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: Sykmelding) {}
 
         override fun nyPeriodeFørMedNyFlyt(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: Søknad) {
-            vedtaksperiode.tilstand(hendelse, AvventerTidligereEllerOverlappendePerioder)
+            vedtaksperiode.tilstand(hendelse, AvventerBlokkerendePeriode)
         }
 
         override fun håndterTidligereUferdigPeriode(
@@ -3069,7 +3071,7 @@ internal class Vedtaksperiode private constructor(
                     if (Toggle.GjenopptaAvsluttetUtenUtbetaling.disabled) return@håndterInntektsmelding AvsluttetUtenUtbetaling
                     vedtaksperiode.arbeidsgiver.tidligerePeriodeRebehandles(vedtaksperiode, inntektsmelding)
                     vedtaksperiode.kontekst(inntektsmelding)
-                    AvventerTidligereEllerOverlappendePerioder
+                    AvventerBlokkerendePeriode
                 }
             }
         }
@@ -3228,21 +3230,11 @@ internal class Vedtaksperiode private constructor(
             val inntektsmeldingIds =
                 vedtaksperiode.arbeidsgiver.finnSammenhengendePeriode(vedtaksperiode.skjæringstidspunkt)
                     .mapNotNull { it.inntektsmeldingInfo }.ider()
-            if (vedtaksperiode.harNærliggendeUtbetaling()) {
-                vedtaksperiode.person.opprettOppgaveForSpeilsaksbehandlere(
-                    hendelse,
-                    PersonObserver.OpprettOppgaveForSpeilsaksbehandlereEvent(
-                        hendelser = vedtaksperiode.hendelseIder() + inntektsmeldingIds,
-                    )
-                )
-            } else {
-                vedtaksperiode.person.opprettOppgave(
-                    hendelse,
-                    PersonObserver.OpprettOppgaveEvent(
-                        hendelser = vedtaksperiode.hendelseIder() + inntektsmeldingIds,
-                    )
-                )
-            }
+            vedtaksperiode.person.sendOppgaveEvent(
+                hendelse = hendelse,
+                periode = vedtaksperiode.periode(),
+                hendelseIder = vedtaksperiode.hendelseIder() + inntektsmeldingIds
+            )
         }
 
         private fun skalOppretteOppgave(vedtaksperiode: Vedtaksperiode) =

@@ -14,7 +14,7 @@ import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
-import no.nav.helse.person.TilstandType.AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER
+import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -1317,7 +1317,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `alle arbeidsgivere burde hoppe inn i AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER dersom de har samme skjæringstidspunkt men ikke overlapper`() {
+    fun `alle arbeidsgivere burde hoppe inn i AVVENTER_BLOKKERENDE_PERIODE dersom de har samme skjæringstidspunkt men ikke overlapper`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a2)
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent), orgnummer = a3)
@@ -1325,6 +1325,6 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = a3)
         håndterInntektsmelding(listOf(1.februar til 16.februar), orgnummer = a3)
 
-        assertTilstander(1.vedtaksperiode, START,AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER, orgnummer = a3)
+        assertTilstander(1.vedtaksperiode, START,AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a3)
     }
 }

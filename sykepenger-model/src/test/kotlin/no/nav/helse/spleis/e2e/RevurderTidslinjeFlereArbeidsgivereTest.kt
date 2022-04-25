@@ -91,7 +91,7 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
             assertTilstander(
                 2.vedtaksperiode,
                 START,
-                AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
+                AVVENTER_BLOKKERENDE_PERIODE,
                 AVVENTER_HISTORIKK,
                 AVVENTER_SIMULERING,
                 AVVENTER_GODKJENNING,
@@ -106,7 +106,7 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
             assertTilstander(
                 2.vedtaksperiode,
                 START,
-                AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
+                AVVENTER_BLOKKERENDE_PERIODE,
                 AVVENTER_HISTORIKK,
                 AVVENTER_SIMULERING,
                 AVVENTER_GODKJENNING,

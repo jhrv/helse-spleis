@@ -23,7 +23,7 @@ import no.nav.helse.person.Inntektshistorikk.Skatt.Inntekttype.LØNNSINNTEKT
 import no.nav.helse.person.Inntektskilde
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
-import no.nav.helse.person.TilstandType.AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER
+import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -783,7 +783,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(18.januar, 10.februar, 100.prosent), orgnummer = a2)
         håndterInntektsmelding(listOf(18.januar til 2.februar), orgnummer = a2)
 
-        assertTilstand(1.vedtaksperiode, AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER, orgnummer = a2)
+        assertTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
     }
 
     @Test
@@ -803,7 +803,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(13.februar, 28.februar, 100.prosent), orgnummer = a2)
 
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, orgnummer = a2)
-        assertTilstand(2.vedtaksperiode, AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER, orgnummer = a2)
+        assertTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
     }
 
     @Test
@@ -823,8 +823,8 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(21.februar, 28.februar, 100.prosent), orgnummer = a2)
 
 
-        assertTilstand(1.vedtaksperiode, AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER, orgnummer = a2)
-        assertTilstand(2.vedtaksperiode, AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER, orgnummer = a2)
+        assertTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
+        assertTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
     }
 
     @Test

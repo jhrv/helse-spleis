@@ -39,7 +39,7 @@ internal class InstitusjonsoppholdBehovTest : AbstractEndToEndTest() {
             1.vedtaksperiode,
             TilstandType.START,
             TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
-            TilstandType.AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
+            TilstandType.AVVENTER_BLOKKERENDE_PERIODE,
             TilstandType.AVVENTER_HISTORIKK,
             TilstandType.AVVENTER_VILKÅRSPRØVING,
             TilstandType.AVVENTER_HISTORIKK,
@@ -61,7 +61,7 @@ internal class InstitusjonsoppholdBehovTest : AbstractEndToEndTest() {
             1.vedtaksperiode,
             TilstandType.START,
             TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
-            TilstandType.AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
+            TilstandType.AVVENTER_BLOKKERENDE_PERIODE,
             TilstandType.AVVENTER_HISTORIKK,
             TilstandType.TIL_INFOTRYGD
         )
@@ -78,7 +78,7 @@ internal class InstitusjonsoppholdBehovTest : AbstractEndToEndTest() {
             1.vedtaksperiode,
             TilstandType.START,
             TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
-            TilstandType.AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
+            TilstandType.AVVENTER_BLOKKERENDE_PERIODE,
             TilstandType.AVVENTER_HISTORIKK,
             TilstandType.TIL_INFOTRYGD
         )
@@ -95,7 +95,7 @@ internal class InstitusjonsoppholdBehovTest : AbstractEndToEndTest() {
             1.vedtaksperiode,
             TilstandType.START,
             TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
-            TilstandType.AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
+            TilstandType.AVVENTER_BLOKKERENDE_PERIODE,
             TilstandType.AVVENTER_HISTORIKK,
             TilstandType.TIL_INFOTRYGD
         )
@@ -135,7 +135,7 @@ internal class InstitusjonsoppholdBehovTest : AbstractEndToEndTest() {
             1.vedtaksperiode,
             TilstandType.START,
             TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
-            TilstandType.AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
+            TilstandType.AVVENTER_BLOKKERENDE_PERIODE,
             TilstandType.AVVENTER_HISTORIKK,
             TilstandType.AVVENTER_VILKÅRSPRØVING,
             TilstandType.AVVENTER_HISTORIKK,
@@ -168,7 +168,7 @@ internal class InstitusjonsoppholdBehovTest : AbstractEndToEndTest() {
             1.vedtaksperiode,
             TilstandType.START,
             TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
-            TilstandType.AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
+            TilstandType.AVVENTER_BLOKKERENDE_PERIODE,
             TilstandType.AVVENTER_HISTORIKK,
             TilstandType.AVVENTER_VILKÅRSPRØVING,
             TilstandType.AVVENTER_HISTORIKK,
@@ -190,7 +190,7 @@ internal class InstitusjonsoppholdBehovTest : AbstractEndToEndTest() {
             1.vedtaksperiode,
             TilstandType.START,
             TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
-            TilstandType.AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
+            TilstandType.AVVENTER_BLOKKERENDE_PERIODE,
             TilstandType.AVVENTER_HISTORIKK,
             TilstandType.TIL_INFOTRYGD
         )
@@ -207,7 +207,7 @@ internal class InstitusjonsoppholdBehovTest : AbstractEndToEndTest() {
             1.vedtaksperiode,
             TilstandType.START,
             TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
-            TilstandType.AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
+            TilstandType.AVVENTER_BLOKKERENDE_PERIODE,
             TilstandType.AVVENTER_HISTORIKK,
             TilstandType.TIL_INFOTRYGD
         )
