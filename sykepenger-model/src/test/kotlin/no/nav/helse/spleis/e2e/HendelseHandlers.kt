@@ -72,7 +72,7 @@ import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.fail
 
 
@@ -260,9 +260,23 @@ internal fun AbstractEndToEndTest.tilGodkjenning(
     inntekterBlock: Inntektperioder.() -> Unit = { lagInntektperioder(orgnummer, fom) },
     arbeidsgiverperiode: List<Periode>? = null
 ): IdInnhenter {
-    val id = tilYtelser(fom, tom, grad, førsteFraværsdag, fnr = fnr, orgnummer = orgnummer, refusjon = refusjon, inntekterBlock = inntekterBlock, arbeidsgiverperiode = arbeidsgiverperiode)
+    val id = tilSimulering(fom, tom, grad, førsteFraværsdag, fnr = fnr, orgnummer = orgnummer, refusjon = refusjon, inntekterBlock = inntekterBlock, arbeidsgiverperiode = arbeidsgiverperiode)
     håndterSimulering(id, fnr = fnr, orgnummer = orgnummer)
     return id
+}
+
+internal fun AbstractEndToEndTest.tilSimulering(
+    fom: LocalDate,
+    tom: LocalDate,
+    grad: Prosentdel,
+    førsteFraværsdag: LocalDate,
+    fnr: Fødselsnummer = AbstractPersonTest.UNG_PERSON_FNR_2018,
+    orgnummer: String = AbstractPersonTest.ORGNUMMER,
+    refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(AbstractEndToEndTest.INNTEKT, null, emptyList()),
+    inntekterBlock: Inntektperioder.() -> Unit = { lagInntektperioder(orgnummer, fom) },
+    arbeidsgiverperiode: List<Periode>? = null
+): IdInnhenter {
+    return tilYtelser(fom, tom, grad, førsteFraværsdag, fnr = fnr, orgnummer = orgnummer, refusjon = refusjon, inntekterBlock = inntekterBlock, arbeidsgiverperiode = arbeidsgiverperiode)
 }
 
 internal fun AbstractEndToEndTest.tilYtelser(
@@ -332,6 +346,19 @@ internal fun AbstractEndToEndTest.forlengTilGodkjentVedtak(
 ) {
     forlengTilGodkjenning(fom, tom, grad, fnr, orgnummer)
     håndterUtbetalingsgodkjenning(observatør.sisteVedtaksperiode(), true, fnr = fnr, orgnummer = orgnummer)
+}
+
+internal fun AbstractEndToEndTest.forlengTilSimulering(
+    fom: LocalDate,
+    tom: LocalDate,
+    grad: Prosentdel = 100.prosent,
+    fnr: Fødselsnummer = AbstractPersonTest.UNG_PERSON_FNR_2018,
+    orgnummer: String = AbstractPersonTest.ORGNUMMER
+) {
+    nyPeriode(fom til tom, orgnummer, grad = grad, fnr = fnr)
+    val id: IdInnhenter = observatør.sisteVedtaksperiode()
+    håndterYtelser(id, fnr = fnr, orgnummer = orgnummer)
+    assertTrue(person.personLogg.etterspurteBehov(id, Behovtype.Simulering)) { "Forventet at simulering er etterspurt" }
 }
 
 internal fun AbstractEndToEndTest.forlengTilGodkjenning(
@@ -456,7 +483,7 @@ internal fun AbstractEndToEndTest.håndterInntektsmeldingReplay(
     vedtaksperiodeId: UUID
 ) {
     val inntektsmeldinggenerator = inntektsmeldinger[inntektsmeldingId] ?: fail { "Fant ikke inntektsmelding med id $inntektsmeldingId" }
-    Assertions.assertTrue(observatør.bedtOmInntektsmeldingReplay(vedtaksperiodeId)) { "Vedtaksperioden har ikke bedt om replay av inntektsmelding" }
+    assertTrue(observatør.bedtOmInntektsmeldingReplay(vedtaksperiodeId)) { "Vedtaksperioden har ikke bedt om replay av inntektsmelding" }
     inntektsmeldingReplay(inntektsmeldinggenerator(), vedtaksperiodeId)
         .håndter(Person::håndter)
 }

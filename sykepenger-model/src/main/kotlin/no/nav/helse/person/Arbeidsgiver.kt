@@ -311,6 +311,10 @@ internal class Arbeidsgiver private constructor(
             }
         }
 
+        internal fun Iterable<Arbeidsgiver>.slettUtgåtteSykmeldingsperioder(tom: LocalDate) = forEach {
+            it.sykmeldingsperioder.fjern(tom.minusDays(1))
+        }
+
         internal fun søppelbøtte(
             arbeidsgivere: List<Arbeidsgiver>,
             hendelse: IAktivitetslogg,
@@ -500,7 +504,8 @@ internal class Arbeidsgiver private constructor(
 
     internal fun håndter(søknad: Søknad) {
         søknad.kontekst(this)
-        sykmeldingsperioder.fjern(søknad.periode())
+        sykmeldingsperioder.fjern(søknad.periode().endInclusive)
+        person.slettUtgåtteSykmeldingsperioder(søknad.periode().endInclusive)
         if (Toggle.NyTilstandsflyt.enabled) {
             opprettVedtaksperiodeOgHåndter(søknad)
         } else {
@@ -566,7 +571,6 @@ internal class Arbeidsgiver private constructor(
             if (Toggle.NyTilstandsflyt.enabled && sykmeldingsperioder.blirTruffetAv(inntektsmelding)) {
                 person.emitUtsettOppgaveEvent(inntektsmelding)
             }
-            inntektsmelding.error("Forventet ikke inntektsmelding. Har nok ikke mottatt sykmelding")
             if (ForkastetVedtaksperiode.sjekkOmOverlapperMedForkastet(forkastede, inntektsmelding)) {
                 person.opprettOppgave(
                     inntektsmelding,
