@@ -43,19 +43,12 @@ internal class ArbeidsgiverUtbetalinger(
         val tidslinjer = arbeidsgivere.values.toList()
         Sykdomsgradfilter(tidslinjer, periode, aktivitetslogg, subsumsjonObserver).filter()
         AvvisDagerEtterDødsdatofilter(tidslinjer, periode, dødsdato, aktivitetslogg).filter()
-        vilkårsgrunnlagHistorikk.avvisInngangsvilkår(tidslinjer, alder)
+        AvvisInngangsvilkårfilter(vilkårsgrunnlagHistorikk, alder).filter(tidslinjer)
         maksimumSykepenger = MaksimumSykepengedagerfilter(alder, regler, periode, aktivitetslogg, subsumsjonObserver).filter(
             tidslinjer,
             infotrygdhistorikk.utbetalingstidslinje().kutt(periode.endInclusive)
         )
-        arbeidsgivere.forEach { (arbeidsgiver, tidslinje) ->
-            Refusjonsgjødsler(
-                tidslinje = tidslinje + arbeidsgiver.utbetalingstidslinje(infotrygdhistorikk),
-                refusjonshistorikk = arbeidsgiver.refusjonshistorikk,
-                infotrygdhistorikk = infotrygdhistorikk,
-                organisasjonsnummer = arbeidsgiver.organisasjonsnummer()
-            ).gjødsle(aktivitetslogg, periode)
-        }
+        Refusjonsfilter.filter(arbeidsgivere, infotrygdhistorikk, aktivitetslogg, periode)
         MaksimumUtbetaling(tidslinjer, aktivitetslogg, virkningsdato).betal()
     }
 }
