@@ -32,7 +32,7 @@ internal class MaksimumUtbetalingFlereArbeidsgivereTest {
     private fun assert6GBegrensetUtbetaling(ag1: Pair<Utbetalingstidslinje, Double>, ag2: Pair<Utbetalingstidslinje, Double>) {
         val dato = Utbetalingstidslinje.periode(listOf(ag1.first, ag2.first)).start
         val maksDagsats = Grunnbeløp.`6G`.dagsats(dato)
-        MaksimumUtbetaling(listOf(ag2.first, ag1.first), aktivitetslogg, dato).betal()
+        MaksimumUtbetaling.betal(listOf(ag2.first, ag1.first), aktivitetslogg, dato)
         assertTrue(ag1.first.inspektør.økonomi(reflectedArbeidsgiverBeløp).all { it.daglig == maksDagsats }) {
             "noen dager har fått nytt grunnbeløp"
         }

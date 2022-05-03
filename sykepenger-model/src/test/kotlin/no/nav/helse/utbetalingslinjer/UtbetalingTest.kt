@@ -780,7 +780,7 @@ internal class UtbetalingTest {
                 else -> spleisdag
             }
         }
-    }.also { MaksimumUtbetaling(listOf(tidslinje), aktivitetslogg, 1.januar).betal() }
+    }.also { MaksimumUtbetaling.betal(listOf(tidslinje), aktivitetslogg, 1.januar) }
 
     private fun opprettGodkjentUtbetaling(
         tidslinje: Utbetalingstidslinje = tidslinjeOf(16.AP, 5.NAV(3000)),

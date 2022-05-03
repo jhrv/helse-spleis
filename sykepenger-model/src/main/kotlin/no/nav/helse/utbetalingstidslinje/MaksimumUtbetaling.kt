@@ -5,15 +5,15 @@ import no.nav.helse.økonomi.betal
 import no.nav.helse.økonomi.er6GBegrenset
 import java.time.LocalDate
 
-internal class MaksimumUtbetaling(
-    private val tidslinjer: List<Utbetalingstidslinje>,
-    private val aktivitetslogg: IAktivitetslogg,
-    private val virkningsdato: LocalDate
-) {
+internal object MaksimumUtbetaling {
 
     private var harRedusertUtbetaling = false
 
-    internal fun betal() {
+    internal fun betal(
+        tidslinjer: List<Utbetalingstidslinje>,
+        aktivitetslogg: IAktivitetslogg,
+        virkningsdato: LocalDate
+    ) {
         Utbetalingstidslinje.periode(tidslinjer).forEach { dato ->
             tidslinjer.map { it[dato].økonomi }.also { økonomiList ->
                 try {

@@ -482,11 +482,11 @@ internal class OppdragBuilderTest {
                 else -> spleisdag
             }
         }
-        MaksimumUtbetaling(
+        MaksimumUtbetaling.betal(
             listOf(tidslinje),
             Aktivitetslogg(),
             startdato
-        ).betal()
+        )
         return OppdragBuilder(
             tidslinje,
             ORGNUMMER,

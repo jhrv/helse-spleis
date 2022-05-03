@@ -16,6 +16,7 @@ import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
 import no.nav.helse.person.Aktivitetskontekst
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.godkjenning
+import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.ArbeidstakerHendelse
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.Periodetype
@@ -23,12 +24,21 @@ import no.nav.helse.person.SpesifikkKontekst
 import no.nav.helse.person.UtbetalingVisitor
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.builders.VedtakFattetBuilder
+import no.nav.helse.person.etterlevelse.SubsumsjonObserver
+import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.serde.reflection.Utbetalingstatus
 import no.nav.helse.sykdomstidslinje.Dag.Companion.replace
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingslinjer.Fagområde.Sykepenger
 import no.nav.helse.utbetalingslinjer.Fagområde.SykepengerRefusjon
+import no.nav.helse.utbetalingstidslinje.IAvvisDagerEtterDødsdatofilter
+import no.nav.helse.utbetalingstidslinje.IAvvisInngangsvilkårfilter
+import no.nav.helse.utbetalingstidslinje.Inntekter
+import no.nav.helse.utbetalingstidslinje.MaksimumUtbetaling
+import no.nav.helse.utbetalingstidslinje.Refusjonsfilter
+import no.nav.helse.utbetalingstidslinje.Sykdomsgradfilter
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
+import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjeBuilder
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -275,6 +285,44 @@ internal class Utbetaling private constructor(
         tilstand.entering(this, hendelse)
     }
 
+    internal class Builder(
+        private val subsumsjonObserver: SubsumsjonObserver,
+        private val infotrygdhistorikk: Infotrygdhistorikk,
+        private val periode: Periode,
+        private val aktivitetslogg: IAktivitetslogg,
+        private val avvisDagerEtterDødsdatofilter: IAvvisDagerEtterDødsdatofilter,
+        private val avvisInngangsvilkårfilter: IAvvisInngangsvilkårfilter
+    ) {
+        private val arbeidsgivere = mutableMapOf<Arbeidsgiver, Utbetalingstidslinje>()
+
+        internal fun arbeidsgiver(
+            arbeidsgiver: Arbeidsgiver,
+            sykdomstidslinje: Sykdomstidslinje,
+            inntekter: Inntekter
+        ) {
+            require(!arbeidsgivere.contains(arbeidsgiver)) { "Det er allerede laget utbetalingstidslinje for arbeidsgiver ${arbeidsgiver.organisasjonsnummer()}" }
+            val utbetalingstidslinjeBuilder = UtbetalingstidslinjeBuilder(inntekter)
+            val sykdomstidslinje = sykdomstidslinje.fremTilOgMed(periode.endInclusive)
+            val utbetalingstidslinje = infotrygdhistorikk.build(arbeidsgiver.organisasjonsnummer(), sykdomstidslinje, utbetalingstidslinjeBuilder, subsumsjonObserver)
+            arbeidsgivere[arbeidsgiver] = utbetalingstidslinje
+        }
+
+        private fun filtrer() {
+            val tidslinjer = arbeidsgivere.values.toList()
+            Sykdomsgradfilter.filter(tidslinjer, periode, aktivitetslogg, subsumsjonObserver)
+            avvisDagerEtterDødsdatofilter.filter(tidslinjer, periode, aktivitetslogg)
+            avvisInngangsvilkårfilter.filter(tidslinjer)
+            // TODO: MaksimumSykepengedagerfilter
+            Refusjonsfilter.filter(arbeidsgivere, infotrygdhistorikk, aktivitetslogg, periode)
+            MaksimumUtbetaling.betal(tidslinjer, aktivitetslogg, periode.endInclusive)
+        }
+
+        internal fun build(): Map<Arbeidsgiver, Utbetalingstidslinje> {
+            require(arbeidsgivere.isNotEmpty()) { "Må settes minst en arbeidsgiver for å beregne utbetalingstidslinjer" }
+            filtrer()
+            return arbeidsgivere
+        }
+    }
 
     internal companion object {
 

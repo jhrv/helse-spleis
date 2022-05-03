@@ -110,11 +110,11 @@ internal class UtbetalingsfilterTest {
     }
 
     private fun lagUtbetaling(tidslinje: Utbetalingstidslinje = tidslinjeOf(16.AP, 15.NAV), forrige: Utbetaling? = null): Utbetaling {
-        MaksimumUtbetaling(
+        MaksimumUtbetaling.betal(
             listOf(tidslinje),
             aktivitetslogg,
             tidslinje.first().dato
-        ).betal()
+        )
 
         return Utbetaling.lagUtbetaling(
             forrige?.let { listOf(forrige) } ?: emptyList(),
