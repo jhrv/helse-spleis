@@ -547,11 +547,13 @@ internal class MaksimumSykepengedagerfilterTest {
     ): List<LocalDate> {
         maksimumSykepenger = MaksimumSykepengedagerfilter(
             fnr.somFødselsnummer().alder(),
-            NormalArbeidstaker,
-            periode ?: (this + personTidslinje).periode(),
-            aktivitetslogg,
-            subsumsjonObserver = MaskinellJurist()
-        ).filter(listOf(this), personTidslinje)
+            NormalArbeidstaker
+        ).filter(
+            tidslinjer = listOf(this),
+            personTidslinje = personTidslinje,
+            periode = periode ?: (this + personTidslinje).periode(),
+            aktivitetslogg = aktivitetslogg,
+            subsumsjonObserver = MaskinellJurist())
         return inspektør.avvistedatoer
     }
 }
