@@ -37,7 +37,7 @@ import no.nav.helse.utbetalingstidslinje.IAvvisInngangsvilkårfilter
 import no.nav.helse.utbetalingstidslinje.IMaksimumSykepengedagerfilter
 import no.nav.helse.utbetalingstidslinje.Inntekter
 import no.nav.helse.utbetalingstidslinje.MaksimumUtbetaling
-import no.nav.helse.utbetalingstidslinje.Refusjonsfilter
+import no.nav.helse.utbetalingstidslinje.Refusjonsgjødsler
 import no.nav.helse.utbetalingstidslinje.Sykdomsgradfilter
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjeBuilder
@@ -909,6 +909,12 @@ internal class Utbetaling private constructor(
             val utbetalingstidslinjeBuilder = UtbetalingstidslinjeBuilder(inntekter)
             val sykdomstidslinje = sykdomstidslinje.fremTilOgMed(periode.endInclusive)
             val utbetalingstidslinje = infotrygdhistorikk.build(arbeidsgiver.organisasjonsnummer(), sykdomstidslinje, utbetalingstidslinjeBuilder, subsumsjonObserver)
+            Refusjonsgjødsler(
+                tidslinje = utbetalingstidslinje + arbeidsgiver.utbetalingstidslinje(infotrygdhistorikk),
+                refusjonshistorikk = arbeidsgiver.refusjonshistorikk,
+                infotrygdhistorikk = infotrygdhistorikk,
+                organisasjonsnummer = arbeidsgiver.organisasjonsnummer()
+            ).gjødsle(aktivitetslogg, periode)
             arbeidsgivere[arbeidsgiver] = utbetalingstidslinje
         }
 
@@ -924,7 +930,6 @@ internal class Utbetaling private constructor(
                 aktivitetslogg = aktivitetslogg,
                 subsumsjonObserver = subsumsjonObserver
             )
-            Refusjonsfilter.filter(arbeidsgivere, infotrygdhistorikk, aktivitetslogg, periode)
             MaksimumUtbetaling(tidslinjer, aktivitetslogg, periode.endInclusive).betal()
         }
 
