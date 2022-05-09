@@ -10,14 +10,14 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.Nav
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.UkjentDag
 import no.nav.helse.økonomi.Økonomi
 import java.time.LocalDate
+import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 
 internal class MaksimumSykepengedagerfilter(
     private val alder: Alder,
     private val arbeidsgiverRegler: ArbeidsgiverRegler,
-    private val periode: Periode,
-    private val aktivitetslogg: IAktivitetslogg,
-    private val subsumsjonObserver: SubsumsjonObserver
-) : UtbetalingsdagVisitor {
+    private val infotrygdHistorikk: Infotrygdhistorikk,
+    private val infotrygdtidslinje: () -> Utbetalingstidslinje = { infotrygdHistorikk.utbetalingstidslinje() }
+) : UtbetalingsdagVisitor, UtbetalingstidslinjerFilter {
 
     private companion object {
         const val TILSTREKKELIG_OPPHOLD_I_SYKEDAGER = 26 * 7
@@ -32,52 +32,66 @@ internal class MaksimumSykepengedagerfilter(
     private lateinit var beregnetTidslinje: Utbetalingstidslinje
     private lateinit var tidslinjegrunnlag: List<Utbetalingstidslinje>
 
+    private lateinit var periode: Periode
+    private lateinit var aktivitetslogg: IAktivitetslogg
+    private lateinit var subsumsjonObserver: SubsumsjonObserver
+    private lateinit var maksimumSykepenger: Alder.MaksimumSykepenger
+
     private fun avvisDag(dag: LocalDate, begrunnelse: Begrunnelse) {
         begrunnelserForAvvisteDager.getOrPut(begrunnelse) {
             mutableSetOf()
         }.add(dag)
     }
 
-    private val karantenesporing = object : Alder.MaksimumSykepenger.Begrunnelse {
-        override fun `§ 8-12 ledd 1 punktum 1`(sisteDag: LocalDate, forbrukteDager: Int, gjenståendeDager: Int) {
-            val sakensStartdato = teller.startdatoSykepengerettighet() ?: return
-            subsumsjonObserver.`§ 8-12 ledd 1 punktum 1`(
-                periode,
-                tidslinjegrunnlag.subsumsjonsformat(),
-                beregnetTidslinje.subsumsjonsformat(),
-                gjenståendeDager,
-                forbrukteDager,
-                sisteDag,
-                sakensStartdato
-            )
-        }
+    private val karantenesporing by lazy {
+        object : Alder.MaksimumSykepenger.Begrunnelse {
+            override fun `§ 8-12 ledd 1 punktum 1`(sisteDag: LocalDate, forbrukteDager: Int, gjenståendeDager: Int) {
+                val sakensStartdato = teller.startdatoSykepengerettighet() ?: return
+                subsumsjonObserver.`§ 8-12 ledd 1 punktum 1`(
+                    periode,
+                    tidslinjegrunnlag.subsumsjonsformat(),
+                    beregnetTidslinje.subsumsjonsformat(),
+                    gjenståendeDager,
+                    forbrukteDager,
+                    sisteDag,
+                    sakensStartdato
+                )
+            }
 
-        override fun `§ 8-51 ledd 3`(sisteDag: LocalDate, forbrukteDager: Int, gjenståendeDager: Int) {
-            val sakensStartdato = teller.startdatoSykepengerettighet() ?: return
-            subsumsjonObserver.`§ 8-51 ledd 3`(
-                periode,
-                tidslinjegrunnlag.subsumsjonsformat(),
-                beregnetTidslinje.subsumsjonsformat(),
-                gjenståendeDager,
-                forbrukteDager,
-                sisteDag,
-                sakensStartdato
-            )
-        }
+            override fun `§ 8-51 ledd 3`(sisteDag: LocalDate, forbrukteDager: Int, gjenståendeDager: Int) {
+                val sakensStartdato = teller.startdatoSykepengerettighet() ?: return
+                subsumsjonObserver.`§ 8-51 ledd 3`(
+                    periode,
+                    tidslinjegrunnlag.subsumsjonsformat(),
+                    beregnetTidslinje.subsumsjonsformat(),
+                    gjenståendeDager,
+                    forbrukteDager,
+                    sisteDag,
+                    sakensStartdato
+                )
+            }
 
-        override fun `§ 8-3 ledd 1 punktum 2`(sisteDag: LocalDate, forbrukteDager: Int, gjenståendeDager: Int) {}
+            override fun `§ 8-3 ledd 1 punktum 2`(sisteDag: LocalDate, forbrukteDager: Int, gjenståendeDager: Int) {}
+        }
     }
 
-    internal fun filter(tidslinjer: List<Utbetalingstidslinje>, personTidslinje: Utbetalingstidslinje): Alder.MaksimumSykepenger {
-        beregnetTidslinje = tidslinjer
-            .reduce(Utbetalingstidslinje::plus)
-            .plus(personTidslinje)
-        tidslinjegrunnlag = tidslinjer + listOf(personTidslinje)
+    override fun filter(
+        tidslinjer: List<Utbetalingstidslinje>,
+        periode: Periode,
+        aktivitetslogg: IAktivitetslogg,
+        subsumsjonObserver: SubsumsjonObserver
+    ): List<Utbetalingstidslinje> {
+        this.periode = periode
+        this.aktivitetslogg = aktivitetslogg
+        this.subsumsjonObserver = subsumsjonObserver
+        val infotrygdtidslinje = infotrygdtidslinje().kutt(periode.endInclusive)
+        beregnetTidslinje = tidslinjer.reduce(Utbetalingstidslinje::plus).plus(infotrygdtidslinje)
+        tidslinjegrunnlag = tidslinjer + listOf(infotrygdtidslinje)
         teller = UtbetalingTeller(alder, arbeidsgiverRegler)
         state = State.Initiell
         beregnetTidslinje.accept(this)
 
-        val maksimumSykepenger = teller.maksimumSykepenger(sisteDag).also {
+        maksimumSykepenger = teller.maksimumSykepenger(sisteDag).also {
             it.sisteDag(karantenesporing)
         }
 
@@ -96,8 +110,10 @@ internal class MaksimumSykepengedagerfilter(
         else
             aktivitetslogg.info("Maksimalt antall sykedager overskrides ikke i perioden")
 
-        return maksimumSykepenger
+        return tidslinjer
     }
+
+    internal fun maksimumSykepenger() = maksimumSykepenger
 
     private fun state(nyState: State) {
         if (this.state == nyState) return

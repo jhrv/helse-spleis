@@ -1,26 +1,24 @@
 package no.nav.helse.utbetalingstidslinje
 
-import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.til
-import no.nav.helse.hentErrors
-import no.nav.helse.inspectors.inspektør
-import no.nav.helse.person.Aktivitetslogg
-import no.nav.helse.person.etterlevelse.MaskinellJurist
-import no.nav.helse.sykdomstidslinje.erHelg
-import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import no.nav.helse.april
 import no.nav.helse.desember
 import no.nav.helse.februar
+import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.til
+import no.nav.helse.hentErrors
 import no.nav.helse.hentInfo
+import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.juli
 import no.nav.helse.juni
 import no.nav.helse.mars
 import no.nav.helse.oktober
+import no.nav.helse.person.Aktivitetslogg
+import no.nav.helse.person.etterlevelse.MaskinellJurist
+import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.somFødselsnummer
+import no.nav.helse.sykdomstidslinje.erHelg
 import no.nav.helse.testhelpers.AP
 import no.nav.helse.testhelpers.ARB
 import no.nav.helse.testhelpers.FRI
@@ -30,9 +28,12 @@ import no.nav.helse.testhelpers.NAVDAGER
 import no.nav.helse.testhelpers.UTELATE
 import no.nav.helse.testhelpers.Utbetalingsdager
 import no.nav.helse.testhelpers.tidslinjeOf
+import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 
 internal class MaksimumSykepengedagerfilterTest {
     private companion object {
@@ -72,10 +73,10 @@ internal class MaksimumSykepengedagerfilterTest {
     }
 
     @Test
-    fun `stopper betaling etter 248 dager inkl persontidslinje`() {
-        val persontidslinje = tidslinjeOf(16.AP, 247.NAVDAGER)
-        val tidslinje = tidslinjeOf(2.NAVDAGER, startDato = persontidslinje.periode().endInclusive.plusDays(1))
-        assertEquals(listOf(31.desember), tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018, personTidslinje = persontidslinje))
+    fun `stopper betaling etter 248 dager inkl infotrygdtidslinje`() {
+        val historikk = tidslinjeOf(16.AP, 247.NAVDAGER)
+        val tidslinje = tidslinjeOf(2.NAVDAGER, startDato = historikk.periode().endInclusive.plusDays(1))
+        assertEquals(listOf(31.desember), tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018, infotrygdtidslinje = historikk))
         assertTrue(aktivitetslogg.hentInfo().contains("Maks antall sykepengedager er nådd i perioden"))
     }
 
@@ -444,7 +445,7 @@ internal class MaksimumSykepengedagerfilterTest {
     fun `teller sykedager med opphold i sykdom`() {
         val tidslinje = tidslinjeOf(12.NAV, startDato = 1.mars)
         val historikk = tidslinjeOf(45.NAV, startDato = 1.januar(2018))
-        tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018, personTidslinje = historikk)
+        tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018, infotrygdtidslinje = historikk)
         assertEquals(41, maksimumSykepenger.forbrukteDager())
     }
 
@@ -452,7 +453,7 @@ internal class MaksimumSykepengedagerfilterTest {
     fun `teller sykedager med overlapp`() {
         val tidslinje = tidslinjeOf(12.NAV, startDato = 1.februar)
         val historikk = tidslinjeOf(12.ARB, 45.NAV, startDato = 1.januar(2018))
-        tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018, personTidslinje = historikk)
+        tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018, infotrygdtidslinje = historikk)
         assertEquals(31, maksimumSykepenger.forbrukteDager())
     }
 
@@ -460,7 +461,7 @@ internal class MaksimumSykepengedagerfilterTest {
     fun `teller sykedager med konflikt`() {
         val tidslinje = tidslinjeOf(12.NAV)
         val historikk = tidslinjeOf(12.ARB, 45.NAV)
-        tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018, personTidslinje = historikk)
+        tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018, infotrygdtidslinje = historikk)
         assertEquals(41, maksimumSykepenger.forbrukteDager())
     }
 
@@ -543,15 +544,21 @@ internal class MaksimumSykepengedagerfilterTest {
     private fun Utbetalingstidslinje.utbetalingsavgrenser(
         fnr: String,
         periode: Periode? = null,
-        personTidslinje: Utbetalingstidslinje = Utbetalingstidslinje()
+        infotrygdtidslinje: Utbetalingstidslinje = Utbetalingstidslinje()
     ): List<LocalDate> {
-        maksimumSykepenger = MaksimumSykepengedagerfilter(
-            fnr.somFødselsnummer().alder(),
-            NormalArbeidstaker,
-            periode ?: (this + personTidslinje).periode(),
-            aktivitetslogg,
+        val filter = MaksimumSykepengedagerfilter(
+            alder = fnr.somFødselsnummer().alder(),
+            arbeidsgiverRegler = NormalArbeidstaker,
+            infotrygdHistorikk = Infotrygdhistorikk(), // Brukes ikke når infotrygdtidslinje settes eksplisitt
+            infotrygdtidslinje = { infotrygdtidslinje }
+        )
+        filter.filter(
+            tidslinjer = listOf(this),
+            periode = periode ?: (this + infotrygdtidslinje).periode(),
+            aktivitetslogg = aktivitetslogg,
             subsumsjonObserver = MaskinellJurist()
-        ).filter(listOf(this), personTidslinje)
+        )
+        maksimumSykepenger = filter.maksimumSykepenger()
         return inspektør.avvistedatoer
     }
 }

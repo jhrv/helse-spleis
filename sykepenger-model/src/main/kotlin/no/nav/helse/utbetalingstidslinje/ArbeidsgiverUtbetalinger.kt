@@ -44,10 +44,9 @@ internal class ArbeidsgiverUtbetalinger(
         Sykdomsgradfilter.filter(tidslinjer, periode, aktivitetslogg, subsumsjonObserver)
         AvvisDagerEtterDødsdatofilter(dødsdato).filter(tidslinjer, periode, aktivitetslogg, subsumsjonObserver)
         AvvisInngangsvilkårfilter(vilkårsgrunnlagHistorikk, alder).filter(tidslinjer, periode, aktivitetslogg, subsumsjonObserver)
-        maksimumSykepenger = MaksimumSykepengedagerfilter(alder, regler, periode, aktivitetslogg, subsumsjonObserver).filter(
-            tidslinjer,
-            infotrygdhistorikk.utbetalingstidslinje().kutt(periode.endInclusive)
-        )
+        val maksimumSykepengedagerfilter = MaksimumSykepengedagerfilter(alder, regler, infotrygdhistorikk)
+        maksimumSykepengedagerfilter.filter(tidslinjer, periode, aktivitetslogg, subsumsjonObserver)
+        maksimumSykepenger = maksimumSykepengedagerfilter.maksimumSykepenger()
         arbeidsgivere.forEach { (arbeidsgiver, tidslinje) ->
             Refusjonsgjødsler(
                 tidslinje = tidslinje + arbeidsgiver.utbetalingstidslinje(infotrygdhistorikk),
