@@ -1102,15 +1102,7 @@ internal class Vedtaksperiode private constructor(
                 vedtaksperiode.arbeidsgiver.finnVedtaksperiodeRettFør(vedtaksperiode)?.forlengelseFraInfotrygd
             if (forlengelseFraInfotrygd != null) vedtaksperiode.forlengelseFraInfotrygd = forlengelseFraInfotrygd
 
-            vedtaksperiode.håndterSøknad(søknad) {
-                when {
-                    forlengelseFraInfotrygd == JA -> AvventerBlokkerendePeriode
-                    vedtaksperiode.harInntektsmelding() && vedtaksperiode.ingenUtbetaling() -> AvsluttetUtenUtbetaling
-                    vedtaksperiode.harInntektsmelding() -> AvventerBlokkerendePeriode
-                    else -> AvventerInntektsmeldingEllerHistorikk
-                }
-            }
-
+            vedtaksperiode.håndterSøknad(søknad) { AvventerInntektsmeldingEllerHistorikk }
             søknad.info("Fullført behandling av søknad")
         }
     }
@@ -1435,18 +1427,8 @@ internal class Vedtaksperiode private constructor(
                     )
                 }
                 onSuccess {
-                    if (vedtaksperiode.forlengelseFraInfotrygd() || vedtaksperiode.forlengelseFraInfotrygd == JA) {
-                        info("Oppdaget at perioden startet i infotrygd")
-                        vedtaksperiode.forlengelseFraInfotrygd = JA
-                        return@onSuccess vedtaksperiode.tilstand(hendelse, AvventerBlokkerendePeriode)
-                            .also {
-                                arbeidsgiver.finnVedtaksperiodeRettEtter(vedtaksperiode)
-                                    ?.håndterInfotrygdforlengelse(hendelse)
-                                vedtaksperiode.kontekst(hendelse)
-                            }
-                    } else if (vedtaksperiode.ingenUtbetaling()) {
-                        vedtaksperiode.tilstand(hendelse, AvsluttetUtenUtbetaling)
-                    }
+                    if (!vedtaksperiode.harInntekt() && !vedtaksperiode.ingenUtbetaling()) return@onSuccess
+                    vedtaksperiode.tilstand(hendelse, AvventerBlokkerendePeriode)
                 }
             }
         }
@@ -1478,7 +1460,8 @@ internal class Vedtaksperiode private constructor(
         override fun nyPeriodeFørMedNyFlyt(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: Søknad) {}
 
         override fun gjenopptaBehandlingNy(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
-            vedtaksperiode.tilstand(hendelse, AvventerHistorikk)
+            val nesteTilstand = if (vedtaksperiode.ingenUtbetaling()) AvsluttetUtenUtbetaling else AvventerHistorikk
+            vedtaksperiode.tilstand(hendelse, nesteTilstand)
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
