@@ -1,9 +1,9 @@
 package no.nav.helse.økonomi
 
+import java.time.LocalDate
 import no.nav.helse.memoize
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
-import java.time.LocalDate
 import kotlin.math.absoluteValue
 import kotlin.math.roundToInt
 
@@ -65,6 +65,10 @@ class Inntekt private constructor(private val årlig: Double) : Comparable<Innte
         val dekningsgrunnlag = Inntekt(this.årlig * regler.dekningsgrad())
         subsumsjonObserver.`§ 8-16 ledd 1`(dagen, regler.dekningsgrad(), this.årlig, dekningsgrunnlag.årlig)
         return dekningsgrunnlag
+    }
+
+    internal fun avgrens(grense: Inntekt): Inntekt {
+        return this.årlig.coerceAtMost(grense.årlig).årlig
     }
 
     internal operator fun times(scalar: Number) = Inntekt(this.årlig * scalar.toDouble())

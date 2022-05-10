@@ -1,5 +1,6 @@
 package no.nav.helse.økonomi
 
+import java.time.LocalDate
 import no.nav.helse.Grunnbeløp
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.SykdomstidslinjeVisitor
@@ -7,13 +8,16 @@ import no.nav.helse.person.UtbetalingsdagVisitor
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.Arbeidsdag
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDag
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.AvvistDag
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavDag
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavHelgDag
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.summer
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import java.time.LocalDate
 import kotlin.math.roundToInt
 import kotlin.properties.Delegates
 
@@ -33,8 +37,8 @@ internal class Økonomi private constructor(
 ) {
 
     companion object {
-        internal val arbeidsgiverBeløp = { økonomi: Økonomi -> økonomi.arbeidsgiverbeløp!! }
-        internal val personBeløp = { økonomi: Økonomi -> økonomi.personbeløp!! }
+        private val arbeidsgiverBeløp = { økonomi: Økonomi -> økonomi.arbeidsgiverbeløp }
+        private val personBeløp = { økonomi: Økonomi -> økonomi.personbeløp }
 
         internal fun sykdomsgrad(grad: Prosentdel) =
             Økonomi(grad)
@@ -55,13 +59,11 @@ internal class Økonomi private constructor(
         }
 
         internal fun betal(økonomiList: List<Økonomi>, virkningsdato: LocalDate): List<Økonomi> = økonomiList.also {
+            val totalSykdomsgrad = totalSykdomsgrad(økonomiList)
+            økonomiList.forEach { økonomi -> økonomi.totalGrad = totalSykdomsgrad }
             delteUtbetalinger(it)
-            økonomiList.forEach { it.totalGrad = totalSykdomsgrad(økonomiList) }
             fordelBeløp(it, virkningsdato)
         }
-
-        private fun maksbeløp(økonomi: Økonomi) =
-            (økonomi.grunnbeløpgrense?.rundTilDaglig()!! * økonomi.totalGrad).rundTilDaglig()
 
         private fun delteUtbetalinger(økonomiList: List<Økonomi>) = økonomiList.forEach { it.betal() }
 
@@ -71,54 +73,56 @@ internal class Økonomi private constructor(
             val total = totalArbeidsgiver + totalPerson
             if (total == INGEN) return økonomiList.forEach { økonomi -> økonomi.er6GBegrenset = false }
 
+            val grunnlagForSykepengegrunnlag = økonomiList.map { økonomi -> økonomi.aktuellDagsinntekt }.summer() // TODO: må få denne fra Vilkårsgrunnlag
+            val grunnbeløp = Grunnbeløp.`6G`.beløp(økonomiList.firstNotNullOf { økonomi -> økonomi.skjæringstidspunkt }, virkningsdato)
+            økonomiList.forEach { it.grunnbeløpgrense = grunnbeløp }
+            val sykepengegrunnlag = grunnlagForSykepengegrunnlag.avgrens(grunnbeløp).rundTilDaglig()
+            val redusert = (sykepengegrunnlag * økonomiList.first().totalGrad).rundTilDaglig()
+            val totalRefusjon = økonomiList.mapNotNull { økonomi -> økonomi.arbeidsgiverbeløp }.summer()
+
+            check(totalRefusjon == totalArbeidsgiver)
+
             check(økonomiList.any { it.skjæringstidspunkt != null }) { "ingen økonomiobjekt har skjæringstidspunkt" }
             check(økonomiList.filter { it.skjæringstidspunkt != null }.distinctBy { it.skjæringstidspunkt }.count() == 1) { "det finnes flere unike skjæringstidspunkt for økonomiobjekt på samme dag" }
 
             val skjæringstidspunkt = økonomiList.firstNotNullOf { it.skjæringstidspunkt }
             økonomiList.forEach { it.grunnbeløpgrense = Grunnbeløp.`6G`.beløp(skjæringstidspunkt, virkningsdato) }
 
-            val grense = maksbeløp(økonomiList.first())
-            fordelArbeidsgiverbeløp(økonomiList, totalArbeidsgiver, grense)
-            fordelPersonbeløp(økonomiList, totalPerson + totalArbeidsgiver - totalArbeidsgiver(økonomiList), grense - totalArbeidsgiver(økonomiList))
-            økonomiList.forEach { økonomi -> økonomi.er6GBegrenset = total > grense }
+            fordelArbeidsgiverbeløp(økonomiList, totalRefusjon, redusert)
+            val forventetPersonbeløp = økonomiList.map { it.dekningsgrunnlag * it.grad() }.summer() - totalArbeidsgiver
+            check(forventetPersonbeløp == totalPerson) {
+                "oh no: $forventetPersonbeløp != $totalPerson"
+            }
+            fordelPersonbeløp(økonomiList, forventetPersonbeløp, (redusert - totalArbeidsgiver(økonomiList)).rundTilDaglig())
+            økonomiList.forEach { økonomi -> økonomi.er6GBegrenset = grunnlagForSykepengegrunnlag > grunnbeløp }
         }
 
-        private fun fordelPersonbeløp(økonomiList: List<Økonomi>, total: Inntekt, budsjett: Inntekt) {
-            val beregningsresultat = beregnUtbetalingFørAvrunding(
-                økonomiList,
-                total,
-                budsjett,
-            ) { it.personbeløp!! }
-
-            beregningsresultat.forEach { it.økonomi.personbeløp = it.utbetalingEtterAvrunding() }
-
-            val totaltRestbeløp =
-                (total.coerceAtMost(budsjett) - totalPerson(økonomiList))
-                    .reflection { _, _, _, dagligInt -> dagligInt }
-
-            beregningsresultat
-                .sortedByDescending { it.differanse() }
-                .take(totaltRestbeløp)
-                .forEach { it.økonomi.personbeløp = it.økonomi.personbeløp!! + 1.daglig }
+        private fun fordelPersonbeløp(økonomiList: List<Økonomi>, total: Inntekt, grense: Inntekt) {
+            val kvotient = reduksjon(grense, total)
+            økonomiList.map { økonomi -> økonomi.personbeløp = økonomi.personbeløp?.times(kvotient) }
+            val totaltRestbeløp = grense.reflection { _, _, _, dagligInt -> dagligInt }
+            fordel(totaltRestbeløp, økonomiList, { økonomi, inntekt -> økonomi.personbeløp = inntekt }, personBeløp)
         }
 
         private fun fordelArbeidsgiverbeløp(økonomiList: List<Økonomi>, total: Inntekt, grense: Inntekt) {
-            val beregningsresultat = beregnUtbetalingFørAvrunding(
-                økonomiList,
-                total,
-                grense
-            ) { it.arbeidsgiverbeløp!! }
+            val kvotient = reduksjon(grense, total)
+            // begrens utbetaling ihht forholdet mellom total refusjon og sykepengegrunnlag (justert for total sykdomsgrad og 6G)
+            økonomiList.map { økonomi -> økonomi.arbeidsgiverbeløp = økonomi.arbeidsgiverbeløp?.times(kvotient) }
+            val totaltRestbeløp = (total * kvotient - økonomiList.mapNotNull { it.arbeidsgiverbeløp?.rundNedTilDaglig() }.summer()).reflection { _, _, _, dagligInt -> dagligInt }
+            fordel(totaltRestbeløp, økonomiList, { økonomi, inntekt -> økonomi.arbeidsgiverbeløp = inntekt }, arbeidsgiverBeløp)
+        }
 
-            beregningsresultat.forEach { it.økonomi.arbeidsgiverbeløp = it.utbetalingEtterAvrunding() }
+        private fun reduksjon(grense: Inntekt, total: Inntekt): Prosentdel {
+            if (total == INGEN) return Prosentdel.NULL_PROSENT
+            return Prosentdel.fraRatio((grense ratio total).coerceAtMost(1.0))
+        }
 
-            val totaltRestbeløp =
-                (total.coerceAtMost(grense) - totalArbeidsgiver(økonomiList))
-                    .reflection { _, _, _, dagligInt -> dagligInt }
-
-            beregningsresultat
-                .sortedByDescending { it.differanse() }
-                .take(totaltRestbeløp)
-                .forEach { it.økonomi.arbeidsgiverbeløp = it.økonomi.arbeidsgiverbeløp!! + 1.daglig }
+        private fun fordel(rest: Int, økonomiList: List<Økonomi>, setter: (Økonomi, Inntekt?) -> Unit, beløpstrategi: (Økonomi) -> Inntekt?) {
+            økonomiList
+                .sortedByDescending { økonomi -> (beløpstrategi(økonomi) ?: INGEN).let { it - it.rundNedTilDaglig() }.reflection { _, _, daglig, _ -> daglig } }
+                .onEach { økonomi -> setter(økonomi, beløpstrategi(økonomi)?.rundNedTilDaglig()) }
+                .take(rest)
+                .forEach { økonomi -> setter(økonomi, beløpstrategi(økonomi)?.plus(1.daglig)) }
         }
 
         private fun beregnUtbetalingFørAvrunding(
