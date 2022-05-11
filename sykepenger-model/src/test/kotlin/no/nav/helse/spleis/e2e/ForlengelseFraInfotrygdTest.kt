@@ -349,8 +349,8 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
         håndterSimulering(2.vedtaksperiode)
         håndterPåminnelse(2.vedtaksperiode, AVVENTER_GODKJENNING, LocalDateTime.now().minusDays(110)) // <-- TIL_INFOTRYGD
 
-        håndterSykmelding(Sykmeldingsperiode(16.april(2020), 7.mai(2020), 50.prosent))
-        håndterSøknad(Sykdom(16.april(2020), 7.mai(2020), 50.prosent))
+        håndterSykmelding(Sykmeldingsperiode(16.april(2020), 7.mai(2020), 100.prosent))
+        håndterSøknad(Sykdom(16.april(2020), 7.mai(2020), 100.prosent))
 
         håndterUtbetalingshistorikk(
             4.vedtaksperiode,
@@ -688,8 +688,8 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
 
     @Test
     fun `Ping-pong med ferie mellom Infotrygd-perioder skal ikke beregne nye skjæringstidspunkt etter ferien`() {
-        håndterSykmelding(Sykmeldingsperiode(26.juni(2020), 26.juli(2020), 60.prosent))
-        håndterSøknad(Sykdom(26.juni(2020), 26.juli(2020), 60.prosent))
+        håndterSykmelding(Sykmeldingsperiode(26.juni(2020), 26.juli(2020), 100.prosent))
+        håndterSøknad(Sykdom(26.juni(2020), 26.juli(2020), 100.prosent))
         val historikk1 = arrayOf(
             ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 10.juni(2020), 25.juni(2020), 100.prosent, 1200.daglig),
         )
@@ -714,8 +714,8 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
             AVSLUTTET
         )
 
-        håndterSykmelding(Sykmeldingsperiode(12.oktober(2020), 8.november(2020), 50.prosent))
-        håndterSøknad(Sykdom(12.oktober(2020), 8.november(2020), 50.prosent))
+        håndterSykmelding(Sykmeldingsperiode(12.oktober(2020), 8.november(2020), 100.prosent))
+        håndterSøknad(Sykdom(12.oktober(2020), 8.november(2020), 100.prosent))
 
         val historikk2 = arrayOf(
             ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 10.juni(2020), 25.juni(2020), 60.prosent, 1200.daglig),
@@ -746,8 +746,8 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
             AVSLUTTET
         )
 
-        håndterSykmelding(Sykmeldingsperiode(9.november(2020), 6.desember(2020), 60.prosent))
-        håndterSøknad(Sykdom(9.november(2020), 6.desember(2020), 60.prosent))
+        håndterSykmelding(Sykmeldingsperiode(9.november(2020), 6.desember(2020), 100.prosent))
+        håndterSøknad(Sykdom(9.november(2020), 6.desember(2020), 100.prosent))
         håndterYtelser(3.vedtaksperiode)
         håndterSimulering(3.vedtaksperiode)
         håndterUtbetalingsgodkjenning(3.vedtaksperiode)

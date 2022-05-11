@@ -66,29 +66,28 @@ internal class Økonomi private constructor(
             fordelBeløp(it, virkningsdato)
         }
 
-        private fun maksbeløp(økonomi: Økonomi) =
-            (økonomi.grunnbeløpgrense?.rundTilDaglig()!! * økonomi.totalGrad).rundTilDaglig()
-
         private fun delteUtbetalinger(økonomiList: List<Økonomi>) = økonomiList.forEach { it.betal() }
 
         private fun fordelBeløp(økonomiList: List<Økonomi>, virkningsdato: LocalDate) {
             val totalArbeidsgiver = totalArbeidsgiver(økonomiList)
             val totalPerson = totalPerson(økonomiList)
-            val total = totalArbeidsgiver + totalPerson
-            if (total == INGEN) return økonomiList.forEach { økonomi -> økonomi.er6GBegrenset = false }
+            if (totalArbeidsgiver + totalPerson == INGEN) return økonomiList.forEach { økonomi -> økonomi.er6GBegrenset = false }
 
             check(økonomiList.any { it.skjæringstidspunkt != null }) { "ingen økonomiobjekt har skjæringstidspunkt" }
             check(økonomiList.filter { it.skjæringstidspunkt != null }.distinctBy { it.skjæringstidspunkt }.count() == 1) { "det finnes flere unike skjæringstidspunkt for økonomiobjekt på samme dag" }
 
             val skjæringstidspunkt = økonomiList.firstNotNullOf { it.skjæringstidspunkt }
-            økonomiList.forEach { it.grunnbeløpgrense = Grunnbeløp.`6G`.beløp(skjæringstidspunkt, virkningsdato) }
 
-            val grense = maksbeløp(økonomiList.first())
-            val sykepengegrunnlag = minOf(total, grense) // TODO: få sykepengegrunnlaget (før 6g) fra Vilkårsgrunnlag
-            fordel(økonomiList, totalArbeidsgiver, sykepengegrunnlag, { økonomi, inntekt -> økonomi.arbeidsgiverbeløp = inntekt }, arbeidsgiverBeløp)
+            val sykepengegrunnlag = økonomiList.map { økonomi -> økonomi.aktuellDagsinntekt }.summer() // TODO: Økonomi må få denne fra Vilkårsgrunnlag når vi setter inntekt
+            val grunnbeløp = Grunnbeløp.`6G`.beløp(skjæringstidspunkt, virkningsdato)
+            økonomiList.forEach { it.grunnbeløpgrense = grunnbeløp }
+            val maks = minOf(sykepengegrunnlag, grunnbeløp).rundTilDaglig()
+            val grense = (maks * økonomiList.first().totalGrad).rundTilDaglig()
+
+            fordel(økonomiList, totalArbeidsgiver, totalArbeidsgiver.coerceAtMost(grense), { økonomi, inntekt -> økonomi.arbeidsgiverbeløp = inntekt }, arbeidsgiverBeløp)
             val totalArbeidsgiverrefusjon = totalArbeidsgiver(økonomiList)
-            fordel(økonomiList, total - totalArbeidsgiverrefusjon, sykepengegrunnlag - totalArbeidsgiverrefusjon, { økonomi, inntekt -> økonomi.personbeløp = inntekt }, personBeløp)
-            økonomiList.forEach { økonomi -> økonomi.er6GBegrenset = total > grense }
+            fordel(økonomiList, totalPerson, grense - totalArbeidsgiverrefusjon, { økonomi, inntekt -> økonomi.personbeløp = inntekt }, personBeløp)
+            økonomiList.forEach { økonomi -> økonomi.er6GBegrenset = sykepengegrunnlag > maks }
         }
 
         private fun fordel(økonomiList: List<Økonomi>, total: Inntekt, grense: Inntekt, setter: (Økonomi, Inntekt?) -> Unit, getter: (Økonomi) -> Inntekt?) {
@@ -96,9 +95,7 @@ internal class Økonomi private constructor(
             val beregningsresultat = økonomiList.map { Beregningsresultat(it, getter(it)?.times(ratio)) }
 
             beregningsresultat.forEach { it.oppdater(setter) }
-
-            val totaltRestbeløp = (total.coerceAtMost(grense) - total(økonomiList, getter))
-                .reflection { _, _, _, dagligInt -> dagligInt }
+            val totaltRestbeløp = (grense - total(økonomiList, getter)).reflection { _, _, _, dagligInt -> dagligInt }
 
             Beregningsresultat.fordel(beregningsresultat, totaltRestbeløp, setter, getter)
         }
