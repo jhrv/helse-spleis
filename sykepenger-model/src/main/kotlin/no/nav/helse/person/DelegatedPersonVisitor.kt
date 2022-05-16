@@ -265,6 +265,35 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         )
     }
 
+    override fun previsitGrunnbeløp(
+        grunnbeløp: Inntekt,
+        virkingstidspunkt: LocalDate,
+        virkningstidspunktSomMinsteinntekt: LocalDate,
+        faktor: Double,
+        utregnet: Inntekt
+    ) {
+        delegatee.previsitGrunnbeløp(grunnbeløp, virkingstidspunkt, virkningstidspunktSomMinsteinntekt, faktor, utregnet)
+    }
+
+    override fun postvisitGrunnbeløp(
+        grunnbeløp: Inntekt,
+        virkingstidspunkt: LocalDate,
+        virkningstidspunktSomMinsteinntekt: LocalDate,
+        faktor: Double,
+        utregnet: Inntekt
+    ) {
+        delegatee.postvisitGrunnbeløp(grunnbeløp, virkingstidspunkt, virkningstidspunktSomMinsteinntekt, faktor, utregnet)
+    }
+
+
+    override fun preVisitMinsteinntekt() {
+        delegatee.preVisitMinsteinntekt()
+    }
+
+    override fun postVisitMinsteinntekt() {
+        delegatee.postVisitMinsteinntekt()
+    }
+
     override fun preVisitInfotrygdVilkårsgrunnlag(
         infotrygdVilkårsgrunnlag: VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag,
         skjæringstidspunkt: LocalDate,

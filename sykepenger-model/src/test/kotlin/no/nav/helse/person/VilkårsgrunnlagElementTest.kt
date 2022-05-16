@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.YearMonth
 import java.util.*
+import no.nav.helse.Grunnbeløp
 
 internal class VilkårsgrunnlagElementTest {
 
@@ -54,6 +55,7 @@ internal class VilkårsgrunnlagElementTest {
             avviksprosent = avviksprosent,
             opptjening = Opptjening.opptjening(emptyList(), 1.januar, MaskinellJurist()),
             medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
+            minsteinntekt = Grunnbeløp.FastsattGrunnbeløp.minsteinntekt(1.januar),
             harMinimumInntekt = true,
             vurdertOk = true,
             meldingsreferanseId = UUID.randomUUID(),

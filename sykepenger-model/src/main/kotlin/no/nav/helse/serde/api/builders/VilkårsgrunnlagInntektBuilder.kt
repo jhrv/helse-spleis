@@ -8,6 +8,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.*
+import no.nav.helse.MinsteinntektVisitor
 
 internal class VilkårsgrunnlagInntektBuilder(private val person: Person) {
     private val nøkkeldataOmInntekter = mutableListOf<NøkkeldataOmInntekt>()
@@ -54,7 +55,7 @@ internal class VilkårsgrunnlagInntektBuilder(private val person: Person) {
                 avviksprosent = nøkkeldata.avviksprosent,
                 maksUtbetalingPerDag = sykepengegrunnlag.reflection { _, _, daglig, _ -> daglig },
                 inntekter = arbeidsgiverinntekt + arbeidsgivereMedBareSammenligningsgrunnlag,
-                oppfyllerKravOmMinstelønn = sykepengegrunnlag > person.minimumInntekt(nøkkeldata.skjæringstidspunkt),
+                oppfyllerKravOmMinstelønn = sykepengegrunnlag > MinsteinntektVisitor(person.minimumInntekt(nøkkeldata.skjæringstidspunkt)).minsteinntekt(),
                 grunnbeløp = (Grunnbeløp.`1G`
                     .beløp(nøkkeldata.skjæringstidspunkt, nøkkeldata.sisteDagISammenhengendePeriode)
                     .reflection { årlig, _, _, _ -> årlig })

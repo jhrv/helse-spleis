@@ -18,6 +18,7 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
+import no.nav.helse.Grunnbeløp
 
 internal class VilkårsgrunnlagHistorikkInnslagTest {
     private lateinit var innslag: VilkårsgrunnlagHistorikk.Innslag
@@ -120,6 +121,7 @@ internal class VilkårsgrunnlagHistorikkInnslagTest {
                 true -> Medlemskapsvurdering.Medlemskapstatus.Ja
                 false -> Medlemskapsvurdering.Medlemskapstatus.Nei
             },
+            minsteinntekt = Grunnbeløp.FastsattGrunnbeløp.minsteinntekt(skjæringstidspunkt),
             harMinimumInntekt = harMinimumInntekt,
             vurdertOk = vurdertOk,
             meldingsreferanseId = UUID.randomUUID(),

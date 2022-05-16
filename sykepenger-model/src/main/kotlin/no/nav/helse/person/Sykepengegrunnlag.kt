@@ -76,7 +76,7 @@ internal class Sykepengegrunnlag(
         val oppfyltKravTilMinimumInntekt = oppfyllerKravTilMinimumInntekt(person.minimumInntekt(skjæringstidspunkt))
         person.oppdaterHarMinimumInntekt(skjæringstidspunkt, grunnlagsdata, oppfyltKravTilMinimumInntekt)
     }
-    internal fun oppfyllerKravTilMinimumInntekt(minimumInntekt: Inntekt) = grunnlagForSykepengegrunnlag >= minimumInntekt
+    internal fun oppfyllerKravTilMinimumInntekt(minimumInntekt: Grunnbeløp.FastsattGrunnbeløp) =  minimumInntekt <= grunnlagForSykepengegrunnlag
 
     override fun equals(other: Any?): Boolean {
         if (other !is Sykepengegrunnlag) return false

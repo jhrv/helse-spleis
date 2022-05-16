@@ -1,23 +1,27 @@
 package no.nav.helse.hendelser
 
-import no.nav.helse.Fødselsnummer
+import java.time.LocalDate
+import no.nav.helse.Grunnbeløp
+import no.nav.helse.MinsteinntektVisitor
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.Sykepengegrunnlag
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
-import java.time.LocalDate
+import no.nav.helse.utbetalingstidslinje.Alder
+import no.nav.helse.økonomi.Inntekt
 
 internal fun validerMinimumInntekt(
     aktivitetslogg: IAktivitetslogg,
-    fødselsnummer: Fødselsnummer,
+    minsteinntekt: Grunnbeløp.FastsattGrunnbeløp,
+    alder: Alder,
     skjæringstidspunkt: LocalDate,
     grunnlagForSykepengegrunnlag: Sykepengegrunnlag,
     subsumsjonObserver: SubsumsjonObserver
 ): Boolean {
-    val alder = fødselsnummer.alder()
-    val minimumInntekt = alder.minimumInntekt(skjæringstidspunkt)
-    val oppfylt = grunnlagForSykepengegrunnlag.oppfyllerKravTilMinimumInntekt(minimumInntekt)
+
+    val oppfylt = grunnlagForSykepengegrunnlag.oppfyllerKravTilMinimumInntekt(minsteinntekt)
     val grunnlag = grunnlagForSykepengegrunnlag.grunnlagForSykepengegrunnlag
     val alderPåSkjæringstidspunkt = alder.alderPåDato(skjæringstidspunkt)
+    val minimumInntekt = MinsteinntektVisitor(minsteinntekt).minsteinntekt()
 
     if (alder.forhøyetInntektskrav(skjæringstidspunkt))
         subsumsjonObserver.`§ 8-51 ledd 2`(oppfylt, skjæringstidspunkt, alderPåSkjæringstidspunkt, grunnlag, minimumInntekt)

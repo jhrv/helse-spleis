@@ -134,10 +134,11 @@ internal class MinimumInntektsvurderingTest {
         assertTrue(
             validerMinimumInntekt(
                 aktivitetslogg = aktivitetslogg,
-                fødselsnummer = fødselsnummer,
                 skjæringstidspunkt = skjæringstidspunkt,
                 grunnlagForSykepengegrunnlag = sykepengegrunnlag(skjæringstidspunkt, beløp),
-                MaskinellJurist()
+                minsteinntekt = fødselsnummer.alder().minimumInntekt(skjæringstidspunkt),
+                alder = fødselsnummer.alder(),
+                subsumsjonObserver = MaskinellJurist()
             )
         )
         assertFalse(aktivitetslogg.hasWarningsOrWorse())
@@ -152,10 +153,11 @@ internal class MinimumInntektsvurderingTest {
         assertFalse(
             validerMinimumInntekt(
                 aktivitetslogg = aktivitetslogg,
-                fødselsnummer = fødselsnummer,
                 skjæringstidspunkt = skjæringstidspunkt,
                 grunnlagForSykepengegrunnlag = sykepengegrunnlag(skjæringstidspunkt, beløp),
-                MaskinellJurist()
+                minsteinntekt = fødselsnummer.alder().minimumInntekt(skjæringstidspunkt),
+                alder = fødselsnummer.alder(),
+                subsumsjonObserver = MaskinellJurist()
             )
         )
         assertTrue(aktivitetslogg.hasWarningsOrWorse())

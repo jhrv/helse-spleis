@@ -61,7 +61,17 @@ class Vilkårsgrunnlag(
         )
         val opptjeningvurderingOk = opptjening.valider(this)
         val medlemskapsvurderingOk = medlemskapsvurdering.valider(this)
-        val minimumInntektvurderingOk = validerMinimumInntekt(this, fødselsnummer.somFødselsnummer(), skjæringstidspunkt, grunnlagForSykepengegrunnlag, subsumsjonObserver)
+
+        val minsteinntekt = fødselsnummer.somFødselsnummer().alder().minimumInntekt(skjæringstidspunkt)
+
+        val minimumInntektvurderingOk = validerMinimumInntekt(
+            this,
+            minsteinntekt,
+            fødselsnummer.somFødselsnummer().alder(),
+            skjæringstidspunkt,
+            grunnlagForSykepengegrunnlag,
+            subsumsjonObserver
+        )
 
         grunnlagsdata = VilkårsgrunnlagHistorikk.Grunnlagsdata(
             skjæringstidspunkt = skjæringstidspunkt,
@@ -70,6 +80,7 @@ class Vilkårsgrunnlag(
             avviksprosent = inntektsvurdering.avviksprosent(),
             opptjening = opptjening,
             medlemskapstatus = medlemskapsvurdering.medlemskapstatus,
+            minsteinntekt = minsteinntekt,
             harMinimumInntekt = minimumInntektvurderingOk,
             vurdertOk = inntektsvurderingOk && opptjeningvurderingOk && medlemskapsvurderingOk && minimumInntektvurderingOk,
             meldingsreferanseId = meldingsreferanseId(),

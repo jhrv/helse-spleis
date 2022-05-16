@@ -41,7 +41,9 @@ internal class Alder(private val fødselsdato: LocalDate) {
 
     private fun alderVedSluttenAvÅret(year: Year) = YEARS.between(Year.from(fødselsdato), year).toInt()
 
-    internal fun minimumInntekt(dato: LocalDate) = (if (forhøyetInntektskrav(dato)) Grunnbeløp.`2G` else Grunnbeløp.halvG).minsteinntekt(dato)
+    internal fun minimumInntekt(dato: LocalDate): Grunnbeløp.FastsattGrunnbeløp =
+        if (forhøyetInntektskrav(dato)) Grunnbeløp.FastsattGrunnbeløp.minsteinntektForhøyet(dato)
+        else Grunnbeløp.FastsattGrunnbeløp.minsteinntekt(dato)
 
     // Forhøyet inntektskrav gjelder fra dagen _etter_ 67-årsdagen - se § 8-51 andre ledd der det spesifiseres _mellom_.
     internal fun forhøyetInntektskrav(dato: LocalDate) = dato > forhøyetInntektskravAlder

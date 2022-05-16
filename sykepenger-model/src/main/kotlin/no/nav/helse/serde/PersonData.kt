@@ -6,6 +6,7 @@ import java.time.LocalDateTime
 import java.time.Year
 import java.time.YearMonth
 import java.util.UUID
+import no.nav.helse.Grunnbeløp
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Simulering
@@ -254,6 +255,7 @@ internal data class PersonData(
         private val avviksprosent: Double?,
         private val opptjening: OpptjeningData?,
         private val medlemskapstatus: JsonMedlemskapstatus?,
+        private val minsteinntekt: FastsattGrunnbeløpData,
         private val harMinimumInntekt: Boolean?,
         private val vurdertOk: Boolean?,
         private val meldingsreferanseId: UUID?,
@@ -271,6 +273,7 @@ internal data class PersonData(
                     JsonMedlemskapstatus.NEI -> Medlemskapsvurdering.Medlemskapstatus.Nei
                     JsonMedlemskapstatus.VET_IKKE -> Medlemskapsvurdering.Medlemskapstatus.VetIkke
                 },
+                minsteinntekt = minsteinntekt.tilFastsatt(),
                 harMinimumInntekt = harMinimumInntekt,
                 vurdertOk = vurdertOk!!,
                 meldingsreferanseId = meldingsreferanseId,
@@ -354,6 +357,16 @@ internal data class PersonData(
                     }
                 }
             }
+        }
+
+        internal data class FastsattGrunnbeløpData(
+            private val grunnbeløp: Double,
+            private val virkingstidspunkt: LocalDate,
+            private val virkningstidspunktSomMinsteinntekt: LocalDate,
+            private val faktor: Double
+        ) {
+            internal fun tilFastsatt() =
+                Grunnbeløp.FastsattGrunnbeløp.deserialiser(grunnbeløp, virkingstidspunkt, virkningstidspunktSomMinsteinntekt, faktor)
         }
     }
 

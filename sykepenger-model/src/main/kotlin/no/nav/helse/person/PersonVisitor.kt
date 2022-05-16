@@ -46,6 +46,7 @@ import java.time.LocalDateTime
 import java.time.Year
 import java.time.YearMonth
 import java.util.*
+import no.nav.helse.Grunnbeløp
 
 internal interface PersonVisitor : ArbeidsgiverVisitor, AktivitetsloggVisitor, VilkårsgrunnlagHistorikkVisitor, InfotrygdhistorikkVisitor {
     fun preVisitPerson(
@@ -121,7 +122,7 @@ internal interface FeriepengeutbetalingsperiodeVisitor {
     fun visitArbeidsgiverutbetalingsperiode(orgnr: String, periode: Periode, beløp: Int, utbetalt: LocalDate) {}
 }
 
-internal interface VilkårsgrunnlagHistorikkVisitor : InntekthistorikkVisitor, ArbeidsforholdVisitor {
+internal interface VilkårsgrunnlagHistorikkVisitor : InntekthistorikkVisitor, ArbeidsforholdVisitor, Grunnbeløp.FastsattGrunnbeløpVisitor {
     fun preVisitVilkårsgrunnlagHistorikk() {}
     fun preVisitInnslag(innslag: VilkårsgrunnlagHistorikk.Innslag, id: UUID, opprettet: LocalDateTime) {}
     fun postVisitInnslag(innslag: VilkårsgrunnlagHistorikk.Innslag, id: UUID, opprettet: LocalDateTime) {}
@@ -151,6 +152,8 @@ internal interface VilkårsgrunnlagHistorikkVisitor : InntekthistorikkVisitor, A
         meldingsreferanseId: UUID?,
         vilkårsgrunnlagId: UUID
     ) {}
+    fun preVisitMinsteinntekt() {}
+    fun postVisitMinsteinntekt() {}
     fun preVisitInfotrygdVilkårsgrunnlag(
         infotrygdVilkårsgrunnlag: VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag,
         skjæringstidspunkt: LocalDate,

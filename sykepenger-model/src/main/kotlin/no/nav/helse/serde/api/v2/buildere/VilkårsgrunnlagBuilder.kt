@@ -15,6 +15,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.*
+import no.nav.helse.MinsteinntektVisitor
 import kotlin.properties.Delegates
 
 private typealias VilkårsgrunnlagHistorikkId = UUID
@@ -167,7 +168,7 @@ internal class VilkårsgrunnlagBuilder(
             medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus
         ) {
             val compositeSykepengegrunnlag = SykepengegrunnlagBuilder(sykepengegrunnlag, sammenligningsgrunnlagBuilder, skjæringstidspunkt, inntektshistorikkForAordningenBuilder).build()
-            val minimumInntekt = InntektBuilder(person.minimumInntekt(skjæringstidspunkt)).build()
+            val minimumInntekt = InntektBuilder(MinsteinntektVisitor(person.minimumInntekt(skjæringstidspunkt)).minsteinntekt()).build()
             val grunnbeløp = InntektBuilder(Grunnbeløp.`1G`.beløp(skjæringstidspunkt)).build()
             val oppfyllerKravOmMedlemskap = when (medlemskapstatus) {
                 Medlemskapsvurdering.Medlemskapstatus.Ja -> true

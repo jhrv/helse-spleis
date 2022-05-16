@@ -6,6 +6,7 @@ import java.time.LocalDate
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.utbetalingstidslinje.Alder
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
+import kotlin.math.min
 
 internal class Grunnbeløp private constructor(private val multiplier: Double) {
     private val grunnbeløp = listOf(
@@ -124,7 +125,7 @@ internal class Grunnbeløp private constructor(private val multiplier: Double) {
         }
     }
 
-    private class HistoriskGrunnbeløp(private val beløp: Inntekt, private val gyldigFra: LocalDate, private val virkningsdato: LocalDate = gyldigFra, private val gyldigMinsteinntektKrav: LocalDate) {
+    private class HistoriskGrunnbeløp( val beløp: Inntekt, val gyldigFra: LocalDate, val virkningsdato: LocalDate = gyldigFra, val gyldigMinsteinntektKrav: LocalDate) {
         init {
             require(virkningsdato >= gyldigFra) { "Virkningsdato må være nyere eller lik gyldighetstidspunktet" }
             require(gyldigMinsteinntektKrav >= gyldigFra) { "Virkningsdato for kravet til minsteinntekt må være nyere eller lik gyldighetstidspunktet" }
@@ -149,5 +150,93 @@ internal class Grunnbeløp private constructor(private val multiplier: Double) {
         }
 
         fun beløp(multiplier: Double) = beløp * multiplier
+    }
+
+
+    internal interface FastsattGrunnbeløpVisitor {
+        fun visitGrunnbeløp(grunnbeløp: Inntekt, virkingstidspunkt: LocalDate, virkningstidspunktSomMinsteinntekt: LocalDate, faktor: Double, utregnet: Inntekt) {}
+        fun previsitGrunnbeløp(
+            grunnbeløp: Inntekt,
+            virkingstidspunkt: LocalDate,
+            virkningstidspunktSomMinsteinntekt: LocalDate,
+            faktor: Double,
+            utregnet: Inntekt,
+        ) {}
+        fun postvisitGrunnbeløp(
+            grunnbeløp: Inntekt,
+            virkingstidspunkt: LocalDate,
+            virkningstidspunktSomMinsteinntekt: LocalDate,
+            faktor: Double,
+            utregnet: Inntekt,
+        ) {}
+    }
+
+    internal class FastsattGrunnbeløp private constructor(private val grunnbeløp: HistoriskGrunnbeløp, private val multiplier: Double): Comparable<Inntekt>  {
+
+        companion object {
+            internal fun minsteinntekt(skjæringstidspunkt: LocalDate): FastsattGrunnbeløp {
+                val historiskGrunnbeløp = HistoriskGrunnbeløp.
+                gjeldendeMinsteinntektGrunnbeløp(Grunnbeløp(1.0).grunnbeløp, skjæringstidspunkt)
+                return FastsattGrunnbeløp(historiskGrunnbeløp, 0.5)
+            }
+            internal fun minsteinntektForhøyet(skjæringstidspunkt: LocalDate): FastsattGrunnbeløp {
+                val historiskGrunnbeløp = HistoriskGrunnbeløp.
+                gjeldendeMinsteinntektGrunnbeløp(Grunnbeløp(1.0).grunnbeløp, skjæringstidspunkt)
+                return FastsattGrunnbeløp(historiskGrunnbeløp, 2.0)
+            }
+            internal fun sykepengegrunnlagBregrensing(skjæringstidspunkt: LocalDate) {}
+
+            internal fun deserialiser(
+                grunnbeløp: Double,
+                virkingstidspunkt: LocalDate,
+                virkningstidspunktSomMinsteinntekt: LocalDate,
+                faktor: Double,
+            ) = FastsattGrunnbeløp(grunnbeløp.årlig.gyldigFra(virkingstidspunkt, virkningstidspunktSomMinsteinntekt), faktor)
+        }
+
+        override fun compareTo(other: Inntekt) =
+            if (grunnbeløp.beløp(multiplier) == other) 0 else grunnbeløp.beløp(multiplier).compareTo(other)
+
+
+        fun accept(visitor: FastsattGrunnbeløpVisitor) {
+            visitor.previsitGrunnbeløp(
+                grunnbeløp.beløp,
+                grunnbeløp.gyldigFra,
+                grunnbeløp.gyldigMinsteinntektKrav,
+                multiplier,
+                grunnbeløp.beløp(multiplier)
+            )
+            visitor.postvisitGrunnbeløp(
+                grunnbeløp.beløp,
+                grunnbeløp.gyldigFra,
+                grunnbeløp.gyldigMinsteinntektKrav,
+                multiplier,
+                grunnbeløp.beløp(multiplier)
+            )
+        }
+    }
+}
+
+
+// TODO: Slett etter refaktor er ferdig
+internal class MinsteinntektVisitor(grunnbeløp: Grunnbeløp.FastsattGrunnbeløp) : Grunnbeløp.FastsattGrunnbeløpVisitor {
+    private lateinit var minsteinntekt: Inntekt
+
+    init {
+        grunnbeløp.accept(this)
+    }
+
+    fun minsteinntekt(): Inntekt {
+        return minsteinntekt
+    }
+
+    override fun postvisitGrunnbeløp(
+        grunnbeløp: Inntekt,
+        virkingstidspunkt: LocalDate,
+        virkningstidspunktSomMinsteinntekt: LocalDate,
+        faktor: Double,
+        utregnet: Inntekt
+    ) {
+        minsteinntekt = utregnet
     }
 }

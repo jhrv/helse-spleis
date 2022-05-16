@@ -678,7 +678,7 @@ class Person private constructor(
 
     private fun arbeidsgivereMedSykdom() = arbeidsgivere.filter(Arbeidsgiver::harSykdom)
 
-    internal fun minimumInntekt(skjæringstidspunkt: LocalDate): Inntekt = fødselsnummer.alder().minimumInntekt(skjæringstidspunkt)
+    internal fun minimumInntekt(skjæringstidspunkt: LocalDate) = fødselsnummer.alder().minimumInntekt(skjæringstidspunkt)
 
     internal fun kunOvergangFraInfotrygd(vedtaksperiode: Vedtaksperiode) =
         Arbeidsgiver.kunOvergangFraInfotrygd(arbeidsgivere, vedtaksperiode)
@@ -848,15 +848,18 @@ class Person private constructor(
             hendelse.warn("Perioden er avslått på grunn av manglende opptjening")
         }
 
+        val minsteinntekt = fødselsnummer.alder().minimumInntekt(skjæringstidspunkt)
+
         when (val grunnlag = vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt)) {
             is VilkårsgrunnlagHistorikk.Grunnlagsdata -> {
-                val harMinimumInntekt = validerMinimumInntekt(hendelse, fødselsnummer, skjæringstidspunkt, sykepengegrunnlag, subsumsjonObserver)
+                val harMinimumInntekt = validerMinimumInntekt(hendelse, minsteinntekt, fødselsnummer.alder(), skjæringstidspunkt, sykepengegrunnlag, subsumsjonObserver)
                 val grunnlagselement = grunnlag.kopierGrunnlagsdataMed(
                     sykepengegrunnlag = sykepengegrunnlag,
                     sammenligningsgrunnlag = sammenligningsgrunnlag,
                     sammenligningsgrunnlagVurdering = harAkseptabeltAvvik,
                     avviksprosent = avviksprosent,
                     nyOpptjening = opptjening,
+                    minsteinntekt = minsteinntekt,
                     minimumInntektVurdering = harMinimumInntekt,
                     meldingsreferanseId = hendelse.meldingsreferanseId()
                 )

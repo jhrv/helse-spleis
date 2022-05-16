@@ -880,6 +880,11 @@ internal class JsonBuilder : AbstractBuilder() {
         private val sykepengegrunnlagMap = mutableMapOf<String, Any>()
         private val sammenligningsgrunnlagMap = mutableMapOf<String, Any>()
         private val opptjeningMap = mutableMapOf<String, Any>()
+        private val minsteinntektMap = mutableMapOf<String, Any>()
+
+        override fun preVisitMinsteinntekt() {
+            pushState(FastsattGrunnbeløpState(minsteinntektMap))
+        }
 
         override fun preVisitSykepengegrunnlag(
             sykepengegrunnlag1: Sykepengegrunnlag,
@@ -941,12 +946,33 @@ internal class JsonBuilder : AbstractBuilder() {
                         Medlemskapsvurdering.Medlemskapstatus.Nei -> JsonMedlemskapstatus.NEI
                         Medlemskapsvurdering.Medlemskapstatus.VetIkke -> JsonMedlemskapstatus.VET_IKKE
                     },
+                    "minsteinntekt" to minsteinntektMap,
                     "harMinimumInntekt" to harMinimumInntekt,
                     "vurdertOk" to vurdertOk,
                     "meldingsreferanseId" to meldingsreferanseId,
                     "vilkårsgrunnlagId" to vilkårsgrunnlagId
                 )
             )
+            popState()
+        }
+    }
+
+    class FastsattGrunnbeløpState(private val fastsatt: MutableMap<String, Any>) : BuilderState() {
+
+        override fun postvisitGrunnbeløp(
+            grunnbeløp: Inntekt,
+            virkingstidspunkt: LocalDate,
+            virkningstidspunktSomMinsteinntekt: LocalDate,
+            faktor: Double,
+            utregnet: Inntekt
+        ) {
+            fastsatt.putAll(mapOf(
+                "grunnbeløp" to grunnbeløp.reflection { årlig, _, _, _ -> årlig },
+                "virkingstidspunkt" to virkingstidspunkt,
+                "virkningstidspunktSomMinsteinntekt" to virkningstidspunktSomMinsteinntekt,
+                "faktor" to faktor,
+                "utregnet" to utregnet.reflection { årlig, _, _, _ -> årlig }
+            ))
             popState()
         }
     }

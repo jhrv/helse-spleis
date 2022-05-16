@@ -3,6 +3,7 @@ package no.nav.helse.spleis.e2e
 import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
+import no.nav.helse.Grunnbeløp
 import no.nav.helse.april
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
@@ -372,6 +373,7 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
             avviksprosent = Prosent.prosent(0.0),
             opptjening = Opptjening.opptjening(emptyList(), 1.januar, MaskinellJurist()),
             medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
+            minsteinntekt = Grunnbeløp.FastsattGrunnbeløp.minsteinntekt(1.januar),
             harMinimumInntekt = null,
             vurdertOk = true,
             meldingsreferanseId = UUID.randomUUID(),

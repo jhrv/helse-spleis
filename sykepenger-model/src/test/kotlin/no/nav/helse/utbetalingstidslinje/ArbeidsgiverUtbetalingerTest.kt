@@ -5,6 +5,7 @@ import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
 import no.nav.helse.Fødselsnummer
+import no.nav.helse.Grunnbeløp
 import no.nav.helse.april
 import no.nav.helse.desember
 import no.nav.helse.februar
@@ -93,6 +94,7 @@ internal class ArbeidsgiverUtbetalingerTest {
             avviksprosent = Prosent.prosent(0.0),
             opptjening = Opptjening.opptjening(emptyList(), 1.januar, MaskinellJurist()),
             medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
+            minsteinntekt = Grunnbeløp.FastsattGrunnbeløp.minsteinntekt(1.januar),
             harMinimumInntekt = false,
             vurdertOk = false,
             meldingsreferanseId = UUID.randomUUID(),
@@ -335,6 +337,7 @@ internal class ArbeidsgiverUtbetalingerTest {
                 avviksprosent = Prosent.prosent(0.0),
                 opptjening = Opptjening.opptjening(emptyList(), 1.januar, MaskinellJurist()),
                 medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
+                minsteinntekt = Grunnbeløp.FastsattGrunnbeløp.minsteinntekt(1.januar),
                 harMinimumInntekt = true,
                 vurdertOk = true,
                 meldingsreferanseId = UUID.randomUUID(),
