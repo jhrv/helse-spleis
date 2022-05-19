@@ -6,6 +6,7 @@ import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.erHelg
 import no.nav.helse.økonomi.Økonomi
 import java.time.LocalDate
+import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 
 internal class Arbeidsgiverperiodesubsumsjon(
     private val other: ArbeidsgiverperiodeMediator,
@@ -46,11 +47,11 @@ internal class Arbeidsgiverperiodesubsumsjon(
         other.arbeidsgiverperiodedag(dato, økonomi)
     }
 
-    override fun utbetalingsdag(dato: LocalDate, økonomi: Økonomi) {
+    override fun utbetalingsdag(dato: LocalDate, økonomi: Økonomi, kilde: SykdomstidslinjeHendelse.Hendelseskilde) {
         // på første navdag etter fullført agp
         if (dato.erHelg()) subsumsjonObserver.`§ 8-11 første ledd`(dato)
         else tilstand.utbetalingsdag(this, dato, økonomi)
-        other.utbetalingsdag(dato, økonomi)
+        other.utbetalingsdag(dato, økonomi, kilde)
     }
 
     override fun arbeidsgiverperiodeAvbrutt() {

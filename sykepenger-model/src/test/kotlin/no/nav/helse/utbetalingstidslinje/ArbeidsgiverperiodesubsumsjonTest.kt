@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
+import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 
 internal class ArbeidsgiverperiodesubsumsjonTest {
     @Test
@@ -258,7 +259,7 @@ internal class ArbeidsgiverperiodesubsumsjonTest {
             arbeidsgiverperiodedager += 1
         }
 
-        override fun utbetalingsdag(dato: LocalDate, økonomi: Økonomi) {
+        override fun utbetalingsdag(dato: LocalDate, økonomi: Økonomi, kilde: SykdomstidslinjeHendelse.Hendelseskilde) {
             utbetalingsdager += 1
         }
 

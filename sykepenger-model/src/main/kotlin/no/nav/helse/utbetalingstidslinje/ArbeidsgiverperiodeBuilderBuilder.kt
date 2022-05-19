@@ -1,9 +1,10 @@
 package no.nav.helse.utbetalingstidslinje
 
+import java.time.LocalDate
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.somPeriode
+import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.økonomi.Økonomi
-import java.time.LocalDate
 
 internal class ArbeidsgiverperiodeBuilderBuilder() : ArbeidsgiverperiodeMediator {
     private val perioder = mutableListOf<Periode>()
@@ -36,7 +37,7 @@ internal class ArbeidsgiverperiodeBuilderBuilder() : ArbeidsgiverperiodeMediator
     override fun arbeidsdag(dato: LocalDate) {
         aktivArbeidsgiverperiode?.kjentDag(dato)
     }
-    override fun utbetalingsdag(dato: LocalDate, økonomi: Økonomi) {
+    override fun utbetalingsdag(dato: LocalDate, økonomi: Økonomi, kilde: SykdomstidslinjeHendelse.Hendelseskilde) {
         // lager en fiktig arbeidsgiverperiode for Infotrygd-perioder, eller
         // andre tilfeller hvor arbeidsgiverperioden består av 0 dager
         aktivArbeidsgiverperiode?.utbetalingsdag(dato) ?: Arbeidsgiverperiode.fiktiv(dato).also {

@@ -4,6 +4,7 @@ import no.nav.helse.utbetalingstidslinje.ArbeidsgiverperiodeMediator
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.økonomi.Økonomi
 import java.time.LocalDate
+import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 
 internal class InfotrygdUtbetalingstidslinjedekoratør(
     private val other: ArbeidsgiverperiodeMediator,
@@ -24,9 +25,9 @@ internal class InfotrygdUtbetalingstidslinjedekoratør(
         other.arbeidsgiverperiodedag(dato, økonomi)
     }
 
-    override fun utbetalingsdag(dato: LocalDate, økonomi: Økonomi) {
+    override fun utbetalingsdag(dato: LocalDate, økonomi: Økonomi, kilde: SykdomstidslinjeHendelse.Hendelseskilde) {
         if (dato < førsteDag) return
-        other.utbetalingsdag(dato, økonomi)
+        other.utbetalingsdag(dato, økonomi, kilde)
     }
 
     override fun foreldetDag(dato: LocalDate, økonomi: Økonomi) {
