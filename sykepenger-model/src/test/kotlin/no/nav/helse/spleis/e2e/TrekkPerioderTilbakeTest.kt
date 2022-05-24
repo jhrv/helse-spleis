@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e
 
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Inntektsvurdering
@@ -89,6 +90,34 @@ internal class TrekkPerioderTilbakeTest : AbstractEndToEndTest() {
         )
         assertNoErrors()
         assertNoWarnings()
+    }
+
+
+    @Test
+    fun `Trekker periode tilbake med etterfølgende periode - etterfølgende periode treffes av IM og bruker default håndtering`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        val inntektsmeldingId = håndterInntektsmelding(listOf(1.januar til 16.januar))
+        assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
+
+
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
+        assertTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
+
+        håndterPåminnelse(1.vedtaksperiode, AVVENTER_HISTORIKK)
+        assertTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
+        håndterInntektsmeldingReplay(inntektsmeldingId, 1.vedtaksperiode.id(ORGNUMMER))
+
+        assertForventetFeil(
+            forklaring = "Her er det ikke korrigert IM",
+            nå = {
+                assertWarning("Mottatt flere inntektsmeldinger - den første inntektsmeldingen som ble mottatt er lagt til grunn. Utbetal kun hvis det blir korrekt.")
+            },
+            ønsket = {
+                assertNoWarnings()
+            }
+        )
     }
 
     @Test
