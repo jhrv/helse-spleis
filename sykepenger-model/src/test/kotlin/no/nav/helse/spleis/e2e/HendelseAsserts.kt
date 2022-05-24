@@ -48,7 +48,7 @@ internal fun AbstractEndToEndTest.assertAlleBehovBesvart() {
 
 internal inline fun <reified R : Utbetalingstidslinje.Utbetalingsdag> assertUtbetalingsdag(dag: Utbetalingstidslinje.Utbetalingsdag, expectedDagtype: KClass<R>, expectedTotalgrad: Double = 100.0) {
     dag.let {
-        it.økonomi.medData { _, _, _, _, totalGrad, _, _, _, _ ->
+        it.økonomi.medData { _, _, _, _, totalGrad, _, _, _, _, _ ->
             assertEquals(expectedTotalgrad, totalGrad)
         }
         assertEquals(it::class, expectedDagtype)
@@ -65,7 +65,7 @@ internal fun AbstractEndToEndTest.assertUtbetalingsbeløp(
     val utbetalingstidslinje = inspektør(orgnummer).utbetalingstidslinjer(vedtaksperiodeIdInnhenter).let { subset?.let(it::subset) ?: it }
 
     utbetalingstidslinje.filterNot { it.dato.erHelg() }.forEach {
-        it.økonomi.medAvrundetData { _, arbeidsgiverRefusjonsbeløp, _, _, _, _, arbeidsgiverbeløp, personbeløp, _ ->
+        it.økonomi.medAvrundetData { _, arbeidsgiverRefusjonsbeløp, _, _, _, _, arbeidsgiverbeløp, personbeløp, _, _ ->
             assertEquals(forventetArbeidsgiverbeløp, arbeidsgiverbeløp)
             assertEquals(forventetArbeidsgiverRefusjonsbeløp, arbeidsgiverRefusjonsbeløp)
             assertEquals(0, personbeløp)

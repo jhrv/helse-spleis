@@ -33,6 +33,7 @@ import no.nav.helse.person.VilkårsgrunnlagHistorikkVisitor
 import no.nav.helse.serde.api.AktivitetDTO
 import no.nav.helse.serde.api.AlderDTO
 import no.nav.helse.serde.api.DagtypeDTO
+import no.nav.helse.serde.api.GrunnbeløpDTO
 import no.nav.helse.serde.api.GrunnlagsdataDTO
 import no.nav.helse.serde.api.MedlemskapstatusDTO
 import no.nav.helse.serde.api.OpptjeningDTO
@@ -54,6 +55,7 @@ import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetaling.Utbetalingtype
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt
+import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosent
 
 internal class VedtaksperiodeBuilder(
@@ -71,7 +73,7 @@ internal class VedtaksperiodeBuilder(
     private val fødselsnummer: String,
     private val hendelseIder: Set<Dokumentsporing>,
     private val vilkårsgrunnlagInntektBuilder: VilkårsgrunnlagInntektBuilder,
-    private val forkastet: Boolean
+    private val forkastet: Boolean,
 ) : BuilderState() {
 
     private val beregningIder = mutableListOf<UUID>()
@@ -100,6 +102,8 @@ internal class VedtaksperiodeBuilder(
     private var inntektsmeldingId: UUID? = null
     private var utbetalingId: UUID? = null
 
+    private var grunnbeløpgrense: Inntekt? = null
+
     internal fun build(hendelser: List<HendelseDTO>, utbetalinger: List<UtbetalingshistorikkElementDTO>): VedtaksperiodeDTOBase {
         val relevanteHendelser = hendelser.filter { it.id in hendelseIder.ider().map(UUID::toString) }
 
@@ -115,15 +119,19 @@ internal class VedtaksperiodeBuilder(
         if (!fullstendig) return buildUfullstendig(utbetaling, tilstandstypeDTO, forkastet)
 
         val sisteUtbetalingFor = utbetaling?.let { UtbetalingshistorikkElementDTO.UtbetalingDTO.sisteUtbetalingFor(utbetalinger, utbetaling) }
-        return buildFullstendig(relevanteHendelser, tilstandstypeDTO, utbetaling, sisteUtbetalingFor, forkastet)
+
+        return buildFullstendig(relevanteHendelser, tilstandstypeDTO, utbetaling, sisteUtbetalingFor, forkastet, grunnbeløpgrense?.let { GrunnbeløpDTO.fra6GBegrensning(it) })
     }
+
+
 
     private fun buildFullstendig(
         relevanteHendelser: List<HendelseDTO>,
         tilstandstypeDTO: TilstandstypeDTO,
         utbetaling: UtbetalingshistorikkElementDTO.UtbetalingDTO?,
         sisteUtbetalingFor: UtbetalingshistorikkElementDTO.UtbetalingDTO?,
-        forkastet: Boolean
+        forkastet: Boolean,
+        grunnbeløpgrense: GrunnbeløpDTO?,
     ): VedtaksperiodeDTO {
         vilkårsgrunnlagInntektBuilder.nøkkeldataOmInntekt(VilkårsgrunnlagInntektBuilder.NøkkeldataOmInntekt(periode.endInclusive, skjæringstidspunkt, grunnlagsdataBuilder?.avviksprosent))
 
@@ -151,7 +159,8 @@ internal class VedtaksperiodeBuilder(
             periodetype = periodetype,
             inntektskilde = inntektskilde,
             beregningIder = beregningIder,
-            erForkastet = forkastet
+            erForkastet = forkastet,
+            grunnbeløpgrense = grunnbeløpgrense
         )
     }
 
@@ -276,6 +285,7 @@ internal class VedtaksperiodeBuilder(
     override fun preVisitUtbetalingstidslinje(tidslinje: Utbetalingstidslinje) {
         if (this.inUtbetaling || tidslinje.isEmpty()) return
         this.vedtaksperiodeUtbetalingstidslinjeperiode = tidslinje.periode()
+        this.grunnbeløpgrense = tidslinje.grunnbeløpgrense()?.årlig
     }
 
     override fun postVisitUtbetaling(

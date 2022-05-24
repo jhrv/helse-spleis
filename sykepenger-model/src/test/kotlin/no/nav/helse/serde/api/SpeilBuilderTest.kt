@@ -4,6 +4,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
+import no.nav.helse.Grunnbeløp
 import no.nav.helse.april
 import no.nav.helse.august
 import no.nav.helse.desember
@@ -138,6 +139,18 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         assertEquals(31.januar, vedtaksperiode.tom)
         assertEquals(TilstandstypeDTO.Utbetalt, vedtaksperiode.tilstand)
         assertTrue(vedtaksperiode.fullstendig)
+        assertEquals(
+            Grunnbeløp.`1G`.beløp(1.januar).reflection { årlig, _, _, _ -> årlig }.toInt(),
+            vedtaksperiode.grunnbeløpgrense!!.beløp
+        )
+        assertEquals(
+            Grunnbeløp.`6G`.beløp(1.januar).reflection { årlig, _, _, _ -> årlig },
+            vedtaksperiode.grunnbeløpgrense!!.utregnet
+        )
+        assertEquals(
+            Grunnbeløp.virkningstidspunktFor(Grunnbeløp.`1G`.beløp(1.januar)),
+            vedtaksperiode.grunnbeløpgrense!!.virkningstidspunkt
+        )
 
         val modellUtbetaling = inspektør.utbetalinger.first()
         val apiUtbetalinger = vedtaksperiode.utbetalinger

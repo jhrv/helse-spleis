@@ -51,7 +51,7 @@ internal class UtbetalingstidslinjeBuilder(
     ) {
         // TODO: Trenger speil _egentlig_ doubles?
         val (grad, totalGrad) = økonomi.medData { grad, totalGrad, _ -> grad to totalGrad }
-        økonomi.medAvrundetData { _, arbeidsgiverRefusjonsbeløp, _, _, _, aktuellDagsinntekt, arbeidsgiverbeløp, personbeløp, _ ->
+        økonomi.medAvrundetData { _, arbeidsgiverRefusjonsbeløp, _, _, _, aktuellDagsinntekt, arbeidsgiverbeløp, personbeløp, _, _ ->
             utbetalingstidslinjeMap.add(
                 NavDagDTO(
                     type = DagtypeDTO.NavDag,

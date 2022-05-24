@@ -4,6 +4,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
+import no.nav.helse.Grunnbeløp
 import no.nav.helse.person.ForlengelseFraInfotrygd
 import no.nav.helse.person.Inntektskilde
 import no.nav.helse.person.Periodetype
@@ -15,6 +16,7 @@ import no.nav.helse.serde.api.v2.Vilkårsgrunnlag
 import no.nav.helse.serde.mapping.SpeilDagtype
 import no.nav.helse.serde.mapping.SpeilKildetype
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
+import no.nav.helse.økonomi.Inntekt
 
 data class PersonDTO(
     val aktørId: String,
@@ -72,7 +74,8 @@ data class VedtaksperiodeDTO(
     val aktivitetslogg: List<AktivitetDTO>,
     val forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
     val periodetype: Periodetype,
-    val beregningIder: List<UUID> = emptyList()
+    val beregningIder: List<UUID> = emptyList(),
+    val grunnbeløpgrense: GrunnbeløpDTO?
 ) : VedtaksperiodeDTOBase {
     @Deprecated("Speil må lese fra utbetaling.vurdering")
     val godkjentAv: String? = utbetaling?.vurdering?.ident
@@ -107,6 +110,25 @@ data class VedtaksperiodeDTO(
 
     @Deprecated("Speil må bytte til sisteUtbetaling")
     val utbetalteUtbetalinger: UtbetalingerDTO = utbetalinger
+}
+
+class GrunnbeløpDTO(
+    val beløp: Int,
+    val faktor: Double,
+    val utregnet: Double,
+    val virkningstidspunkt: LocalDate,
+) {
+    companion object {
+        fun fra6GBegrensning(grunnbeløpgrense: Inntekt): GrunnbeløpDTO {
+            val virkningstidspunkt = Grunnbeløp.virkningstidspunktFor(grunnbeløpgrense / 6)
+            return GrunnbeløpDTO(
+                Grunnbeløp.`1G`.beløp(virkningstidspunkt).reflection { årlig, _, _, _ -> årlig.toInt() },
+                6.0,
+                grunnbeløpgrense.reflection { årlig, _, _, _ -> årlig },
+                virkningstidspunkt
+            )
+        }
+    }
 }
 
 data class GhostPeriodeDTO(

@@ -62,7 +62,7 @@ internal class UtbetalingstidslinjeInspektør(private val utbetalingstidslinje: 
         utbetalingstidslinje.accept(this)
     }
 
-    internal fun grad(dag: LocalDate) = økonomi.getValue(dag).medAvrundetData { grad, _, _, _, _, _, _, _, _ -> grad }
+    internal fun grad(dag: LocalDate) = økonomi.getValue(dag).medAvrundetData { grad, _, _, _, _, _, _, _, _, _-> grad }
     internal fun <R> økonomi(lambda: (Økonomi) -> R): List<R> = økonomi.values.map(lambda)
 
     internal fun totalUtbetaling() = totalUtbetaling
@@ -134,7 +134,7 @@ internal class UtbetalingstidslinjeInspektør(private val utbetalingstidslinje: 
         dato: LocalDate,
         økonomi: Økonomi
     ) {
-        økonomi.medData { _, _, _, _, _, aktuellDagsinntekt, arbeidsgiverbeløp, personbeløp, _ ->
+        økonomi.medData { _, _, _, _, _, aktuellDagsinntekt, arbeidsgiverbeløp, personbeløp, _, _ ->
             totalUtbetaling += arbeidsgiverbeløp ?: 0.0
             totalUtbetaling += personbeløp ?: 0.0
             totalInntekt += aktuellDagsinntekt

@@ -27,7 +27,7 @@ internal class ØkonomiTest {
     @Test
     fun `er 6g-begrensning selv om dekningsgrunnlaget er lavere`() {
         val `6g` = Grunnbeløp.`6G`.beløp(1.januar)
-        val `over6g` = `6g` + 260.daglig
+        val over6g = `6g` + 260.daglig
         val økonomi = listOf(100.prosent.sykdomsgrad.inntekt(over6g, dekningsgrunnlag = `6g`, skjæringstidspunkt = 1.januar))
         Økonomi.betal(økonomi, 1.januar)
         assertTrue(økonomi.er6GBegrenset()) { "sykepengegrunnlaget regnes ut fra innrapportert inntekt (§ 8-28) og ikke dekningsgrunnlaget" }
@@ -207,17 +207,17 @@ internal class ØkonomiTest {
 
     @Test
     fun `arbeidsgiverrefusjon uten inntekt`() {
-        100.prosent.sykdomsgrad.arbeidsgiverRefusjon(1000.daglig).medData { _, arbeidsgiverRefusjonsbeløp, _, _, _, _, _, _, _ ->
+        100.prosent.sykdomsgrad.arbeidsgiverRefusjon(1000.daglig).medData { _, arbeidsgiverRefusjonsbeløp, _, _, _, _, _, _, _, _ ->
             assertEquals(0.0, arbeidsgiverRefusjonsbeløp)
         }
     }
 
     @Test
     fun `arbeidsgiverrefusjon med inntekt`() {
-        100.prosent.sykdomsgrad.arbeidsgiverRefusjon(1000.daglig).medData { _, arbeidsgiverRefusjonsbeløp, _, _, _, _, _, _, _ ->
+        100.prosent.sykdomsgrad.arbeidsgiverRefusjon(1000.daglig).medData { _, arbeidsgiverRefusjonsbeløp, _, _, _, _, _, _, _, _ ->
             assertEquals(0.0, arbeidsgiverRefusjonsbeløp)
         }
-        100.prosent.sykdomsgrad.inntekt(1000.daglig, skjæringstidspunkt = 1.januar).arbeidsgiverRefusjon(1000.daglig).medData { _, arbeidsgiverRefusjonsbeløp, _, _, _, _, _, _, _ ->
+        100.prosent.sykdomsgrad.inntekt(1000.daglig, skjæringstidspunkt = 1.januar).arbeidsgiverRefusjon(1000.daglig).medData { _, arbeidsgiverRefusjonsbeløp, _, _, _, _, _, _, _, _ ->
             assertEquals(1000.0, arbeidsgiverRefusjonsbeløp)
         }
     }
@@ -274,7 +274,7 @@ internal class ØkonomiTest {
     @Test
     fun `toMap uten dekningsgrunnlag`() {
         79.5.prosent.sykdomsgrad
-            .medData { grad, _, dekningsgrunnlag, _, _, aktuellDagsinntekt, _, _, _ ->
+            .medData { grad, _, dekningsgrunnlag, _, _, aktuellDagsinntekt, _, _, _, _ ->
                 assertEquals(79.5, grad)
                 assertEquals(0.0, dekningsgrunnlag)
                 assertEquals(0.0, aktuellDagsinntekt)
@@ -284,7 +284,7 @@ internal class ØkonomiTest {
     @Test
     fun `toMap med dekningsgrunnlag`() {
         79.5.prosent.sykdomsgrad.inntekt(1200.4.daglig, 1200.4.daglig, skjæringstidspunkt = 1.januar)
-            .medData { grad, _, dekningsgrunnlag, _, _, _, _, _, _ ->
+            .medData { grad, _, dekningsgrunnlag, _, _, _, _, _, _, _ ->
                 assertEquals(79.5, grad)
                 assertEquals(1200.4, dekningsgrunnlag)
             }
@@ -293,7 +293,7 @@ internal class ØkonomiTest {
     @Test
     fun `toIntMap med dekningsgrunnlag`() {
         79.5.prosent.sykdomsgrad.inntekt(1200.4.daglig, 1200.4.daglig, skjæringstidspunkt = 1.januar)
-            .medAvrundetData { grad, _, dekningsgrunnlag, _, _, _, _, _, _ ->
+            .medAvrundetData { grad, _, dekningsgrunnlag, _, _, _, _, _, _, _ ->
                 assertEquals(80, grad)
                 assertEquals(1200, dekningsgrunnlag)
             }
@@ -310,13 +310,13 @@ internal class ØkonomiTest {
     fun `Beregn utbetaling når mindre enn 6G`() {
         80.prosent.sykdomsgrad.inntekt(1200.daglig, 1200.daglig, skjæringstidspunkt = 1.januar).arbeidsgiverRefusjon(1200.daglig).also {
             listOf(it).betal(1.januar)
-            it.medData { grad, _, dekningsgrunnlag, _, _, _, arbeidsgiverbeløp, personbeløp, _ ->
+            it.medData { grad, _, dekningsgrunnlag, _, _, _, arbeidsgiverbeløp, personbeløp, _, _ ->
                 assertEquals(80.0, grad)
                 assertEquals(1200.0, dekningsgrunnlag)
                 assertEquals(960.0, arbeidsgiverbeløp)
                 assertEquals(0.0, personbeløp)
             }
-            it.medAvrundetData { grad, _, dekningsgrunnlag, _, _, _, arbeidsgiverbeløp, personbeløp, _ ->
+            it.medAvrundetData { grad, _, dekningsgrunnlag, _, _, _, arbeidsgiverbeløp, personbeløp, _, _ ->
                 assertEquals(80, grad)
                 assertEquals(1200, dekningsgrunnlag)
                 assertEquals(960, arbeidsgiverbeløp)
@@ -332,7 +332,7 @@ internal class ØkonomiTest {
             .arbeidsgiverRefusjon(499.5.daglig)
             .also {
                 listOf(it).betal(1.januar)
-                it.medData { grad, arbeidsgiverRefusjonsbeløp, dekningsgrunnlag, _, _, _, arbeidsgiverbeløp, personbeløp, _ ->
+                it.medData { grad, arbeidsgiverRefusjonsbeløp, dekningsgrunnlag, _, _, _, arbeidsgiverbeløp, personbeløp, _, _ ->
                     assertEquals(100.0, grad)
                     assertEquals(499.5, arbeidsgiverRefusjonsbeløp)
                     assertEquals(999.0, dekningsgrunnlag)
@@ -463,7 +463,7 @@ internal class ØkonomiTest {
     }
 
     private fun assertUtbetaling(økonomi: Økonomi, expectedArbeidsgiver: Double, expectedPerson: Double) {
-        økonomi.medData { _, _, _, _, _, _, arbeidsgiverbeløp, personbeløp, _ ->
+        økonomi.medData { _, _, _, _, _, _, arbeidsgiverbeløp, personbeløp, _, _ ->
             assertEquals(expectedArbeidsgiver, arbeidsgiverbeløp, "arbeidsgiverbeløp problem")
             assertEquals(expectedPerson, personbeløp, "personbeløp problem")
         }

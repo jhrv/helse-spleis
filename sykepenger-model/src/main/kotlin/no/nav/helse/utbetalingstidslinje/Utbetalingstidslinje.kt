@@ -89,6 +89,9 @@ internal class Utbetalingstidslinje(utbetalingsdager: List<Utbetalingsdag>) : Co
         }
     }
 
+    internal fun grunnbeløpgrense() =
+        utbetalingsdager.first().økonomi.medData { _, _, _, _, _, _, _, _, _, grunnbeløpgrense -> grunnbeløpgrense }
+
     internal fun accept(visitor: UtbetalingsdagVisitor) {
         visitor.preVisitUtbetalingstidslinje(this)
         utbetalingsdager.forEach { it.accept(visitor) }
@@ -103,7 +106,7 @@ internal class Utbetalingstidslinje(utbetalingsdager: List<Utbetalingsdag>) : Co
 
     private fun avvis(avvisteSkjæringstidspunkt: Set<LocalDate>, begrunnelser: List<Begrunnelse>) {
         avvis(begrunnelser) { utbetalingsdag ->
-            utbetalingsdag.økonomi.medAvrundetData { _, _, _, skjæringstidspunkt, _, _, _, _, _ ->
+            utbetalingsdag.økonomi.medAvrundetData { _, _, _, skjæringstidspunkt, _, _, _, _, _, _ ->
                 skjæringstidspunkt in avvisteSkjæringstidspunkt
             }
         }
@@ -293,11 +296,11 @@ internal class Utbetalingstidslinje(utbetalingsdager: List<Utbetalingsdag>) : Co
 
             companion object {
                 internal val reflectedArbeidsgiverBeløp = { økonomi: Økonomi ->
-                    økonomi.medAvrundetData { _, _, _, _, _, _, arbeidsgiverbeløp, _, _ -> arbeidsgiverbeløp!! }
+                    økonomi.medAvrundetData { _, _, _, _, _, _, arbeidsgiverbeløp, _, _, _ -> arbeidsgiverbeløp!! }
                 }
 
                 internal val reflectedPersonBeløp = { økonomi: Økonomi ->
-                    økonomi.medAvrundetData { _, _, _, _, _, _, _, personbeløp, _ -> personbeløp!! }
+                    økonomi.medAvrundetData { _, _, _, _, _, _, _, personbeløp, _, _ -> personbeløp!! }
                 }
             }
 

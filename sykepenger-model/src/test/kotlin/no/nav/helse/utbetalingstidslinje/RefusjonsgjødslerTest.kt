@@ -337,7 +337,7 @@ internal class RefusjonsgjødslerTest {
             endringerIRefusjon = emptyList()
         )
 
-        private fun Økonomi.arbeidsgiverRefusjonsbeløp() = medData { _, arbeidsgiverRefusjonsbeløp, _, _, _, _, _, _, _ -> arbeidsgiverRefusjonsbeløp }
+        private fun Økonomi.arbeidsgiverRefusjonsbeløp() = medData { _, arbeidsgiverRefusjonsbeløp, _, _, _, _, _, _, _, _ -> arbeidsgiverRefusjonsbeløp }
 
         private fun inntektsopplysning(skjæringstidspunkt: LocalDate, inntekt: Inntekt) = mapOf(
             skjæringstidspunkt to Inntektshistorikk.Inntektsmelding(UUID.randomUUID(), skjæringstidspunkt, UUID.randomUUID(), inntekt)

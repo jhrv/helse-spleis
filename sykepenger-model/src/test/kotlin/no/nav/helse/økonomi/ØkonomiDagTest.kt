@@ -163,6 +163,7 @@ internal class ØkonomiDagTest {
                     _,
                     actualArbeidsgiverbeløp,
                     actualPersonbeløp,
+                    _,
                     _ ->
                 assertEquals(arbeidsgiverbeløp, actualArbeidsgiverbeløp)
                 assertEquals(personbeløp, actualPersonbeløp)

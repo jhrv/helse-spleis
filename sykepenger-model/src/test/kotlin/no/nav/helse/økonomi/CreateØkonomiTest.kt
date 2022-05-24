@@ -19,6 +19,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
 import java.util.*
+import no.nav.helse.økonomi.Inntekt.Companion.årlig
 
 internal class CreateØkonomiTest {
 
@@ -27,7 +28,7 @@ internal class CreateØkonomiTest {
         val data = sykdomstidslinjedag(79.5)
         createØkonomi(data).also { økonomi ->
             listOf(økonomi).betal(1.januar)
-            økonomi.medData { grad, arbeidsgiverRefusjonsbeløp, dekningsgrunnlag, _, _, aktuellDagsinntekt, arbeidsgiverbeløp, personbeløp, begrenset ->
+            økonomi.medData { grad, arbeidsgiverRefusjonsbeløp, dekningsgrunnlag, _, _, aktuellDagsinntekt, arbeidsgiverbeløp, personbeløp, begrenset, _ ->
                 assertEquals(79.5, grad)
                 assertEquals(0.0, arbeidsgiverRefusjonsbeløp)
                 assertEquals(0.0, dekningsgrunnlag)
@@ -44,7 +45,7 @@ internal class CreateØkonomiTest {
     fun `opprette bare prosenter`() {
         val data = sykdomstidslinjedag(79.5)
         createØkonomi(data).also { økonomi ->
-            økonomi.medData { grad, arbeidsgiverRefusjonsbeløp, dekningsgrunnlag, _, _, aktuellDagsinntekt, arbeidsgiverbeløp, personbeløp, begrenset ->
+            økonomi.medData { grad, arbeidsgiverRefusjonsbeløp, dekningsgrunnlag, _, _, aktuellDagsinntekt, arbeidsgiverbeløp, personbeløp, begrenset, grunnbeløpgrense ->
                 assertEquals(79.5, grad)
                 assertEquals(0.0, arbeidsgiverRefusjonsbeløp)
                 assertEquals(0.0, dekningsgrunnlag)
@@ -52,10 +53,11 @@ internal class CreateØkonomiTest {
                 assertNull(arbeidsgiverbeløp)
                 assertNull(personbeløp)
                 assertNull(begrenset)
+                assertNull(grunnbeløpgrense)
             }
             økonomi
                 .inntekt(1200.daglig, skjæringstidspunkt = 1.januar)
-                .medData { grad, arbeidsgiverRefusjonsbeløp, dekningsgrunnlag, skjæringstidspunkt, _, aktuellDagsinntekt, arbeidsgiverbeløp, personbeløp, begrenset ->
+                .medData { grad, arbeidsgiverRefusjonsbeløp, dekningsgrunnlag, skjæringstidspunkt, _, aktuellDagsinntekt, arbeidsgiverbeløp, personbeløp, begrenset, grunnbeløpgrense ->
                     assertEquals(79.5, grad)
                     assertEquals(0.0, arbeidsgiverRefusjonsbeløp)
                     assertEquals(1200.0, dekningsgrunnlag)
@@ -64,6 +66,7 @@ internal class CreateØkonomiTest {
                     assertNull(arbeidsgiverbeløp)
                     assertNull(personbeløp)
                     assertNull(begrenset)
+                    assertNull(grunnbeløpgrense)
                 }
         }
     }
@@ -90,7 +93,8 @@ internal class CreateØkonomiTest {
                               aktuellDagsinntekt,
                               arbeidsgiverbeløp,
                               personbeløp,
-                              er6GBegrenset ->
+                              er6GBegrenset,
+                              grunnbeløpgrense ->
                 assertEquals(80.0, grad)
                 assertEquals(420.0, arbeidsgiverRefusjonsbeløp)
                 assertEquals(1500.0, aktuellDagsinntekt)
@@ -98,6 +102,7 @@ internal class CreateØkonomiTest {
                 assertNull(arbeidsgiverbeløp)
                 assertNull(personbeløp)
                 assertNull(er6GBegrenset)
+                assertNull(grunnbeløpgrense)
             }
             // Indirect test of Økonomi state is HarLønn
             assertThrows<IllegalStateException> { økonomi.inntekt(1200.daglig, skjæringstidspunkt = 1.januar) }
@@ -117,7 +122,8 @@ internal class CreateØkonomiTest {
                               aktuellDagsinntekt,
                               arbeidsgiverbeløp,
                               personbeløp,
-                              er6GBegrenset ->
+                              er6GBegrenset,
+                              grunnbeløpgrense ->
                 assertEquals(79.5, grad)
                 assertEquals(79.5, totalGrad)
                 assertEquals(420.0, arbeidsgiverRefusjon)
@@ -126,6 +132,7 @@ internal class CreateØkonomiTest {
                 assertEquals(640.0, arbeidsgiverbeløp)
                 assertEquals(320.0, personbeløp)
                 assertTrue(er6GBegrenset as Boolean)
+                assertEquals(Grunnbeløp.`6G`.beløp(1.januar), grunnbeløpgrense!!.årlig)
             }
             // Indirect test of Økonomi state
             assertThrows<IllegalStateException> { økonomi.inntekt(1200.daglig, skjæringstidspunkt = 1.januar) }

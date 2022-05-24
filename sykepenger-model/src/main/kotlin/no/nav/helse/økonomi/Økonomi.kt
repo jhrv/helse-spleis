@@ -157,7 +157,7 @@ internal class Økonomi private constructor(
     }
 
     private fun _buildKunGrad(builder: ØkonomiBuilder) {
-        medData { grad, _, _, _, _, _, _, _, _ ->
+        medData { grad, _, _, _, _, _, _, _, _, _ ->
             /* ikke legg på flere felter - alle er enten null eller har defaultverdi */
             builder.grad(grad)
         }
@@ -172,7 +172,8 @@ internal class Økonomi private constructor(
                   aktuellDagsinntekt,
                   arbeidsgiverbeløp,
                   personbeløp,
-                  er6GBegrenset ->
+                  er6GBegrenset,
+                  grunnbeløpgrense, ->
             builder.grad(grad)
                 .arbeidsgiverRefusjonsbeløp(arbeidsgiverRefusjonsbeløp)
                 .dekningsgrunnlag(dekningsgrunnlag)
@@ -183,7 +184,7 @@ internal class Økonomi private constructor(
                 .personbeløp(personbeløp)
                 .er6GBegrenset(er6GBegrenset)
                 .arbeidsgiverperiode(arbeidsgiverperiode)
-                .grunnbeløpsgrense(grunnbeløpgrense?.reflection { årlig, _, _, _ -> årlig })
+                .grunnbeløpsgrense(grunnbeløpgrense)
                 .tilstand(tilstand)
         }
     }
@@ -200,7 +201,8 @@ internal class Økonomi private constructor(
             aktuellDagsinntekt: Int,
             arbeidsgiverbeløp: Int?,
             personbeløp: Int?,
-            er6GBegrenset: Boolean?
+            er6GBegrenset: Boolean?,
+            grunnbeløpgrense: Double?
         ) -> R
     ) =
         medData { grad: Double,
@@ -211,7 +213,8 @@ internal class Økonomi private constructor(
                   aktuellDagsinntekt: Double,
                   arbeidsgiverbeløp: Double?,
                   personbeløp: Double?,
-                  er6GBegrenset: Boolean? ->
+                  er6GBegrenset: Boolean?,
+                  grunnbeløpgrense: Double? ->
             block(
                 grad.roundToInt(),
                 arbeidsgiverRefusjonsbeløp.roundToInt(),
@@ -221,7 +224,8 @@ internal class Økonomi private constructor(
                 aktuellDagsinntekt.roundToInt(),
                 arbeidsgiverbeløp?.roundToInt(),
                 personbeløp?.roundToInt(),
-                er6GBegrenset
+                er6GBegrenset,
+                grunnbeløpgrense,
             )
         }
 
@@ -234,12 +238,13 @@ internal class Økonomi private constructor(
                   aktuellDagsinntekt: Double,
                   _: Double?,
                   _: Double?,
-                  _: Boolean? ->
+                  _: Boolean?,
+                  _: Double? ->
             block(grad, totalGrad, aktuellDagsinntekt)
         }
 
     internal fun medAvrundetData(block: (grad: Int, aktuellDagsinntekt: Int) -> Unit) {
-        medAvrundetData { grad, _, _, _, _, aktuellDagsinntekt, _, _, _ -> block(grad, aktuellDagsinntekt) }
+        medAvrundetData { grad, _, _, _, _, aktuellDagsinntekt, _, _, _, _-> block(grad, aktuellDagsinntekt) }
     }
 
     private fun <R> medDataFraBeløp(lambda: MedØkonomiData<R>) = lambda(
@@ -251,7 +256,8 @@ internal class Økonomi private constructor(
         aktuellDagsinntekt.reflection { _, _, daglig, _ -> daglig },
         arbeidsgiverbeløp!!.reflection { _, _, daglig, _ -> daglig },
         personbeløp!!.reflection { _, _, daglig, _ -> daglig },
-        er6GBegrenset
+        er6GBegrenset,
+        grunnbeløpgrense?.reflection { årlig, _, _, _ ->  årlig }
     )
 
     private fun <R> medDataFraInntekt(lambda: MedØkonomiData<R>) = lambda(
@@ -261,7 +267,7 @@ internal class Økonomi private constructor(
         skjæringstidspunkt,
         totalGrad.toDouble(),
         aktuellDagsinntekt.reflection { _, _, daglig, _ -> daglig },
-        null, null, null
+        null, null, null, null
     )
 
     private fun grad() = tilstand.grad(this)
@@ -418,7 +424,8 @@ internal class Økonomi private constructor(
                     aktuellDagsinntekt = økonomi.aktuellDagsinntekt.reflection { _, _, daglig, _ -> daglig },
                     arbeidsgiverbeløp = null,
                     personbeløp = null,
-                    er6GBegrenset = null
+                    er6GBegrenset = null,
+                    grunnbeløpgrense = null
                 )
         }
 
@@ -589,6 +596,7 @@ internal fun interface MedØkonomiData<R> {
         aktuellDagsinntekt: Double,
         arbeidsgiverbeløp: Double?,
         personbeløp: Double?,
-        er6GBegrenset: Boolean?
+        er6GBegrenset: Boolean?,
+        grunnbeløpgrense: Double?,
     ): R
 }
