@@ -138,11 +138,22 @@ internal interface SykepengegrunnlagVisitor : ArbeidsgiverInntektsopplysningVisi
         deaktiverteArbeidsforhold: List<String>,
         vurdertInfotrygd: Boolean,
         minsteinntekt: Inntekt,
-        oppfyllerMinsteinntektskrav: Boolean
+        oppfyllerMinsteinntektskrav: Boolean,
+        sammenligningsgrunnlag: Sammenligningsgrunnlag?,
+        avviksprosent: Prosent?
     ) {}
     fun preVisitArbeidsgiverInntektsopplysninger() {}
 
     fun postVisitArbeidsgiverInntektsopplysninger() {}
+
+    fun preVisitSammenligningsgrunnlag(
+        sammenligningsgrunnlag1: Sammenligningsgrunnlag,
+        sammenligningsgrunnlag: Inntekt
+    ) {}
+    fun postVisitSammenligningsgrunnlag(
+        sammenligningsgrunnlag1: Sammenligningsgrunnlag,
+        sammenligningsgrunnlag: Inntekt
+    ) {}
 
     fun postVisitSykepengegrunnlag(
         sykepengegrunnlag1: Sykepengegrunnlag,
@@ -156,7 +167,9 @@ internal interface SykepengegrunnlagVisitor : ArbeidsgiverInntektsopplysningVisi
         deaktiverteArbeidsforhold: List<String>,
         vurdertInfotrygd: Boolean,
         minsteinntekt: Inntekt,
-        oppfyllerMinsteinntektskrav: Boolean
+        oppfyllerMinsteinntektskrav: Boolean,
+        sammenligningsgrunnlag: Sammenligningsgrunnlag?,
+        avviksprosent: Prosent?
     ) {}
 }
 
@@ -169,8 +182,6 @@ internal interface VilkårsgrunnlagHistorikkVisitor : SykepengegrunnlagVisitor, 
         skjæringstidspunkt: LocalDate,
         grunnlagsdata: VilkårsgrunnlagHistorikk.Grunnlagsdata,
         sykepengegrunnlag: Sykepengegrunnlag,
-        sammenligningsgrunnlag: Inntekt,
-        avviksprosent: Prosent?,
         opptjening: Opptjening,
         vurdertOk: Boolean,
         meldingsreferanseId: UUID?,
@@ -181,8 +192,6 @@ internal interface VilkårsgrunnlagHistorikkVisitor : SykepengegrunnlagVisitor, 
         skjæringstidspunkt: LocalDate,
         grunnlagsdata: VilkårsgrunnlagHistorikk.Grunnlagsdata,
         sykepengegrunnlag: Sykepengegrunnlag,
-        sammenligningsgrunnlag: Inntekt,
-        avviksprosent: Prosent?,
         medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus,
         vurdertOk: Boolean,
         meldingsreferanseId: UUID?,
@@ -201,14 +210,6 @@ internal interface VilkårsgrunnlagHistorikkVisitor : SykepengegrunnlagVisitor, 
         skjæringstidspunkt: LocalDate,
         sykepengegrunnlag: Sykepengegrunnlag,
         vilkårsgrunnlagId: UUID
-    ) {}
-    fun preVisitSammenligningsgrunnlag(
-        sammenligningsgrunnlag1: Sammenligningsgrunnlag,
-        sammenligningsgrunnlag: Inntekt
-    ) {}
-    fun postVisitSammenligningsgrunnlag(
-        sammenligningsgrunnlag1: Sammenligningsgrunnlag,
-        sammenligningsgrunnlag: Inntekt
     ) {}
     fun preVisitOpptjening(opptjening: Opptjening, arbeidsforhold: List<Opptjening.ArbeidsgiverOpptjeningsgrunnlag>, opptjeningsperiode: Periode) {}
     fun postVisitOpptjening(opptjening: Opptjening, arbeidsforhold: List<Opptjening.ArbeidsgiverOpptjeningsgrunnlag>, opptjeningsperiode: Periode) {}

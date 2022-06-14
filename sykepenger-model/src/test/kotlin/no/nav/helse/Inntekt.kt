@@ -5,6 +5,7 @@ import java.util.UUID
 import no.nav.helse.person.AbstractPersonTest
 import no.nav.helse.person.ArbeidsgiverInntektsopplysning
 import no.nav.helse.person.Inntektshistorikk
+import no.nav.helse.person.Sammenligningsgrunnlag
 import no.nav.helse.person.Sykepengegrunnlag
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.utbetalingstidslinje.Alder
@@ -28,6 +29,7 @@ internal fun Inntekt.sykepengegrunnlag(alder: Alder, orgnr: String, skjæringsti
         ),
         deaktiverteArbeidsforhold = emptyList(),
         skjæringstidspunkt = skjæringstidspunkt,
+        sammenligningsgrunnlag = Sammenligningsgrunnlag(this, emptyList()),
         subsumsjonObserver = subsumsjonObserver
     )
 internal fun Inntekt.sykepengegrunnlag(orgnr: String, skjæringstidspunkt: LocalDate, virkningstidspunkt: LocalDate) =
@@ -42,5 +44,6 @@ internal fun Inntekt.sykepengegrunnlag(orgnr: String, skjæringstidspunkt: Local
         ),
         deaktiverteArbeidsforhold = emptyList(),
         vurdertInfotrygd = false,
+        sammenligningsgrunnlag = Sammenligningsgrunnlag(this, emptyList()),
         `6G` = Grunnbeløp.`6G`.beløp(skjæringstidspunkt, virkningstidspunkt)
     )

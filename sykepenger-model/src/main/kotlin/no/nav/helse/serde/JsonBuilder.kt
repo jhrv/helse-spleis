@@ -801,8 +801,6 @@ internal class JsonBuilder : AbstractBuilder() {
             skjæringstidspunkt: LocalDate,
             grunnlagsdata: VilkårsgrunnlagHistorikk.Grunnlagsdata,
             sykepengegrunnlag: Sykepengegrunnlag,
-            sammenligningsgrunnlag: Inntekt,
-            avviksprosent: Prosent?,
             opptjening: Opptjening,
             vurdertOk: Boolean,
             meldingsreferanseId: UUID?,
@@ -828,7 +826,7 @@ internal class JsonBuilder : AbstractBuilder() {
                 )
             )
 
-            pushState(SykepengegrunnlagState(sykepengegrunnlagMap))
+            pushState(SykepengegrunnlagState(sykepengegrunnlagMap, mutableMapOf()))
         }
 
 
@@ -884,13 +882,11 @@ internal class JsonBuilder : AbstractBuilder() {
             deaktiverteArbeidsforhold: List<String>,
             vurdertInfotrygd: Boolean,
             minsteinntekt: Inntekt,
-            oppfyllerMinsteinntektskrav: Boolean
+            oppfyllerMinsteinntektskrav: Boolean,
+            sammenligningsgrunnlag: Sammenligningsgrunnlag?,
+            avviksprosent: Prosent?
         ) {
-            pushState(SykepengegrunnlagState(sykepengegrunnlagMap))
-        }
-
-        override fun preVisitSammenligningsgrunnlag(sammenligningsgrunnlag1: Sammenligningsgrunnlag, sammenligningsgrunnlag: Inntekt) {
-            pushState(SammenlingningsgrunnlagState(sammenligningsgrunnlagMap))
+            pushState(SykepengegrunnlagState(sykepengegrunnlagMap, sammenligningsgrunnlagMap))
         }
 
         override fun preVisitOpptjening(opptjening: Opptjening, arbeidsforhold: List<Opptjening.ArbeidsgiverOpptjeningsgrunnlag>, opptjeningsperiode: Periode) {
@@ -901,8 +897,6 @@ internal class JsonBuilder : AbstractBuilder() {
             skjæringstidspunkt: LocalDate,
             grunnlagsdata: VilkårsgrunnlagHistorikk.Grunnlagsdata,
             sykepengegrunnlag: Sykepengegrunnlag,
-            sammenligningsgrunnlag: Inntekt,
-            avviksprosent: Prosent?,
             medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus,
             vurdertOk: Boolean,
             meldingsreferanseId: UUID?,
@@ -912,7 +906,6 @@ internal class JsonBuilder : AbstractBuilder() {
                 mapOf(
                     "skjæringstidspunkt" to skjæringstidspunkt,
                     "type" to "Vilkårsprøving",
-                    "avviksprosent" to avviksprosent?.ratio(),
                     "sykepengegrunnlag" to sykepengegrunnlagMap,
                     "sammenligningsgrunnlag" to sammenligningsgrunnlagMap,
                     "opptjening" to opptjeningMap,
@@ -931,8 +924,12 @@ internal class JsonBuilder : AbstractBuilder() {
     }
 
 
-    class SykepengegrunnlagState(private val sykepengegrunnlag: MutableMap<String, Any>) : BuilderState() {
+    class SykepengegrunnlagState(private val sykepengegrunnlag: MutableMap<String, Any>, private val sammenligningsgrunnlagMap: MutableMap<String, Any>) : BuilderState() {
         val arbeidsgiverInntektsopplysninger = mutableListOf<Map<String, Any>>()
+
+        override fun preVisitSammenligningsgrunnlag(sammenligningsgrunnlag1: Sammenligningsgrunnlag, sammenligningsgrunnlag: Inntekt) {
+            pushState(SammenlingningsgrunnlagState(sammenligningsgrunnlagMap))
+        }
 
         override fun postVisitSykepengegrunnlag(
             sykepengegrunnlag1: Sykepengegrunnlag,
@@ -946,7 +943,9 @@ internal class JsonBuilder : AbstractBuilder() {
             deaktiverteArbeidsforhold: List<String>,
             vurdertInfotrygd: Boolean,
             minsteinntekt: Inntekt,
-            oppfyllerMinsteinntektskrav: Boolean
+            oppfyllerMinsteinntektskrav: Boolean,
+            sammenligningsgrunnlag: Sammenligningsgrunnlag?,
+            avviksprosent: Prosent?
         ) {
             this.sykepengegrunnlag.putAll(
                 mutableMapOf(
@@ -961,6 +960,7 @@ internal class JsonBuilder : AbstractBuilder() {
                     "minsteinntekt" to minsteinntekt.reflection { årlig, _, _, _ -> årlig },
                     "oppfyllerMinsteinntektskrav" to oppfyllerMinsteinntektskrav
                 ).apply {
+                    compute("avviksprosent") { _, _ -> avviksprosent?.ratio() }
                     compute("skjønnsmessigFastsattÅrsinntekt") { _, _ -> skjønnsmessigFastsattÅrsinntekt?.reflection { årlig, _, _, _ -> årlig } }
                 }
             )

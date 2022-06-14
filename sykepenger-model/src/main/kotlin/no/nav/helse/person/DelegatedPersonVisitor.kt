@@ -62,8 +62,6 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         skjæringstidspunkt: LocalDate,
         grunnlagsdata: VilkårsgrunnlagHistorikk.Grunnlagsdata,
         sykepengegrunnlag: Sykepengegrunnlag,
-        sammenligningsgrunnlag: Inntekt,
-        avviksprosent: Prosent?,
         medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus,
         vurdertOk: Boolean,
         meldingsreferanseId: UUID?,
@@ -73,8 +71,6 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
             skjæringstidspunkt,
             grunnlagsdata,
             sykepengegrunnlag,
-            sammenligningsgrunnlag,
-            avviksprosent,
             medlemskapstatus,
             vurdertOk,
             meldingsreferanseId,
@@ -103,7 +99,9 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         deaktiverteArbeidsforhold: List<String>,
         vurdertInfotrygd: Boolean,
         minsteinntekt: Inntekt,
-        oppfyllerMinsteinntektskrav: Boolean
+        oppfyllerMinsteinntektskrav: Boolean,
+        sammenligningsgrunnlag: Sammenligningsgrunnlag?,
+        avviksprosent: Prosent?
     ) {
         delegatee.preVisitSykepengegrunnlag(
             sykepengegrunnlag1,
@@ -117,7 +115,9 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
             deaktiverteArbeidsforhold,
             vurdertInfotrygd,
             minsteinntekt,
-            oppfyllerMinsteinntektskrav
+            oppfyllerMinsteinntektskrav,
+            sammenligningsgrunnlag,
+            avviksprosent
         )
     }
 
@@ -133,7 +133,9 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         deaktiverteArbeidsforhold: List<String>,
         vurdertInfotrygd: Boolean,
         minsteinntekt: Inntekt,
-        oppfyllerMinsteinntektskrav: Boolean
+        oppfyllerMinsteinntektskrav: Boolean,
+        sammenligningsgrunnlag: Sammenligningsgrunnlag?,
+        avviksprosent: Prosent?
     ) {
         delegatee.postVisitSykepengegrunnlag(
             sykepengegrunnlag1,
@@ -147,7 +149,9 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
             deaktiverteArbeidsforhold,
             vurdertInfotrygd,
             minsteinntekt,
-            oppfyllerMinsteinntektskrav
+            oppfyllerMinsteinntektskrav,
+            sammenligningsgrunnlag,
+            avviksprosent
         )
     }
 
@@ -279,8 +283,6 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         skjæringstidspunkt: LocalDate,
         grunnlagsdata: VilkårsgrunnlagHistorikk.Grunnlagsdata,
         sykepengegrunnlag: Sykepengegrunnlag,
-        sammenligningsgrunnlag: Inntekt,
-        avviksprosent: Prosent?,
         opptjening: Opptjening,
         vurdertOk: Boolean,
         meldingsreferanseId: UUID?,
@@ -291,8 +293,6 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
             skjæringstidspunkt,
             grunnlagsdata,
             sykepengegrunnlag,
-            sammenligningsgrunnlag,
-            avviksprosent,
             opptjening,
             vurdertOk,
             meldingsreferanseId,

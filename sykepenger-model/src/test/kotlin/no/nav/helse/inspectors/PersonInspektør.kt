@@ -15,8 +15,6 @@ import no.nav.helse.person.PersonVisitor
 import no.nav.helse.person.Sykepengegrunnlag
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
-import no.nav.helse.økonomi.Inntekt
-import no.nav.helse.økonomi.Prosent
 
 internal val Person.inspektør get() = PersonInspektør(this)
 internal val Person.personLogg get() = inspektør.aktivitetslogg
@@ -63,8 +61,6 @@ internal class PersonInspektør(person: Person): PersonVisitor {
         skjæringstidspunkt: LocalDate,
         grunnlagsdata: VilkårsgrunnlagHistorikk.Grunnlagsdata,
         sykepengegrunnlag: Sykepengegrunnlag,
-        sammenligningsgrunnlag: Inntekt,
-        avviksprosent: Prosent?,
         opptjening: Opptjening,
         vurdertOk: Boolean,
         meldingsreferanseId: UUID?,

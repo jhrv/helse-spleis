@@ -11,7 +11,6 @@ import no.nav.helse.hendelser.Hendelseskontekst
 import no.nav.helse.hendelser.Infotrygdendring
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.InntektsmeldingReplay
-import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.hendelser.OverstyrInntekt
 import no.nav.helse.hendelser.OverstyrTidslinje
@@ -634,7 +633,8 @@ class Person private constructor(
             arbeidsgivere.beregnSykepengegrunnlag(skjæringstidspunkt, subsumsjonObserver),
             skjæringstidspunkt,
             subsumsjonObserver,
-            arbeidsgivere.deaktiverteArbeidsforhold(skjæringstidspunkt).map { it.organisasjonsnummer() }
+            arbeidsgivere.deaktiverteArbeidsforhold(skjæringstidspunkt).map { it.organisasjonsnummer() },
+            beregnSammenligningsgrunnlag(skjæringstidspunkt, subsumsjonObserver)
         )
     }
 
@@ -820,27 +820,13 @@ class Person private constructor(
     }
 
     internal fun vilkårsprøvEtterNyInformasjonFraSaksbehandler(hendelse: PersonHendelse, skjæringstidspunkt: LocalDate, subsumsjonObserver: SubsumsjonObserver) {
-        val sykepengegrunnlag = beregnSykepengegrunnlag(skjæringstidspunkt, subsumsjonObserver)
-        val sammenligningsgrunnlag = beregnSammenligningsgrunnlag(skjæringstidspunkt, subsumsjonObserver)
-        val avviksprosent = sammenligningsgrunnlag.avviksprosent(sykepengegrunnlag, subsumsjonObserver)
-
-        val harAkseptabeltAvvik = Inntektsvurdering.validerAvvik(hendelse, avviksprosent) { _, maksimaltTillattAvvik ->
-            warn("Har mer enn %.0f %% avvik. Dette støttes foreløpig ikke i Speil. Du må derfor annullere periodene.", maksimaltTillattAvvik)
-        }
-
         val opptjening = beregnOpptjening(skjæringstidspunkt, subsumsjonObserver)
-        if (!opptjening.erOppfylt()) {
-            hendelse.warn("Perioden er avslått på grunn av manglende opptjening")
-        }
-
+        if (!opptjening.erOppfylt()) hendelse.warn("Perioden er avslått på grunn av manglende opptjening")
         when (val grunnlag = vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt)) {
             is VilkårsgrunnlagHistorikk.Grunnlagsdata -> {
                 val grunnlagselement = grunnlag.kopierGrunnlagsdataMed(
                     hendelse = hendelse,
-                    sykepengegrunnlag = sykepengegrunnlag,
-                    sammenligningsgrunnlag = sammenligningsgrunnlag,
-                    sammenligningsgrunnlagVurdering = harAkseptabeltAvvik,
-                    avviksprosent = avviksprosent,
+                    sykepengegrunnlag = beregnSykepengegrunnlag(skjæringstidspunkt, subsumsjonObserver),
                     nyOpptjening = opptjening,
                     meldingsreferanseId = hendelse.meldingsreferanseId()
                 )

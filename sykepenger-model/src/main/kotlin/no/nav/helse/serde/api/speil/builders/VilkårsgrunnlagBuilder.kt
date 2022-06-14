@@ -16,6 +16,7 @@ import no.nav.helse.person.Inntektshistorikk.SkattComposite
 import no.nav.helse.person.Opptjening
 import no.nav.helse.person.Person
 import no.nav.helse.person.PersonVisitor
+import no.nav.helse.person.Sammenligningsgrunnlag
 import no.nav.helse.person.Sykepengegrunnlag
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.person.VilkårsgrunnlagHistorikk.Grunnlagsdata
@@ -182,8 +183,6 @@ internal class VilkårsgrunnlagBuilder(
             skjæringstidspunkt: LocalDate,
             grunnlagsdata: Grunnlagsdata,
             sykepengegrunnlag: Sykepengegrunnlag,
-            sammenligningsgrunnlag: Inntekt,
-            avviksprosent: Prosent?,
             opptjening: Opptjening,
             vurdertOk: Boolean,
             meldingsreferanseId: UUID?,
@@ -284,7 +283,9 @@ internal class VilkårsgrunnlagBuilder(
                 deaktiverteArbeidsforhold: List<String>,
                 vurdertInfotrygd: Boolean,
                 minsteinntekt: Inntekt,
-                oppfyllerMinsteinntektskrav: Boolean
+                oppfyllerMinsteinntektskrav: Boolean,
+                sammenligningsgrunnlag: Sammenligningsgrunnlag?,
+                avviksprosent: Prosent?
             ) {
 
                 this.sykepengegrunnlag = InntektBuilder(sykepengegrunnlag).build()

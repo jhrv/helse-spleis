@@ -27,6 +27,7 @@ internal class Sykepengegrunnlag(
     private val arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysning>,
     private val deaktiverteArbeidsforhold: List<String>,
     private val vurdertInfotrygd: Boolean,
+    private val sammenligningsgrunnlag: Sammenligningsgrunnlag? = null,
     private val skjønnsmessigFastsattBeregningsgrunnlag: Inntekt? = null,
     `6G`: Inntekt? = null
 ) : Comparable<Inntekt> {
@@ -40,14 +41,17 @@ internal class Sykepengegrunnlag(
     private val minsteinntekt = (if (forhøyetInntektskrav) Grunnbeløp.`2G` else halvG).minsteinntekt(skjæringstidspunkt)
     private val oppfyllerMinsteinntektskrav = beregningsgrunnlag >= minsteinntekt
 
+    private val avviksprosent = sammenligningsgrunnlag?.avviksprosent(beregningsgrunnlag)
+
     internal constructor(
         alder: Alder,
         arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysning>,
         deaktiverteArbeidsforhold: List<String>,
         skjæringstidspunkt: LocalDate,
+        sammenligningsgrunnlag: Sammenligningsgrunnlag?,
         subsumsjonObserver: SubsumsjonObserver,
         vurdertInfotrygd: Boolean = false
-    ) : this(alder, skjæringstidspunkt, arbeidsgiverInntektsopplysninger, deaktiverteArbeidsforhold, vurdertInfotrygd) {
+    ) : this(alder, skjæringstidspunkt, arbeidsgiverInntektsopplysninger, deaktiverteArbeidsforhold, vurdertInfotrygd, sammenligningsgrunnlag) {
         subsumsjonObserver.apply {
             `§ 8-30 ledd 1`(arbeidsgiverInntektsopplysninger.omregnetÅrsinntektPerArbeidsgiver(), beregningsgrunnlag)
             `§ 8-10 ledd 2 punktum 1`(
@@ -56,6 +60,7 @@ internal class Sykepengegrunnlag(
                 skjæringstidspunkt = skjæringstidspunkt,
                 beregningsgrunnlag = beregningsgrunnlag
             )
+            sammenligningsgrunnlag?.avviksprosent(beregningsgrunnlag, subsumsjonObserver)
             if (alder.forhøyetInntektskrav(skjæringstidspunkt))
                 `§ 8-51 ledd 2`(oppfyllerMinsteinntektskrav, skjæringstidspunkt, alder.alderPåDato(skjæringstidspunkt), beregningsgrunnlag, minsteinntekt)
             else
@@ -69,9 +74,10 @@ internal class Sykepengegrunnlag(
             arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysning>,
             skjæringstidspunkt: LocalDate,
             subsumsjonObserver: SubsumsjonObserver,
-            deaktiverteArbeidsforhold: List<String>
+            deaktiverteArbeidsforhold: List<String>,
+            sammenligningsgrunnlag: Sammenligningsgrunnlag
         ): Sykepengegrunnlag {
-            return Sykepengegrunnlag(alder, arbeidsgiverInntektsopplysninger, deaktiverteArbeidsforhold, skjæringstidspunkt, subsumsjonObserver)
+            return Sykepengegrunnlag(alder, arbeidsgiverInntektsopplysninger, deaktiverteArbeidsforhold, skjæringstidspunkt, sammenligningsgrunnlag, subsumsjonObserver)
         }
 
         fun opprettForInfotrygd(
@@ -80,7 +86,7 @@ internal class Sykepengegrunnlag(
             skjæringstidspunkt: LocalDate,
             subsumsjonObserver: SubsumsjonObserver
         ): Sykepengegrunnlag {
-            return Sykepengegrunnlag(alder, arbeidsgiverInntektsopplysninger, emptyList(), skjæringstidspunkt, subsumsjonObserver, true)
+            return Sykepengegrunnlag(alder, arbeidsgiverInntektsopplysninger, emptyList(), skjæringstidspunkt, null, subsumsjonObserver, true)
         }
     }
 
@@ -95,7 +101,16 @@ internal class Sykepengegrunnlag(
         arbeidsgiverInntektsopplysninger.valider(aktivitetslogg)
         if (oppfyllerMinsteinntektskrav) aktivitetslogg.info("Krav til minste sykepengegrunnlag er oppfylt")
         else aktivitetslogg.warn("Perioden er avslått på grunn av at inntekt er under krav til minste sykepengegrunnlag")
+        avviksprosent?.harAkseptabeltAvvik()?.also { harAkseptabeltAvvik ->
+            if (harAkseptabeltAvvik) aktivitetslogg.info("Har %.0f %% eller mindre avvik i inntekt (%.2f %%)", Prosent.MAKSIMALT_TILLATT_AVVIK_PÅ_ÅRSINNTEKT.prosent(), avviksprosent.prosent())
+            else aktivitetslogg.error("Har mer enn %.0f %% avvik", Prosent.MAKSIMALT_TILLATT_AVVIK_PÅ_ÅRSINNTEKT.prosent())
+        }
         return oppfyllerMinsteinntektskrav && !aktivitetslogg.hasErrorsOrWorse()
+    }
+
+    internal fun validerWarn(aktivitetslogg: IAktivitetslogg) {
+        if (avviksprosent?.harAkseptabeltAvvik() != false) return
+        aktivitetslogg.warn("Har mer enn 25 %% avvik. Dette støttes foreløpig ikke i Speil. Du må derfor annullere periodene.")
     }
 
     internal fun justerGrunnbeløp() =
@@ -105,8 +120,10 @@ internal class Sykepengegrunnlag(
             arbeidsgiverInntektsopplysninger = arbeidsgiverInntektsopplysninger,
             deaktiverteArbeidsforhold = deaktiverteArbeidsforhold,
             vurdertInfotrygd = vurdertInfotrygd,
+            sammenligningsgrunnlag = sammenligningsgrunnlag,
             skjønnsmessigFastsattBeregningsgrunnlag = skjønnsmessigFastsattBeregningsgrunnlag
         )
+
     internal fun accept(visitor: SykepengegrunnlagVisitor) {
         visitor.preVisitSykepengegrunnlag(
             this,
@@ -120,7 +137,9 @@ internal class Sykepengegrunnlag(
             deaktiverteArbeidsforhold,
             vurdertInfotrygd,
             minsteinntekt,
-            oppfyllerMinsteinntektskrav
+            oppfyllerMinsteinntektskrav,
+            sammenligningsgrunnlag,
+            avviksprosent
         )
         visitor.preVisitArbeidsgiverInntektsopplysninger()
         arbeidsgiverInntektsopplysninger.forEach { it.accept(visitor) }
@@ -137,7 +156,9 @@ internal class Sykepengegrunnlag(
             deaktiverteArbeidsforhold,
             vurdertInfotrygd,
             minsteinntekt,
-            oppfyllerMinsteinntektskrav
+            oppfyllerMinsteinntektskrav,
+            sammenligningsgrunnlag,
+            avviksprosent
         )
     }
 
@@ -160,6 +181,10 @@ internal class Sykepengegrunnlag(
             .omregnetÅrsinntektPerArbeidsgiver(arbeidsgiverInntektsopplysninger.omregnetÅrsinntektPerArbeidsgiver())
     }
 
+    internal fun erRelevant(organisasjonsnummer: String) =
+        this.inntektsopplysningPerArbeidsgiver().containsKey(organisasjonsnummer)
+                || this.sammenligningsgrunnlag?.inntektsopplysningPerArbeidsgiver()?.containsKey(organisasjonsnummer) == true
+
     override fun equals(other: Any?): Boolean {
         if (other !is Sykepengegrunnlag) return false
         return sykepengegrunnlag == other.sykepengegrunnlag
@@ -168,7 +193,6 @@ internal class Sykepengegrunnlag(
                  && begrensning == other.begrensning
                  && deaktiverteArbeidsforhold == other.deaktiverteArbeidsforhold
     }
-
     override fun hashCode(): Int {
         var result = sykepengegrunnlag.hashCode()
         result = 31 * result + arbeidsgiverInntektsopplysninger.hashCode()

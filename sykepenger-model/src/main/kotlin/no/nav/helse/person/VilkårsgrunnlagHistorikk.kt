@@ -4,7 +4,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.Grunnbeløp
-import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.til
 import no.nav.helse.mai
@@ -16,7 +15,6 @@ import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjeBuilderException
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
-import no.nav.helse.økonomi.Prosent
 import no.nav.helse.økonomi.Økonomi
 
 internal class VilkårsgrunnlagHistorikk private constructor(private val historikk: MutableList<Innslag>) {
@@ -102,11 +100,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             .keys
 
         internal fun erRelevant(organisasjonsnummer: String, skjæringstidspunkter: List<LocalDate>) =
-            skjæringstidspunkter.mapNotNull(vilkårsgrunnlag::get)
-                .any {
-                    it.sykepengegrunnlag().inntektsopplysningPerArbeidsgiver().containsKey(organisasjonsnummer)
-                        || it.sammenligningsgrunnlagPerArbeidsgiver().containsKey(organisasjonsnummer)
-                }
+            skjæringstidspunkter.mapNotNull(vilkårsgrunnlag::get).any { it.erRelevant(organisasjonsnummer) }
 
         internal fun avvis(tidslinjer: List<Utbetalingstidslinje>) {
             vilkårsgrunnlag.forEach { (skjæringstidspunkt, element) ->
@@ -149,17 +143,20 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             innslag.add(skjæringstidspunkt, this)
         }
 
-        internal open fun valider(aktivitetslogg: IAktivitetslogg): Boolean = true
+        internal open fun valider(aktivitetslogg: IAktivitetslogg): Boolean {
+            sykepengegrunnlag.valider(aktivitetslogg)
+            return !aktivitetslogg.hasErrorsOrWorse()
+        }
+
+        internal fun erRelevant(organisasjonsnummer: String) = sykepengegrunnlag.erRelevant(organisasjonsnummer)
+
         internal abstract fun accept(vilkårsgrunnlagHistorikkVisitor: VilkårsgrunnlagHistorikkVisitor)
         internal fun sykepengegrunnlag() = sykepengegrunnlag
-        internal abstract fun sammenligningsgrunnlagPerArbeidsgiver(): Map<String, Inntektshistorikk.Inntektsopplysning>
         internal fun build(builder: VedtakFattetBuilder) {
             sykepengegrunnlag.build(builder)
         }
         internal fun gjelderFlereArbeidsgivere() = sykepengegrunnlag.inntektsopplysningPerArbeidsgiver().size > 1
-        internal open fun sjekkAvviksprosent(aktivitetslogg: IAktivitetslogg): Boolean = true
         internal open fun avvis(tidslinjer: List<Utbetalingstidslinje>, skjæringstidspunkt: LocalDate) {}
-        internal open fun sjekkGammeltSkjæringstidspunkt(aktivitetslogg: IAktivitetslogg) {}
 
         final override fun toSpesifikkKontekst() = SpesifikkKontekst(
             kontekstType = "vilkårsgrunnlag",
@@ -216,31 +213,17 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
     internal class Grunnlagsdata(
         skjæringstidspunkt: LocalDate,
         sykepengegrunnlag: Sykepengegrunnlag,
-        private val sammenligningsgrunnlag: Sammenligningsgrunnlag,
-        private val avviksprosent: Prosent?,
         internal val opptjening: Opptjening,
         private val medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus,
         private val vurdertOk: Boolean,
         private val meldingsreferanseId: UUID?,
         vilkårsgrunnlagId: UUID
     ) : VilkårsgrunnlagElement(vilkårsgrunnlagId, skjæringstidspunkt, sykepengegrunnlag) {
-        override fun valider(aktivitetslogg: IAktivitetslogg): Boolean {
-            sjekkAvviksprosent(aktivitetslogg)
-            return !aktivitetslogg.hasErrorsOrWorse()
-        }
-
-        override fun sjekkAvviksprosent(aktivitetslogg: IAktivitetslogg): Boolean {
-            if (avviksprosent == null) return true
-            return Inntektsvurdering.sjekkAvvik(avviksprosent, aktivitetslogg, IAktivitetslogg::error)
-        }
-
         override fun accept(vilkårsgrunnlagHistorikkVisitor: VilkårsgrunnlagHistorikkVisitor) {
             vilkårsgrunnlagHistorikkVisitor.preVisitGrunnlagsdata(
                 skjæringstidspunkt,
                 this,
                 sykepengegrunnlag,
-                sammenligningsgrunnlag.sammenligningsgrunnlag,
-                avviksprosent,
                 opptjening,
                 vurdertOk,
                 meldingsreferanseId,
@@ -248,22 +231,17 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
                 medlemskapstatus
             )
             sykepengegrunnlag.accept(vilkårsgrunnlagHistorikkVisitor)
-            sammenligningsgrunnlag.accept(vilkårsgrunnlagHistorikkVisitor)
             opptjening.accept(vilkårsgrunnlagHistorikkVisitor)
             vilkårsgrunnlagHistorikkVisitor.postVisitGrunnlagsdata(
                 skjæringstidspunkt,
                 this,
                 sykepengegrunnlag,
-                sammenligningsgrunnlag.sammenligningsgrunnlag,
-                avviksprosent,
                 medlemskapstatus,
                 vurdertOk,
                 meldingsreferanseId,
                 vilkårsgrunnlagId
             )
         }
-
-        override fun sammenligningsgrunnlagPerArbeidsgiver() = sammenligningsgrunnlag.inntektsopplysningPerArbeidsgiver()
 
         override fun avvis(tidslinjer: List<Utbetalingstidslinje>, skjæringstidspunkt: LocalDate) {
             val begrunnelser = mutableListOf<Begrunnelse>()
@@ -279,21 +257,16 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         internal fun kopierGrunnlagsdataMed(
             hendelse: PersonHendelse,
             sykepengegrunnlag: Sykepengegrunnlag,
-            sammenligningsgrunnlag: Sammenligningsgrunnlag,
-            sammenligningsgrunnlagVurdering: Boolean,
-            avviksprosent: Prosent,
             nyOpptjening: Opptjening,
             meldingsreferanseId: UUID
         ): Grunnlagsdata {
-            val sykepengegrunnlagOk = sykepengegrunnlag.valider(hendelse)
+            sykepengegrunnlag.validerWarn(hendelse)
             return Grunnlagsdata(
-                skjæringstidspunkt = skjæringstidspunkt,
+                skjæringstidspunkt = this.skjæringstidspunkt,
                 sykepengegrunnlag = sykepengegrunnlag,
-                sammenligningsgrunnlag = sammenligningsgrunnlag,
-                avviksprosent = avviksprosent,
                 opptjening = nyOpptjening,
-                medlemskapstatus = medlemskapstatus,
-                vurdertOk = nyOpptjening.erOppfylt() && sykepengegrunnlagOk && sammenligningsgrunnlagVurdering,
+                medlemskapstatus = this.medlemskapstatus,
+                vurdertOk = this.vurdertOk,
                 meldingsreferanseId = meldingsreferanseId,
                 vilkårsgrunnlagId = UUID.randomUUID()
             )
@@ -308,7 +281,12 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         sykepengegrunnlag: Sykepengegrunnlag,
         vilkårsgrunnlagId: UUID = UUID.randomUUID()
     ) : VilkårsgrunnlagElement(vilkårsgrunnlagId, skjæringstidspunkt, sykepengegrunnlag) {
-        override fun sjekkGammeltSkjæringstidspunkt(aktivitetslogg: IAktivitetslogg) {
+        override fun valider(aktivitetslogg: IAktivitetslogg): Boolean {
+            sjekkGammeltSkjæringstidspunkt(aktivitetslogg)
+            return true
+        }
+
+        private fun sjekkGammeltSkjæringstidspunkt(aktivitetslogg: IAktivitetslogg) {
             if (skjæringstidspunkt !in 1.mai(2021) til 16.mai(2021)) return
             val gammeltGrunnbeløp = Grunnbeløp.`6G`.beløp(LocalDate.of(2021, 4, 30))
             if (sykepengegrunnlag < gammeltGrunnbeløp) return
@@ -320,8 +298,6 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             sykepengegrunnlag.accept(vilkårsgrunnlagHistorikkVisitor)
             vilkårsgrunnlagHistorikkVisitor.postVisitInfotrygdVilkårsgrunnlag(this, skjæringstidspunkt, sykepengegrunnlag, vilkårsgrunnlagId)
         }
-
-        override fun sammenligningsgrunnlagPerArbeidsgiver() = emptyMap<String, Inntektshistorikk.Inntektsopplysning>()
 
         override fun vilkårsgrunnlagtype() = "Infotrygd"
 
