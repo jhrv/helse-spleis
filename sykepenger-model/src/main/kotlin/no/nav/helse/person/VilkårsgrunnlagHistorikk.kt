@@ -149,7 +149,14 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             innslag.add(skjæringstidspunkt, this)
         }
 
-        internal open fun valider(aktivitetslogg: IAktivitetslogg, organisasjonsnummer: List<String>): Boolean = true
+        internal fun valider(aktivitetslogg: IAktivitetslogg, organisasjonsnummer: List<String>): Boolean {
+            sykepengegrunnlag.validerInntekt(aktivitetslogg, organisasjonsnummer)
+            valider(aktivitetslogg)
+            return !aktivitetslogg.hasErrorsOrWorse()
+        }
+
+        protected open fun valider(aktivitetslogg: IAktivitetslogg) {}
+
         internal abstract fun accept(vilkårsgrunnlagHistorikkVisitor: VilkårsgrunnlagHistorikkVisitor)
         internal fun sykepengegrunnlag() = sykepengegrunnlag
         internal abstract fun sammenligningsgrunnlagPerArbeidsgiver(): Map<String, Inntektshistorikk.Inntektsopplysning>
@@ -159,7 +166,6 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         internal fun gjelderFlereArbeidsgivere() = sykepengegrunnlag.inntektsopplysningPerArbeidsgiver().size > 1
         internal open fun sjekkAvviksprosent(aktivitetslogg: IAktivitetslogg): Boolean = true
         internal open fun avvis(tidslinjer: List<Utbetalingstidslinje>, skjæringstidspunkt: LocalDate) {}
-        internal open fun sjekkGammeltSkjæringstidspunkt(aktivitetslogg: IAktivitetslogg) {}
 
         final override fun toSpesifikkKontekst() = SpesifikkKontekst(
             kontekstType = "vilkårsgrunnlag",
@@ -224,10 +230,8 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         private val meldingsreferanseId: UUID?,
         vilkårsgrunnlagId: UUID
     ) : VilkårsgrunnlagElement(vilkårsgrunnlagId, skjæringstidspunkt, sykepengegrunnlag) {
-        override fun valider(aktivitetslogg: IAktivitetslogg, organisasjonsnummer: List<String>): Boolean {
+        override fun valider(aktivitetslogg: IAktivitetslogg) {
             sjekkAvviksprosent(aktivitetslogg)
-            sykepengegrunnlag.validerInntekt(aktivitetslogg, organisasjonsnummer)
-            return !aktivitetslogg.hasErrorsOrWorse()
         }
 
         override fun sjekkAvviksprosent(aktivitetslogg: IAktivitetslogg): Boolean {
@@ -309,7 +313,11 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         sykepengegrunnlag: Sykepengegrunnlag,
         vilkårsgrunnlagId: UUID = UUID.randomUUID()
     ) : VilkårsgrunnlagElement(vilkårsgrunnlagId, skjæringstidspunkt, sykepengegrunnlag) {
-        override fun sjekkGammeltSkjæringstidspunkt(aktivitetslogg: IAktivitetslogg) {
+        override fun valider(aktivitetslogg: IAktivitetslogg) {
+            sjekkGammeltSkjæringstidspunkt(aktivitetslogg)
+        }
+
+        private fun sjekkGammeltSkjæringstidspunkt(aktivitetslogg: IAktivitetslogg) {
             if (skjæringstidspunkt !in 1.mai(2021) til 16.mai(2021)) return
             val gammeltGrunnbeløp = Grunnbeløp.`6G`.beløp(LocalDate.of(2021, 4, 30))
             if (sykepengegrunnlag < gammeltGrunnbeløp) return
