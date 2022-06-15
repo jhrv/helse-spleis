@@ -12,7 +12,7 @@ internal class Inntekter(
     private val subsumsjonObserver: SubsumsjonObserver
 ) {
     internal fun medInntekt(dato: LocalDate, økonomi: Økonomi, arbeidsgiverperiode: Arbeidsgiverperiode?) =
-        vilkårsgrunnlagHistorikk.medInntekt(organisasjonsnummer, dato, økonomi, arbeidsgiverperiode, regler, subsumsjonObserver)
+        vilkårsgrunnlagHistorikk.medFrivilligInntekt(organisasjonsnummer, dato, økonomi, arbeidsgiverperiode, regler, subsumsjonObserver)
 
     internal fun medFrivilligInntekt(dato: LocalDate, økonomi: Økonomi) =
         vilkårsgrunnlagHistorikk.medFrivilligInntekt(organisasjonsnummer, dato, økonomi, null, regler, subsumsjonObserver)

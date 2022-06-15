@@ -1581,7 +1581,7 @@ internal class Vedtaksperiode private constructor(
                     ytelser.kontekst(vilkårsgrunnlag)
                 }
                 valider {
-                    vilkårsgrunnlag.valider(this)
+                    person.valider(this, vilkårsgrunnlag, vedtaksperiode.skjæringstidspunkt)
                 }
                 onSuccess {
                     when (periodetype) {
@@ -2476,8 +2476,11 @@ internal class Vedtaksperiode private constructor(
         }
 
         internal val IKKE_FERDIG_BEHANDLET: VedtaksperiodeFilter = { !it.tilstand.erFerdigBehandlet }
+
         internal val ER_ELLER_HAR_VÆRT_AVSLUTTET: VedtaksperiodeFilter =
             { it.tilstand is AvsluttetUtenUtbetaling || it.utbetalinger.harAvsluttede() }
+
+        internal val KREVER_INNTEKT_PÅ_SKJÆRINGSTIDSPUNKTET: VedtaksperiodeFilter = { it.tilstand !is AvsluttetUtenUtbetaling }
 
         internal val ALLE: VedtaksperiodeFilter = { true }
 

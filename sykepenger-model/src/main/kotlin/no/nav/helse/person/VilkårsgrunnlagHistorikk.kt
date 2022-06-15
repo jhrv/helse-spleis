@@ -149,7 +149,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             innslag.add(skjæringstidspunkt, this)
         }
 
-        internal open fun valider(aktivitetslogg: IAktivitetslogg): Boolean = true
+        internal open fun valider(aktivitetslogg: IAktivitetslogg, organisasjonsnummer: List<String>): Boolean = true
         internal abstract fun accept(vilkårsgrunnlagHistorikkVisitor: VilkårsgrunnlagHistorikkVisitor)
         internal fun sykepengegrunnlag() = sykepengegrunnlag
         internal abstract fun sammenligningsgrunnlagPerArbeidsgiver(): Map<String, Inntektshistorikk.Inntektsopplysning>
@@ -224,8 +224,9 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         private val meldingsreferanseId: UUID?,
         vilkårsgrunnlagId: UUID
     ) : VilkårsgrunnlagElement(vilkårsgrunnlagId, skjæringstidspunkt, sykepengegrunnlag) {
-        override fun valider(aktivitetslogg: IAktivitetslogg): Boolean {
+        override fun valider(aktivitetslogg: IAktivitetslogg, organisasjonsnummer: List<String>): Boolean {
             sjekkAvviksprosent(aktivitetslogg)
+            sykepengegrunnlag.validerInntekt(aktivitetslogg, organisasjonsnummer)
             return !aktivitetslogg.hasErrorsOrWorse()
         }
 
