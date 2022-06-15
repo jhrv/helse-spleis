@@ -98,7 +98,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             meldingsreferanseId = UUID.randomUUID(),
             vilkårsgrunnlagId = UUID.randomUUID()
         ))
-        val økonomi: Økonomi = historikk.medIngenInntekt(1.januar, Økonomi.ikkeBetalt(), null)
+        val økonomi: Økonomi = historikk.utenInntekt(1.januar, Økonomi.ikkeBetalt(), null)
         assertEquals(INGEN, økonomi.inspektør.aktuellDagsinntekt)
         assertEquals(1.januar, økonomi.inspektør.skjæringstidspunkt)
     }
