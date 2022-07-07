@@ -1,16 +1,11 @@
 package no.nav.helse.dsl
 
-import no.nav.helse.april
 import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
-import no.nav.helse.februar
-import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
-import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
-import no.nav.helse.mars
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
@@ -20,14 +15,9 @@ import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
-import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
-import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
-import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.spleis.e2e.assertInntektForDato
 import no.nav.helse.sykdomstidslinje.Dag
-import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
-import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -183,60 +173,6 @@ internal class TestPersonTest : AbstractDslTest() {
         inspektør.sykdomstidslinje.inspektør.låstePerioder.also {
             assertEquals(1, it.size)
             assertEquals(Periode(3.januar, 26.januar), it.first())
-        }
-    }
-
-    @Test
-    fun `Tillater førstegangsbehandling hos annen arbeidsgiver, hvis gap til foregående`() {
-        val periode = 1.februar(2021) til 28.februar(2021)
-        val inntektshistorikk = listOf(
-            Inntektsopplysning(a1, 1.januar(2021), INNTEKT, true)
-        )
-        a1 {
-            håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent))
-            håndterSøknad(Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent))
-            val utbetalinger = listOf(
-                ArbeidsgiverUtbetalingsperiode(a1, 1.januar(2021), 31.januar(2021), 100.prosent, INNTEKT)
-            )
-            håndterUtbetalingshistorikk(
-                1.vedtaksperiode,
-                utbetalinger,
-                inntektshistorikk = inntektshistorikk
-            )
-            håndterYtelser(1.vedtaksperiode)
-            håndterSimulering(1.vedtaksperiode)
-            håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-            håndterUtbetalt()
-        }
-        val periode2 = 1.mars(2021) til 31.mars(2021)
-        val a2Periode = 2.april(2021) til 30.april(2021)
-        a1 { håndterSykmelding(Sykmeldingsperiode(periode2.start, periode2.endInclusive, 100.prosent)) }
-        a2 { håndterSykmelding(Sykmeldingsperiode(a2Periode.start, a2Periode.endInclusive, 100.prosent)) }
-        a1 {
-            håndterSøknad(Søknad.Søknadsperiode.Sykdom(periode2.start, periode2.endInclusive, 100.prosent))
-            håndterYtelser(2.vedtaksperiode)
-            håndterSimulering(2.vedtaksperiode)
-            håndterUtbetalingsgodkjenning(2.vedtaksperiode)
-            håndterUtbetalt()
-        }
-        a2 {
-            håndterSøknad(Søknad.Søknadsperiode.Sykdom(a2Periode.start, a2Periode.endInclusive, 100.prosent))
-            håndterInntektsmelding(listOf(a2Periode.start til 17.april(2021)), INNTEKT)
-            håndterYtelser(1.vedtaksperiode)
-            håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
-                inntekter = inntektperioderForSammenligningsgrunnlag {
-                    1.april(2020) til 1.mars(2021) inntekter {
-                        a1 inntekt INNTEKT
-                        a2 inntekt Inntekt.INGEN
-                    }
-                }
-            ))
-            assertNoWarnings(1.vedtaksperiode.filter())
-
-            håndterYtelser(1.vedtaksperiode, inntektshistorikk = inntektshistorikk)
-            håndterSimulering(1.vedtaksperiode)
-            håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-            håndterUtbetalt()
         }
     }
 }
