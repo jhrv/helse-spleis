@@ -23,6 +23,7 @@ class Søknad(
     fnr: String,
     aktørId: String,
     orgnummer: String,
+    private val fødselsdato: LocalDate,
     private val perioder: List<Søknadsperiode>,
     private val andreInntektskilder: List<Inntektskilde>,
     private val sendtTilNAVEllerArbeidsgiver: LocalDateTime,
@@ -48,6 +49,8 @@ class Søknad(
             .merge(Dagturnering.SØKNAD::beste)
             .subset(sykdomsperiode)
     }
+
+    override fun fødselsdato(): LocalDate = fødselsdato
 
     override fun fortsettÅBehandle(arbeidsgiver: Arbeidsgiver) {
         arbeidsgiver.håndter(this)

@@ -1,8 +1,10 @@
 package no.nav.helse.person
 
+import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.somFødselsnummer
+import no.nav.helse.utbetalingstidslinje.Alder
 
 internal class ErrorsTilWarnings(private val other: IAktivitetslogg) : IAktivitetslogg by other {
     override fun error(melding: String, vararg params: Any?) = warn(melding, params)
@@ -36,7 +38,7 @@ abstract class PersonHendelse protected constructor(
     fun person(jurist: MaskinellJurist) = Person(
         aktørId = aktørId,
         fødselsnummer = fødselsnummer.somFødselsnummer(),
-        alder = fødselsnummer.somFødselsnummer().alder(), // TODO få alder/fødseldato fra hendelsen
+        alder = Alder(fødselsdato()),
         jurist = jurist
     )
 
@@ -51,7 +53,7 @@ abstract class PersonHendelse protected constructor(
     }
 
     protected open fun kontekst(): Map<String, String> = emptyMap()
-
+    protected open fun fødselsdato(): LocalDate = throw RuntimeException("Har ikke fødselsdato på hendelsen ${this::class.java.simpleName}")
     fun toLogString() = aktivitetslogg.toString()
 
     override fun info(melding: String, vararg params: Any?) = aktivitetslogg.info(melding, *params)

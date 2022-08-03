@@ -3,6 +3,7 @@ package no.nav.helse.spleis
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.februar
 import no.nav.helse.hendelser.Arbeidsavklaringspenger
 import no.nav.helse.hendelser.Dagpenger
 import no.nav.helse.hendelser.Dødsinfo
@@ -46,6 +47,7 @@ abstract class AbstractObservableTest {
         const val UNG_PERSON_FNR = "12029240045"
         const val ORGNUMMER = "987654321"
         const val AKTØRID = "42"
+        val UNG_PERSON_FØDSELSDATO = 12.februar(1992)
         val INNTEKTSMELDING_ID: UUID = UUID.randomUUID()
         val SØKNAD_ID: UUID = UUID.randomUUID()
         val SYKMELDING_ID: UUID = UUID.randomUUID()
@@ -67,9 +69,11 @@ abstract class AbstractObservableTest {
         sykmeldingSkrevet: LocalDateTime = FOM.atStartOfDay(),
         mottatt: LocalDateTime = TOM.plusDays(1).atStartOfDay(),
         fnr: String = UNG_PERSON_FNR,
+        fødselsdato: LocalDate = UNG_PERSON_FØDSELSDATO,
     ): Sykmelding = Sykmelding(
         meldingsreferanseId = id,
         fnr = fnr,
+        fødselsdato = fødselsdato,
         aktørId = AKTØRID,
         orgnummer = orgnummer,
         sykeperioder = sykeperioder,
@@ -85,9 +89,11 @@ abstract class AbstractObservableTest {
         orgnummer: String = ORGNUMMER,
         sykmeldingSkrevet: LocalDateTime = FOM.atStartOfDay(),
         fnr: String = UNG_PERSON_FNR,
+        fødselsdato: LocalDate = UNG_PERSON_FØDSELSDATO
     ): Søknad = Søknad(
         meldingsreferanseId = id,
         fnr = fnr,
+        fødselsdato = fødselsdato,
         aktørId = AKTØRID,
         orgnummer = orgnummer,
         perioder = listOf(*perioder),

@@ -15,6 +15,7 @@ import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
+import no.nav.helse.person.AbstractPersonTest
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Dokumentsporing
@@ -407,7 +408,7 @@ internal class LagUtbetalingForRevurderingTest {
     private fun arbeidsgiver(organisasjonsnummer: String) = Arbeidsgiver(person(), organisasjonsnummer, maskinellJurist)
     private fun søknad(søknadId: UUID, periode: Periode): Søknad {
         val søknadsperiode = Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent)
-        return Søknad(søknadId, FNR.toString(), AKTØRID, ORGNUMMER, listOf(søknadsperiode), emptyList(), LocalDateTime.now(), false, emptyList(), LocalDateTime.now())
+        return Søknad(søknadId, FNR.toString(), AKTØRID, ORGNUMMER, AbstractPersonTest.UNG_PERSON_FØDSELSDATO, listOf(søknadsperiode), emptyList(), LocalDateTime.now(), false, emptyList(), LocalDateTime.now())
     }
 
     private fun Utbetaling.assertDiff(diff: Int) {

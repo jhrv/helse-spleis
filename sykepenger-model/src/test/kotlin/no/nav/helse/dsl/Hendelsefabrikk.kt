@@ -30,17 +30,20 @@ import no.nav.helse.hendelser.utbetaling.AnnullerUtbetaling
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.hendelser.utbetaling.UtbetalingOverført
 import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
+import no.nav.helse.januar
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
+import no.nav.helse.serde.migration.V168Fødselsdato
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.økonomi.Inntekt
 
 internal class Hendelsefabrikk(
     private val aktørId: String,
     private val fødselsnummer: Fødselsnummer,
+    private val fødselsdato: LocalDate,
     private val organisasjonsnummer: String
 ) {
 
@@ -59,6 +62,7 @@ internal class Hendelsefabrikk(
             meldingsreferanseId = id,
             fnr = fødselsnummer.toString(),
             aktørId = aktørId,
+            fødselsdato = fødselsdato,
             orgnummer = organisasjonsnummer,
             sykeperioder = listOf(*sykeperioder),
             sykmeldingSkrevet = sykmeldingSkrevetEkte,
@@ -79,6 +83,7 @@ internal class Hendelsefabrikk(
         return Søknad(
             meldingsreferanseId = id,
             fnr = fødselsnummer.toString(),
+            fødselsdato = fødselsdato,
             aktørId = aktørId,
             orgnummer = organisasjonsnummer,
             perioder = listOf(*perioder),

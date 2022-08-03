@@ -1,5 +1,6 @@
 package no.nav.helse.hendelser
 
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.desember
@@ -40,6 +41,7 @@ internal class SøknadTest {
 
     private companion object {
         private const val UNG_PERSON_FNR_2018 = "12029240045"
+        private val UNG_PERSON_FØDSELSDATO = 12.februar(1992)
         private val EN_PERIODE = Periode(1.januar, 31.januar)
         private const val FYLLER_18_ÅR_2_NOVEMBER = "02110075045"
     }
@@ -337,10 +339,19 @@ internal class SøknadTest {
         assertTrue(søknad.hentErrors().contains("Søknaden inneholder andre inntektskilder enn ANDRE_ARBEIDSFORHOLD"))
     }
 
-    private fun søknad(vararg perioder: Søknadsperiode, andreInntektskilder: List<Inntektskilde> = emptyList(), permittert: Boolean = false, merknaderFraSykmelding: List<Merknad> = emptyList(), fnr: String = UNG_PERSON_FNR_2018, sendtTilNAVEllerArbeidsgiver: LocalDateTime? = null) {
+    private fun søknad(
+        vararg perioder: Søknadsperiode,
+        andreInntektskilder: List<Inntektskilde> = emptyList(),
+        permittert: Boolean = false,
+        merknaderFraSykmelding: List<Merknad> = emptyList(),
+        fnr: String = UNG_PERSON_FNR_2018,
+        fødselsdato: LocalDate = UNG_PERSON_FØDSELSDATO,
+        sendtTilNAVEllerArbeidsgiver: LocalDateTime? = null
+    ) {
         søknad = Søknad(
             meldingsreferanseId = UUID.randomUUID(),
             fnr = fnr,
+            fødselsdato = fødselsdato,
             aktørId = "12345",
             orgnummer = "987654321",
             perioder = listOf(*perioder),

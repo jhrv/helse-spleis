@@ -17,6 +17,7 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
+import no.nav.helse.person.AbstractPersonTest
 
 internal class SkjæringstidspunktTest {
 
@@ -374,6 +375,7 @@ internal class SkjæringstidspunktTest {
             meldingsreferanseId = UUID.randomUUID(),
             fnr = UNG_PERSON_FNR_2018,
             aktørId = AKTØRID,
+            fødselsdato = AbstractPersonTest.UNG_PERSON_FØDSELSDATO,
             orgnummer = ORGNUMMER,
             sykeperioder = sykeperioder.toList(),
             sykmeldingSkrevet = Sykmeldingsperiode.periode(sykeperioder.toList())?.start?.atStartOfDay() ?: LocalDateTime.now(),
@@ -385,6 +387,7 @@ internal class SkjæringstidspunktTest {
         return Søknad(
             meldingsreferanseId = UUID.randomUUID(),
             fnr = UNG_PERSON_FNR_2018,
+            fødselsdato = AbstractPersonTest.UNG_PERSON_FØDSELSDATO,
             aktørId = AKTØRID,
             orgnummer = ORGNUMMER,
             perioder = listOf(*perioder),

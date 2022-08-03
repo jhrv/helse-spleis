@@ -1,7 +1,9 @@
 package no.nav.helse.person
 
+import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.Fødselsnummer
+import no.nav.helse.februar
 import no.nav.helse.inspectors.TestArbeidsgiverInspektør
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.somFødselsnummer
@@ -13,6 +15,7 @@ internal abstract class AbstractPersonTest {
 
     internal companion object {
         val UNG_PERSON_FNR_2018: Fødselsnummer = "12029240045".somFødselsnummer()
+        val UNG_PERSON_FØDSELSDATO: LocalDate = 12.februar(1992)
         const val AKTØRID = "42"
         val ORGNUMMER: String = "987654321"
 

@@ -22,7 +22,8 @@ class Sykmelding(
     sykeperioder: List<Sykmeldingsperiode>,
     private val sykmeldingSkrevet: LocalDateTime,
     private val mottatt: LocalDateTime,
-    private val erFremtidig: Boolean = false
+    private val erFremtidig: Boolean = false,
+    private val fødselsdato: LocalDate
 ) : SykdomstidslinjeHendelse(meldingsreferanseId, fnr, aktørId, orgnummer, sykmeldingSkrevet) {
 
     private val sykdomstidslinje: Sykdomstidslinje
@@ -37,6 +38,8 @@ class Sykmelding(
         sykdomstidslinje = Sykmeldingsperiode.tidslinje(this, sykeperioder)
         periode = requireNotNull(sykdomstidslinje.periode())
     }
+
+    override fun fødselsdato(): LocalDate = fødselsdato
 
     override fun valider(periode: Periode, subsumsjonObserver: SubsumsjonObserver): IAktivitetslogg {
         validerAtSykmeldingIkkeErForGammel()

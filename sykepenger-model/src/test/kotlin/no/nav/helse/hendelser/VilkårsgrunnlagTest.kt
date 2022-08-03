@@ -259,6 +259,7 @@ internal class VilkårsgrunnlagTest : AbstractPersonTest() {
         meldingsreferanseId = UUID.randomUUID(),
         fnr = UNG_PERSON_FNR_2018.toString(),
         aktørId = AKTØRID,
+        fødselsdato = UNG_PERSON_FØDSELSDATO,
         orgnummer = ORGNUMMER,
         sykeperioder = listOf(Sykmeldingsperiode(16.januar, 30.januar, 100.prosent)),
         sykmeldingSkrevet = 1.april.atStartOfDay(),
@@ -268,6 +269,7 @@ internal class VilkårsgrunnlagTest : AbstractPersonTest() {
     private fun søknad() = Søknad(
         meldingsreferanseId = UUID.randomUUID(),
         fnr = UNG_PERSON_FNR_2018.toString(),
+        fødselsdato = UNG_PERSON_FØDSELSDATO,
         aktørId = AKTØRID,
         orgnummer = ORGNUMMER,
         perioder = listOf(Sykdom(16.januar, 30.januar, 100.prosent)),

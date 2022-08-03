@@ -13,6 +13,7 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Permisjon
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Utdanning
 import no.nav.helse.januar
+import no.nav.helse.person.AbstractPersonTest
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Person
 import no.nav.helse.person.etterlevelse.MaskinellJurist
@@ -71,6 +72,7 @@ internal class SerialiseringAvDagerFraSøknadTest {
         meldingsreferanseId = UUID.randomUUID(),
         fnr = fnr,
         aktørId = aktørId,
+        fødselsdato = AbstractPersonTest.UNG_PERSON_FØDSELSDATO,
         orgnummer = orgnummer,
         sykeperioder = listOf(Sykmeldingsperiode(1.januar, 2.januar, 100.prosent)),
         sykmeldingSkrevet = 4.april.atStartOfDay(),
@@ -80,6 +82,7 @@ internal class SerialiseringAvDagerFraSøknadTest {
     private val søknad get() = Søknad(
         meldingsreferanseId = UUID.randomUUID(),
         fnr = fnr,
+        fødselsdato = AbstractPersonTest.UNG_PERSON_FØDSELSDATO,
         aktørId = aktørId,
         orgnummer = orgnummer,
         perioder = listOf(

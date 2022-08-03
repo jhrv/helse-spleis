@@ -171,6 +171,7 @@ internal class GodkjenningHendelseTest : AbstractPersonTest() {
             meldingsreferanseId = UUID.randomUUID(),
             fnr = UNG_PERSON_FNR_2018.toString(),
             aktørId = "aktørId",
+            fødselsdato = UNG_PERSON_FØDSELSDATO,
             orgnummer = ORGNUMMER,
             sykeperioder = listOf(Sykmeldingsperiode(førsteSykedag, sisteSykedag, 100.prosent)),
             sykmeldingSkrevet = førsteSykedag.atStartOfDay(),
@@ -183,6 +184,7 @@ internal class GodkjenningHendelseTest : AbstractPersonTest() {
         Søknad(
             meldingsreferanseId = UUID.randomUUID(),
             fnr = UNG_PERSON_FNR_2018.toString(),
+            fødselsdato = UNG_PERSON_FØDSELSDATO,
             aktørId = "aktørId",
             orgnummer = ORGNUMMER,
             perioder = listOf(Sykdom(førsteSykedag, sisteSykedag, 100.prosent)),

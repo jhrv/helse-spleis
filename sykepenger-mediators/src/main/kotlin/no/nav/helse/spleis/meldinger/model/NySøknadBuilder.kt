@@ -29,6 +29,7 @@ internal class NySøknadBuilder : SøknadBuilder() {
         sykeperioder = sykemeldingsperioder,
         sykmeldingSkrevet = sykmeldingSkrevet,
         mottatt = opprettet,
-        erFremtidig = fremtidigSøknad
+        erFremtidig = fremtidigSøknad,
+        fødselsdato = fødselsdato
     )
 }

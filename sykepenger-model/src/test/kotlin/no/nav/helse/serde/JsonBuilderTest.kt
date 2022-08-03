@@ -49,6 +49,7 @@ import no.nav.helse.juli
 import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.oktober
+import no.nav.helse.person.AbstractPersonTest
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.Arbeidsgiver
@@ -660,6 +661,7 @@ class JsonBuilderTest {
         meldingsreferanseId = hendelseId,
         fnr = fnr.toString(),
         aktørId = aktørId,
+        fødselsdato = AbstractPersonTest.UNG_PERSON_FØDSELSDATO,
         orgnummer = orgnummer,
         sykeperioder = listOf(Sykmeldingsperiode(fom, tom, 100.prosent)),
         sykmeldingSkrevet = fom.atStartOfDay(),
@@ -676,6 +678,7 @@ class JsonBuilderTest {
     ) = Søknad(
         meldingsreferanseId = hendelseId,
         fnr = fnr.toString(),
+        fødselsdato = AbstractPersonTest.UNG_PERSON_FØDSELSDATO,
         aktørId = aktørId,
         orgnummer = orgnummer,
         perioder = perioder,

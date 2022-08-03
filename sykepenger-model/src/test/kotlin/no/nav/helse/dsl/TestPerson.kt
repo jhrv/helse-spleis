@@ -63,6 +63,7 @@ internal class TestPerson(
     private val observatør: PersonObserver,
     private val aktørId: String = AKTØRID,
     private val fødselsnummer: Fødselsnummer = UNG_PERSON_FNR_2018,
+    private val fødselsdato: LocalDate = UNG_PERSON_FDATO_2018,
     alder: Alder = UNG_PERSON_FDATO_2018.alder,
     private val jurist: MaskinellJurist = MaskinellJurist()
 ) {
@@ -117,7 +118,7 @@ internal class TestPerson(
     }
 
     inner class TestArbeidsgiver(internal val orgnummer: String) {
-        private val fabrikk = Hendelsefabrikk(aktørId, fødselsnummer, orgnummer)
+        private val fabrikk = Hendelsefabrikk(aktørId, fødselsnummer, fødselsdato, orgnummer)
 
         internal val inspektør get() = TestArbeidsgiverInspektør(person, orgnummer)
 

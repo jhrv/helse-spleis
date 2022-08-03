@@ -75,6 +75,8 @@ class Inntektsmelding(
         sykdomstidslinje = listOf(arbeidsgivertidslinje, førsteFraværsdagGaptidslinje(arbeidsgiverperiode)).merge(beste)
     }
 
+    override fun fødselsdato(): LocalDate = fødselsdato
+
     private fun arbeidsgivertidslinje(): Sykdomstidslinje {
         val tidslinje = arbeidsgiverperioder.map(::asArbeidsgivertidslinje).merge()
         val periode = tidslinje.periode() ?: return tidslinje

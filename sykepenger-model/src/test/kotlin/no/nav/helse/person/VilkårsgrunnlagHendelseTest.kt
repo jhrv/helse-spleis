@@ -199,6 +199,7 @@ internal class VilkårsgrunnlagHendelseTest : AbstractPersonTest() {
         meldingsreferanseId = UUID.randomUUID(),
         fnr = UNG_PERSON_FNR_2018.toString(),
         aktørId = "aktørId",
+        fødselsdato = UNG_PERSON_FØDSELSDATO,
         orgnummer = ORGNUMMER,
         sykeperioder = perioder,
         sykmeldingSkrevet = Sykmeldingsperiode.periode(perioder)?.start?.atStartOfDay() ?: LocalDateTime.now(),
@@ -212,6 +213,7 @@ internal class VilkårsgrunnlagHendelseTest : AbstractPersonTest() {
     ) = Søknad(
         meldingsreferanseId = UUID.randomUUID(),
         fnr = UNG_PERSON_FNR_2018.toString(),
+        fødselsdato = UNG_PERSON_FØDSELSDATO,
         aktørId = "aktørId",
         orgnummer = ORGNUMMER,
         perioder = perioder,

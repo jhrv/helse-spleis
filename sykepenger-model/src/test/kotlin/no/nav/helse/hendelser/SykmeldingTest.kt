@@ -11,11 +11,13 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.time.LocalDateTime
 import java.util.*
+import no.nav.helse.februar
 
 internal class SykmeldingTest {
 
     private companion object {
         const val UNG_PERSON_FNR_2018 = "12029240045"
+        val UNG_PERSON_FØDSELSDATO = 12.februar(1992)
     }
 
     private lateinit var sykmelding: Sykmelding
@@ -65,6 +67,7 @@ internal class SykmeldingTest {
             meldingsreferanseId = UUID.randomUUID(),
             fnr = UNG_PERSON_FNR_2018,
             aktørId = "12345",
+            fødselsdato = UNG_PERSON_FØDSELSDATO,
             orgnummer = "987654321",
             sykeperioder = sykeperioder.toList(),
             sykmeldingSkrevet = tidligsteFom ?: LocalDateTime.now(),

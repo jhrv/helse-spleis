@@ -12,6 +12,7 @@ import no.nav.helse.januar
 import no.nav.helse.juni
 import no.nav.helse.mai
 import no.nav.helse.mars
+import no.nav.helse.person.AbstractPersonTest
 import no.nav.helse.person.SykdomstidslinjeVisitor
 import no.nav.helse.sykdomstidslinje.Dag.Arbeidsdag
 import no.nav.helse.sykdomstidslinje.Dag.ArbeidsgiverHelgedag
@@ -78,6 +79,7 @@ internal class ForeldetSykedagTest {
         return Søknad(
             meldingsreferanseId = UUID.randomUUID(),
             fnr = UNG_PERSON_FNR_2018,
+            fødselsdato = AbstractPersonTest.UNG_PERSON_FØDSELSDATO,
             aktørId = AKTØRID,
             orgnummer = ORGNUMMER,
             perioder = listOf(Sykdom(18.januar, 14.februar, 100.prosent)), // 10 sykedag januar & februar

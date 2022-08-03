@@ -305,6 +305,7 @@ internal class ArbeidsgiverUtbetalingerTest {
                 meldingsreferanseId = UUID.randomUUID(),
                 fnr = UNG_PERSON_FNR_2018.toString(),
                 aktørId = "",
+                fødselsdato = AbstractPersonTest.UNG_PERSON_FØDSELSDATO,
                 orgnummer = ORGNUMMER,
                 sykeperioder = listOf(Sykmeldingsperiode(førsteDag, sisteDag, 100.prosent)),
                 sykmeldingSkrevet = 1.januar.atStartOfDay(),
@@ -315,6 +316,7 @@ internal class ArbeidsgiverUtbetalingerTest {
             Søknad(
                 meldingsreferanseId = UUID.randomUUID(),
                 fnr = UNG_PERSON_FNR_2018.toString(),
+                fødselsdato = AbstractPersonTest.UNG_PERSON_FØDSELSDATO,
                 aktørId = "",
                 orgnummer = ORGNUMMER,
                 perioder = listOf(Sykdom(førsteDag, sisteDag, 100.prosent)),

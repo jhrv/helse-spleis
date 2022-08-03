@@ -103,6 +103,7 @@ internal class InntektsmeldingHendelseTest : AbstractPersonTest() {
         meldingsreferanseId = UUID.randomUUID(),
         fnr = UNG_PERSON_FNR_2018.toString(),
         aktørId = AKTØRID,
+        fødselsdato = UNG_PERSON_FØDSELSDATO,
         orgnummer = orgnr,
         sykeperioder = sykeperioder.toList(),
         sykmeldingSkrevet = Sykmeldingsperiode.periode(sykeperioder.toList())?.start?.atStartOfDay() ?: LocalDateTime.now(),
@@ -113,6 +114,7 @@ internal class InntektsmeldingHendelseTest : AbstractPersonTest() {
         Søknad(
             meldingsreferanseId = UUID.randomUUID(),
             fnr = UNG_PERSON_FNR_2018.toString(),
+            fødselsdato = UNG_PERSON_FØDSELSDATO,
             aktørId = "12345",
             orgnummer = orgnummer,
             perioder = listOf(*perioder),

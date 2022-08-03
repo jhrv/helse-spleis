@@ -9,6 +9,7 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
+import no.nav.helse.person.AbstractPersonTest
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Dokumentsporing
@@ -173,7 +174,7 @@ internal class UtbetalingBuilderTest {
     private fun arbeidsgiver(organisasjonsnummer: String) = Arbeidsgiver(person(), organisasjonsnummer, maskinellJurist)
     private fun søknad(søknadId: UUID, periode: Periode): Søknad {
         val søknadsperiode = Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent)
-        return Søknad(søknadId, fødselsnummer.toString(), aktørId, organisasjonsnummer, listOf(søknadsperiode), emptyList(), LocalDateTime.now(), false, emptyList(), LocalDateTime.now())
+        return Søknad(søknadId, fødselsnummer.toString(), aktørId, organisasjonsnummer, AbstractPersonTest.UNG_PERSON_FØDSELSDATO, listOf(søknadsperiode), emptyList(), LocalDateTime.now(), false, emptyList(), LocalDateTime.now())
     }
 
     private companion object {

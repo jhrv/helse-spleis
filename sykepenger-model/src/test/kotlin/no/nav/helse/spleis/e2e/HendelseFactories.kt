@@ -112,6 +112,7 @@ internal fun AbstractEndToEndTest.sykmelding(
         meldingsreferanseId = id,
         fnr = fnr.toString(),
         aktørId = AbstractPersonTest.AKTØRID,
+        fødselsdato = AbstractPersonTest.UNG_PERSON_FØDSELSDATO,
         orgnummer = orgnummer,
         sykeperioder = listOf(*sykeperioder),
         sykmeldingSkrevet = sykmeldingSkrevet ?: Sykmeldingsperiode.periode(sykeperioder.toList())?.start?.atStartOfDay() ?: LocalDateTime.now(),
@@ -133,6 +134,7 @@ internal fun AbstractEndToEndTest.søknad(
     return Søknad(
         meldingsreferanseId = id,
         fnr = fnr.toString(),
+        fødselsdato = AbstractPersonTest.UNG_PERSON_FØDSELSDATO,
         aktørId = AbstractPersonTest.AKTØRID,
         orgnummer = orgnummer,
         perioder = listOf(*perioder),

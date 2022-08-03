@@ -190,6 +190,7 @@ internal class PåminnelserOgTimeoutTest : AbstractPersonTest() {
         Søknad(
             meldingsreferanseId = UUID.randomUUID(),
             fnr = UNG_PERSON_FNR_2018.toString(),
+            fødselsdato = UNG_PERSON_FØDSELSDATO,
             aktørId = "12345",
             orgnummer = ORGNUMMER,
             perioder = perioder.toList(),
@@ -215,6 +216,7 @@ internal class PåminnelserOgTimeoutTest : AbstractPersonTest() {
             meldingsreferanseId = UUID.randomUUID(),
             fnr = UNG_PERSON_FNR_2018.toString(),
             aktørId = "12345",
+            fødselsdato = UNG_PERSON_FØDSELSDATO,
             orgnummer = ORGNUMMER,
             sykeperioder = perioder.toList(),
             sykmeldingSkrevet = Sykmeldingsperiode.periode(perioder.toList())?.start?.atStartOfDay() ?: LocalDateTime.now(),

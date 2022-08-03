@@ -15,6 +15,7 @@ internal class SendtSøknadBuilder : SøknadBuilder() {
         meldingsreferanseId = meldingsreferanseId,
         fnr = fnr,
         aktørId = aktørId,
+        fødselsdato = fødselsdato,
         orgnummer = organisasjonsnummer,
         perioder = perioder,
         andreInntektskilder = inntektskilder,
