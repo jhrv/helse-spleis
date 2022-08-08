@@ -96,9 +96,9 @@ class Inntektsmelding(
     private fun førsteFraværsdagGaptidslinje(arbeidsgiverperiode: Periode?): Sykdomstidslinje {
         if (førsteFraværsdag == null || førsteFraværsdagKantIKant(arbeidsgiverperiode)) return Sykdomstidslinje()
         val tidslinje = førsteFraværsdagtidslinje()
-        if (arbeidsgiverperiode == null) return tidslinje
-        if (!arbeidsgiverperiode.erRettFør(førsteFraværsdag)) return tidslinje
-        val gapdager = arbeidsgiverperiode.periodeMellom(førsteFraværsdag) ?: return tidslinje
+        if (arbeidsgiverperiode == null) return Sykdomstidslinje()
+        if (!arbeidsgiverperiode.erRettFør(førsteFraværsdag)) return Sykdomstidslinje()
+        val gapdager = arbeidsgiverperiode.periodeMellom(førsteFraværsdag) ?: return Sykdomstidslinje()
         return Sykdomstidslinje.arbeidsdager(gapdager, kilde) + tidslinje
     }
 
@@ -177,14 +177,19 @@ class Inntektsmelding(
     override fun fortsettÅBehandle(arbeidsgiver: Arbeidsgiver) = arbeidsgiver.håndter(this)
 
     private var inntektLagret = false
-    internal fun addInntekt(inntektshistorikk: Inntektshistorikk, skjæringstidspunktVedtaksperiode: LocalDate, subsumsjonObserver: SubsumsjonObserver) {
+    internal fun addInntekt(inntektshistorikk: Inntektshistorikk, førsteFraværsdagFraSpleis: LocalDate, subsumsjonObserver: SubsumsjonObserver) {
         if (inntektLagret) return
         inntektLagret = true
-        val skjæringstidspunkt = (sykdomstidslinje.sisteSkjæringstidspunkt() ?: return).takeUnless {
-            førsteFraværsdagErEtterArbeidsgiverperioden() && it > skjæringstidspunktVedtaksperiode
-        } ?: skjæringstidspunktVedtaksperiode
 
-        if (skjæringstidspunkt != førsteFraværsdag) {
+        val førsteFraværsdagFraIM = (sykdomstidslinje + førsteFraværsdagtidslinje()).sisteSkjæringstidspunkt() ?: return
+
+        val inntektsdato = if (førsteFraværsdagErEtterArbeidsgiverperioden() && førsteFraværsdagFraIM > førsteFraværsdagFraSpleis) {
+            førsteFraværsdagFraSpleis
+        } else {
+            førsteFraværsdagFraIM
+        }
+
+        if (inntektsdato != førsteFraværsdag) {
             warn(WARN_ULIKHET_FØRSTE_FRAVÆRSDAG_OG_SKJÆRINGSTIDSPUNKT)
         }
 
@@ -192,7 +197,7 @@ class Inntektsmelding(
         subsumsjonObserver.`§ 8-10 ledd 3`(årligInntekt, dagligInntekt)
         inntektshistorikk.append {
             addInntektsmelding(
-                skjæringstidspunkt,
+                inntektsdato,
                 meldingsreferanseId(),
                 beregnetInntekt
             )

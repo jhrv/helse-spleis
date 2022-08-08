@@ -1,5 +1,7 @@
 package no.nav.helse.utbetalingstidslinje
 
+import java.time.DayOfWeek
+import java.time.LocalDate
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
@@ -8,8 +10,6 @@ import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.sykdomstidslinje.erHelg
 import no.nav.helse.sykdomstidslinje.erRettFør
-import java.time.DayOfWeek
-import java.time.LocalDate
 
 internal class Arbeidsgiverperiode private constructor(private val perioder: List<Periode>, førsteUtbetalingsdag: LocalDate?) : Iterable<LocalDate>, Comparable<LocalDate> {
     constructor(perioder: List<Periode>) : this(perioder, null)
@@ -31,7 +31,7 @@ internal class Arbeidsgiverperiode private constructor(private val perioder: Lis
 
     internal fun fiktiv() = perioder.isEmpty()
 
-    internal fun kjentDag(dagen: LocalDate) {
+    internal fun kjentDag(dagen: LocalDate) = apply {
         kjenteDager.add(dagen)
     }
 
@@ -45,7 +45,7 @@ internal class Arbeidsgiverperiode private constructor(private val perioder: Lis
         innflytelseperioden.overlapperMed(periode)
 
     internal fun ingenUtbetaling(periode: Periode, subsumsjonObserver: SubsumsjonObserver): Boolean {
-        if (!dekker(periode)) return erFørsteUtbetalingsdagEtter(periode.endInclusive)
+        if (!dekker(periode)) return erFørsteUtbetalingsdagEtter(periode.endInclusive) || nyArbeidsgiverperiode(periode)
         subsumsjonObserver.`§ 8-17 ledd 1 bokstav a - arbeidsgiversøknad`(this)
         return true
     }
@@ -67,6 +67,11 @@ internal class Arbeidsgiverperiode private constructor(private val perioder: Lis
     }
 
     internal fun erFørsteUtbetalingsdagEtter(dato: LocalDate) = utbetalingsdager.firstOrNull()?.start?.let { dato < it } ?: true
+
+    // hvis det starter ny arbeidsgiverperioden i løpet av *periode* og siste utbetalingsdag var før perioden
+    private fun nyArbeidsgiverperiode(periode: Periode): Boolean {
+        return utbetalingsdager.last().endInclusive < periode.start && sisteKjente < periode.endInclusive
+    }
 
     internal fun periodetype(organisasjonsnummer: String, other: Periode, skjæringstidspunkt: LocalDate, infotrygdhistorikk: Infotrygdhistorikk): Periodetype {
         val førsteUtbetalingsdag = utbetalingsdager.firstOrNull()?.start

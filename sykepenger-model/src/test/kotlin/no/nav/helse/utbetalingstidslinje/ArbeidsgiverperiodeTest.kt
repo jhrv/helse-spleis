@@ -7,7 +7,11 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode.Companion.finn
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertNotEquals
+import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class ArbeidsgiverperiodeTest {
@@ -66,6 +70,29 @@ internal class ArbeidsgiverperiodeTest {
             assertTrue(agp.ingenUtbetaling(15.januar til 22.januar, MaskinellJurist()))
             assertFalse(agp.ingenUtbetaling(15.januar til 23.januar, MaskinellJurist()))
         }
+    }
+
+    @Test
+    fun `ingen utbetaling dersom perioden har opphold til arbeidsgiverperioden, og arbeidsgiverperioden avbrytes`() {
+        agp(1.januar til 16.januar).utbetalingsdag(23.januar)
+            .kjentDag(6.januar)
+            .kjentDag(7.januar)
+            .kjentDag(8.januar) // oppholdsdag nr 16
+            .kjentDag(9.januar)
+            .also { agp ->
+                assertTrue(agp.ingenUtbetaling(6.februar til 9.februar, MaskinellJurist()))
+            }
+    }
+
+    @Test
+    fun `tar ikke stilling til ingen utbetaling dersom arbeidsgiverperioden ikke avbrytes i perioden`() {
+        agp(1.januar til 16.januar).utbetalingsdag(23.januar)
+            .kjentDag(6.januar)
+            .kjentDag(7.januar)
+            .kjentDag(8.februar)
+            .also { agp ->
+                assertFalse(agp.ingenUtbetaling(6.februar til 7.februar, MaskinellJurist()))
+            }
     }
 
     @Test
