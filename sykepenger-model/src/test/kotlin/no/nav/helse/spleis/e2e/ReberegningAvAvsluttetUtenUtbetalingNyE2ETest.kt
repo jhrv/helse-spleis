@@ -258,7 +258,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
 
         håndterYtelser(2.vedtaksperiode)
 
-        assertWarning("Første fraværsdag i inntektsmeldingen er ulik skjæringstidspunktet. Kontrollér at inntektsmeldingen er knyttet til riktig periode.", 1.vedtaksperiode.filter(a1))
+        assertNoWarnings(1.vedtaksperiode.filter(a1))
         assertNoWarnings(2.vedtaksperiode.filter(a1))
 
         assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
@@ -303,7 +303,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
 
         håndterYtelser(3.vedtaksperiode)
 
-        assertWarning("Første fraværsdag i inntektsmeldingen er ulik skjæringstidspunktet. Kontrollér at inntektsmeldingen er knyttet til riktig periode.", 1.vedtaksperiode.filter(a1))
+        assertNoWarnings(1.vedtaksperiode.filter(a1))
         assertNoWarnings(2.vedtaksperiode.filter(a1))
         assertNoWarnings(3.vedtaksperiode.filter(a1))
 
