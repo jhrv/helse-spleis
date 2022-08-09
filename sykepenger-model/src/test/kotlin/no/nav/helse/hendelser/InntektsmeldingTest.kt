@@ -433,11 +433,12 @@ internal class InntektsmeldingTest {
         )
         val nyTidslinje = inntektsmelding.sykdomstidslinje()
 
-        assertEquals(22.januar, nyTidslinje.sisteSkjæringstidspunkt())
+        assertEquals(5.januar, nyTidslinje.sisteSkjæringstidspunkt())
+        assertEquals(22.januar.somPeriode(), inntektsmelding.periode())
         assertEquals(Arbeidsgiverdag::class, nyTidslinje[5.januar]::class)
         assertEquals(ArbeidsgiverHelgedag::class, nyTidslinje[20.januar]::class)
         assertEquals(FriskHelgedag::class, nyTidslinje[21.januar]::class)
-        assertEquals(Arbeidsgiverdag::class, nyTidslinje[22.januar]::class)
+        assertEquals(UkjentDag::class, nyTidslinje[22.januar]::class)
     }
 
     @Test
@@ -468,11 +469,12 @@ internal class InntektsmeldingTest {
         )
         val nyTidslinje = inntektsmelding.sykdomstidslinje()
 
-        assertEquals(21.januar, nyTidslinje.sisteSkjæringstidspunkt())
+        assertEquals(4.januar, nyTidslinje.sisteSkjæringstidspunkt())
+        assertEquals(21.januar.somPeriode(), inntektsmelding.periode())
         assertEquals(Arbeidsgiverdag::class, nyTidslinje[4.januar]::class)
         assertEquals(Arbeidsgiverdag::class, nyTidslinje[19.januar]::class)
         assertEquals(FriskHelgedag::class, nyTidslinje[20.januar]::class)
-        assertEquals(ArbeidsgiverHelgedag::class, nyTidslinje[21.januar]::class)
+        assertEquals(UkjentDag::class, nyTidslinje[21.januar]::class)
     }
 
     @Test
@@ -483,12 +485,13 @@ internal class InntektsmeldingTest {
         )
         val nyTidslinje = inntektsmelding.sykdomstidslinje()
 
-        assertEquals(22.januar, nyTidslinje.sisteSkjæringstidspunkt())
+        assertEquals(4.januar, nyTidslinje.sisteSkjæringstidspunkt())
+        assertEquals(22.januar.somPeriode(), inntektsmelding.periode())
         assertEquals(Arbeidsgiverdag::class, nyTidslinje[4.januar]::class)
         assertEquals(Arbeidsgiverdag::class, nyTidslinje[19.januar]::class)
         assertEquals(FriskHelgedag::class, nyTidslinje[20.januar]::class)
         assertEquals(FriskHelgedag::class, nyTidslinje[21.januar]::class)
-        assertEquals(Arbeidsgiverdag::class, nyTidslinje[22.januar]::class)
+        assertEquals(UkjentDag::class, nyTidslinje[22.januar]::class)
     }
 
 

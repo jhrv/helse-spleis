@@ -1,11 +1,10 @@
 package no.nav.helse.hendelser
 
-import no.nav.helse.sykdomstidslinje.erRettFør
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
-import no.nav.helse.førsteArbeidsdag
 import no.nav.helse.nesteArbeidsdag
+import no.nav.helse.sykdomstidslinje.erRettFør
 
 // Understands beginning and end of a time interval
 open class Periode(fom: LocalDate, tom: LocalDate) : ClosedRange<LocalDate>, Iterable<LocalDate> {
@@ -24,6 +23,10 @@ open class Periode(fom: LocalDate, tom: LocalDate) : ClosedRange<LocalDate>, Ite
 
         fun Iterable<LocalDate>.grupperSammenhengendePerioder() = this
             .grupperSammenhengendePerioder { periode, dato -> periode.endInclusive.plusDays(1) != dato }
+
+        internal fun Iterable<Periode>.grupperSammenhengendePerioder() = flatten().grupperSammenhengendePerioder()
+
+        internal fun Iterable<Periode>.periode() = if (!iterator().hasNext()) null else minOf { it.start } til maxOf { it.endInclusive }
 
         fun List<Periode>.grupperSammenhengendePerioderMedHensynTilHelg() = this
             .flatMap { periode -> periode.map { it } }
