@@ -1295,7 +1295,7 @@ internal class Vedtaksperiode private constructor(
                 arbeidsgivere.senerePerioderPågående(vedtaksperiode) -> return hendelse.info(
                     "Gjenopptar ikke behandling fordi det finnes pågående revurderinger."
                 )
-                vedtaksperiode.ingenUtbetaling() -> vedtaksperiode.tilstand(hendelse, AvsluttetUtenUtbetaling)
+                vedtaksperiode.ingenUtbetaling() && vedtaksperiode.person.vilkårsgrunnlagFor(vedtaksperiode.skjæringstidspunkt) == null -> vedtaksperiode.tilstand(hendelse, AvsluttetUtenUtbetaling)
                 !arbeidsgivere.harNødvendigInntekt(vedtaksperiode.skjæringstidspunkt) -> return hendelse.info(
                     "Gjenopptar ikke behandling fordi minst én arbeidsgiver ikke har tilstrekkelig inntekt for skjæringstidspunktet"
                 )

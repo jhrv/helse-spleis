@@ -45,7 +45,7 @@ internal class Arbeidsgiverperiode private constructor(private val perioder: Lis
         innflytelseperioden.overlapperMed(periode)
 
     internal fun ingenUtbetaling(periode: Periode, subsumsjonObserver: SubsumsjonObserver): Boolean {
-        if (!dekker(periode)) return erFørsteUtbetalingsdagEtter(periode.endInclusive) || nyArbeidsgiverperiode(periode)
+        if (!dekker(periode)) return erFørsteUtbetalingsdagEtter(periode.endInclusive) || erSisteUtbetalingsdagFør(periode)
         subsumsjonObserver.`§ 8-17 ledd 1 bokstav a - arbeidsgiversøknad`(this)
         return true
     }
@@ -69,8 +69,8 @@ internal class Arbeidsgiverperiode private constructor(private val perioder: Lis
     internal fun erFørsteUtbetalingsdagEtter(dato: LocalDate) = utbetalingsdager.firstOrNull()?.start?.let { dato < it } ?: true
 
     // hvis det starter ny arbeidsgiverperioden i løpet av *periode* og siste utbetalingsdag var før perioden
-    private fun nyArbeidsgiverperiode(periode: Periode): Boolean {
-        return utbetalingsdager.last().endInclusive < periode.start && sisteKjente < periode.endInclusive
+    private fun erSisteUtbetalingsdagFør(periode: Periode): Boolean {
+        return utbetalingsdager.last().endInclusive < periode.start
     }
 
     internal fun periodetype(organisasjonsnummer: String, other: Periode, skjæringstidspunkt: LocalDate, infotrygdhistorikk: Infotrygdhistorikk): Periodetype {

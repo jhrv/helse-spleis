@@ -85,13 +85,13 @@ internal class ArbeidsgiverperiodeTest {
     }
 
     @Test
-    fun `tar ikke stilling til ingen utbetaling dersom arbeidsgiverperioden ikke avbrytes i perioden`() {
+    fun `ingen utbetaling dersom utbetaling etterpå`() {
         agp(1.januar til 16.januar).utbetalingsdag(23.januar)
             .kjentDag(6.januar)
             .kjentDag(7.januar)
-            .kjentDag(8.februar)
+            .utbetalingsdag(8.februar)
             .also { agp ->
-                assertFalse(agp.ingenUtbetaling(6.februar til 7.februar, MaskinellJurist()))
+                assertTrue(agp.ingenUtbetaling(6.februar til 7.februar, MaskinellJurist()))
             }
     }
 
