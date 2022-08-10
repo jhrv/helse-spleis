@@ -40,6 +40,7 @@ import no.nav.helse.person.Vedtaksperiode.Companion.ALLE_AVVENTER_ARBEIDSGIVERE
 import no.nav.helse.person.Vedtaksperiode.Companion.ER_ELLER_HAR_VÆRT_AVSLUTTET
 import no.nav.helse.person.Vedtaksperiode.Companion.IKKE_FERDIG_BEHANDLET
 import no.nav.helse.person.Vedtaksperiode.Companion.IKKE_FERDIG_REVURDERT
+import no.nav.helse.person.Vedtaksperiode.Companion.IKKE_FERDIG_UTBETALT
 import no.nav.helse.person.Vedtaksperiode.Companion.KLAR_TIL_BEHANDLING
 import no.nav.helse.person.Vedtaksperiode.Companion.MED_SKJÆRINGSTIDSPUNKT
 import no.nav.helse.person.Vedtaksperiode.Companion.OVERLAPPENDE
@@ -316,6 +317,7 @@ internal class Arbeidsgiver private constructor(
             .any { !it.sykmeldingsperioder.kanFortsetteBehandling(periode) }
 
         internal fun Iterable<Arbeidsgiver>.gjenopptaBehandling(aktivitetslogg: IAktivitetslogg) {
+            if (nåværendeVedtaksperioder(IKKE_FERDIG_UTBETALT).isNotEmpty()) return aktivitetslogg.info("Gjenopptar ikke behandling fordi det finnes en periode som utbetales")
             val førstePeriode = (nåværendeVedtaksperioder(IKKE_FERDIG_REVURDERT).takeUnless { it.isEmpty() } ?: nåværendeVedtaksperioder(IKKE_FERDIG_BEHANDLET))
                 .minOrNull() ?: return
             førstePeriode.gjenopptaBehandling(aktivitetslogg, this)
@@ -364,6 +366,10 @@ internal class Arbeidsgiver private constructor(
 
     internal fun gjenopptaRevurdering(arbeidsgivere: List<Arbeidsgiver>, første: Vedtaksperiode, hendelse: IAktivitetslogg) {
         Vedtaksperiode.gjenopptaRevurdering(arbeidsgivere, hendelse, vedtaksperioder, første, this)
+    }
+
+    internal fun gjenopptaRevurdering(første: Vedtaksperiode, hendelse: IAktivitetslogg) {
+        (vedtaksperioder.filter { it > første }.lastOrNull(IKKE_FERDIG_REVURDERT) ?: første).gjenopptaRevurdering(hendelse)
     }
 
     internal fun accept(visitor: ArbeidsgiverVisitor) {
