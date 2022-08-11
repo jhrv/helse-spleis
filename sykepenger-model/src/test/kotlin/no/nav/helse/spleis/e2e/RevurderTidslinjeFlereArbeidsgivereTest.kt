@@ -149,7 +149,7 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
             assertTilstander(
                 1.vedtaksperiode,
                 AVSLUTTET,
-                AVVENTER_GJENNOMFØRT_REVURDERING,
+                AVVENTER_REVURDERING,AVVENTER_GJENNOMFØRT_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING,
                 AVVENTER_SIMULERING_REVURDERING,
                 AVVENTER_GODKJENNING_REVURDERING,
@@ -165,7 +165,7 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
                 1.vedtaksperiode,
                 AVSLUTTET,
                 AVVENTER_REVURDERING,
-                AVVENTER_GJENNOMFØRT_REVURDERING,
+                AVVENTER_REVURDERING,AVVENTER_GJENNOMFØRT_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING,
                 AVVENTER_GODKJENNING_REVURDERING,
                 AVSLUTTET
@@ -196,7 +196,7 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
             assertTilstander(
                 1.vedtaksperiode,
                 AVSLUTTET,
-                AVVENTER_GJENNOMFØRT_REVURDERING,
+                AVVENTER_REVURDERING,AVVENTER_GJENNOMFØRT_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING,
                 AVVENTER_SIMULERING_REVURDERING,
                 AVVENTER_GODKJENNING_REVURDERING,
@@ -217,7 +217,7 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
                 1.vedtaksperiode,
                 AVSLUTTET,
                 AVVENTER_REVURDERING,
-                AVVENTER_GJENNOMFØRT_REVURDERING,
+                AVVENTER_REVURDERING,AVVENTER_GJENNOMFØRT_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING,
                 AVVENTER_GODKJENNING_REVURDERING,
                 AVSLUTTET
@@ -247,13 +247,13 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
             assertTilstander(
                 1.vedtaksperiode,
                 AVSLUTTET,
-                AVVENTER_GJENNOMFØRT_REVURDERING,
+                AVVENTER_REVURDERING,AVVENTER_GJENNOMFØRT_REVURDERING,
                 AVSLUTTET
             )
             assertTilstander(
                 2.vedtaksperiode,
                 AVSLUTTET,
-                AVVENTER_GJENNOMFØRT_REVURDERING,
+                AVVENTER_REVURDERING,AVVENTER_GJENNOMFØRT_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING,
                 AVVENTER_SIMULERING_REVURDERING,
                 AVVENTER_GODKJENNING_REVURDERING,
@@ -270,14 +270,14 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
                 1.vedtaksperiode,
                 AVSLUTTET,
                 AVVENTER_REVURDERING,
-                AVVENTER_GJENNOMFØRT_REVURDERING,
+                AVVENTER_REVURDERING,AVVENTER_GJENNOMFØRT_REVURDERING,
                 AVSLUTTET
             )
             assertTilstander(
                 2.vedtaksperiode,
                 AVSLUTTET,
                 AVVENTER_REVURDERING,
-                AVVENTER_GJENNOMFØRT_REVURDERING,
+                AVVENTER_REVURDERING,AVVENTER_GJENNOMFØRT_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING,
                 AVVENTER_GODKJENNING_REVURDERING,
                 AVSLUTTET
@@ -303,7 +303,7 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
         assertTilstander(
             1.vedtaksperiode,
             AVSLUTTET,
-            AVVENTER_GJENNOMFØRT_REVURDERING,
+            AVVENTER_REVURDERING,AVVENTER_GJENNOMFØRT_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING,
             orgnummer = aadvokatene
         )
@@ -329,12 +329,12 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
             assertTilstander(
                 1.vedtaksperiode,
                 AVSLUTTET,
-                AVVENTER_GJENNOMFØRT_REVURDERING
+                AVVENTER_REVURDERING,AVVENTER_GJENNOMFØRT_REVURDERING
             )
             assertTilstander(
                 2.vedtaksperiode,
                 AVSLUTTET,
-                AVVENTER_GJENNOMFØRT_REVURDERING,
+                AVVENTER_REVURDERING,AVVENTER_GJENNOMFØRT_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING,
                 AVVENTER_SIMULERING_REVURDERING,
                 AVVENTER_GODKJENNING_REVURDERING

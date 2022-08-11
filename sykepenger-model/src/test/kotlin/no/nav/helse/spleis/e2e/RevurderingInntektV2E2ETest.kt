@@ -71,7 +71,7 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
-        assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, TIL_UTBETALING, AVSLUTTET)
+        assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING,AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, TIL_UTBETALING, AVSLUTTET)
     }
 
 
@@ -94,11 +94,11 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
 
         assertTilstander(1.vedtaksperiode,
             AVSLUTTET,
-            AVVENTER_GJENNOMFØRT_REVURDERING,
+            AVVENTER_REVURDERING,AVVENTER_GJENNOMFØRT_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING,
             AVVENTER_SIMULERING_REVURDERING,
             AVVENTER_GODKJENNING_REVURDERING,
-            AVVENTER_GJENNOMFØRT_REVURDERING,
+            AVVENTER_REVURDERING,AVVENTER_GJENNOMFØRT_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING,
             AVVENTER_SIMULERING_REVURDERING,
             AVVENTER_GODKJENNING_REVURDERING
@@ -128,17 +128,17 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
 
         assertTilstander(1.vedtaksperiode,
             AVSLUTTET,
-            AVVENTER_GJENNOMFØRT_REVURDERING,
-            AVVENTER_GJENNOMFØRT_REVURDERING,
+            AVVENTER_REVURDERING,AVVENTER_GJENNOMFØRT_REVURDERING,
+            AVVENTER_REVURDERING,AVVENTER_GJENNOMFØRT_REVURDERING,
         )
 
         assertTilstander(2.vedtaksperiode,
             AVSLUTTET,
-            AVVENTER_GJENNOMFØRT_REVURDERING,
+            AVVENTER_REVURDERING,AVVENTER_GJENNOMFØRT_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING,
             AVVENTER_SIMULERING_REVURDERING,
             AVVENTER_GODKJENNING_REVURDERING,
-            AVVENTER_GJENNOMFØRT_REVURDERING,
+            AVVENTER_REVURDERING,AVVENTER_GJENNOMFØRT_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING,
             AVVENTER_SIMULERING_REVURDERING,
             AVVENTER_GODKJENNING_REVURDERING
@@ -160,9 +160,9 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
 
         assertTilstander(1.vedtaksperiode,
             AVSLUTTET,
-            AVVENTER_GJENNOMFØRT_REVURDERING,
+            AVVENTER_REVURDERING,AVVENTER_GJENNOMFØRT_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING,
-            AVVENTER_GJENNOMFØRT_REVURDERING,
+            AVVENTER_REVURDERING,AVVENTER_GJENNOMFØRT_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING,
             AVVENTER_SIMULERING_REVURDERING,
             AVVENTER_GODKJENNING_REVURDERING
@@ -186,10 +186,10 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
 
         assertTilstander(1.vedtaksperiode,
             AVSLUTTET,
-            AVVENTER_GJENNOMFØRT_REVURDERING,
+            AVVENTER_REVURDERING,AVVENTER_GJENNOMFØRT_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING,
             AVVENTER_SIMULERING_REVURDERING,
-            AVVENTER_GJENNOMFØRT_REVURDERING,
+            AVVENTER_REVURDERING,AVVENTER_GJENNOMFØRT_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING,
             AVVENTER_SIMULERING_REVURDERING,
             AVVENTER_GODKJENNING_REVURDERING
@@ -241,17 +241,17 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
 
         assertTilstander(1.vedtaksperiode,
             AVSLUTTET,
-            AVVENTER_GJENNOMFØRT_REVURDERING,
-            AVVENTER_GJENNOMFØRT_REVURDERING
+            AVVENTER_REVURDERING,AVVENTER_GJENNOMFØRT_REVURDERING,
+            AVVENTER_REVURDERING,AVVENTER_GJENNOMFØRT_REVURDERING
         )
 
         assertTilstander(2.vedtaksperiode,
             AVSLUTTET,
-            AVVENTER_GJENNOMFØRT_REVURDERING,
+            AVVENTER_REVURDERING,AVVENTER_GJENNOMFØRT_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING,
             AVVENTER_SIMULERING_REVURDERING,
             AVVENTER_GODKJENNING_REVURDERING,
-            AVVENTER_GJENNOMFØRT_REVURDERING,
+            AVVENTER_REVURDERING,AVVENTER_GJENNOMFØRT_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING,
             AVVENTER_SIMULERING_REVURDERING,
             AVVENTER_GODKJENNING_REVURDERING
@@ -319,7 +319,7 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
         assertTilstander(
             1.vedtaksperiode,
             AVSLUTTET,
-            AVVENTER_GJENNOMFØRT_REVURDERING,
+            AVVENTER_REVURDERING,AVVENTER_GJENNOMFØRT_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING,
             AVVENTER_SIMULERING_REVURDERING
         )
@@ -370,7 +370,7 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
         assertTilstander(
             1.vedtaksperiode,
             AVSLUTTET,
-            AVVENTER_GJENNOMFØRT_REVURDERING,
+            AVVENTER_REVURDERING,AVVENTER_GJENNOMFØRT_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING,
             AVVENTER_SIMULERING_REVURDERING
         )
@@ -407,7 +407,7 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
         nullstillTilstandsendringer()
         håndterOverstyrInntekt(inntekt = 7000.månedlig, skjæringstidspunkt = 1.januar)
 
-        assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
+        assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING,AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
 
         assertWarning("Har mer enn 25 % avvik. Dette støttes foreløpig ikke i Speil. Du må derfor annullere periodene.", AktivitetsloggFilter.person())
         assertEquals(1, inspektør.utbetalinger.size)
@@ -420,7 +420,7 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
 
         håndterOverstyrInntekt(inntekt = 70000.månedlig, skjæringstidspunkt = 1.januar)
 
-        assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
+        assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING,AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
 
         assertWarning("Har mer enn 25 % avvik. Dette støttes foreløpig ikke i Speil. Du må derfor annullere periodene.", AktivitetsloggFilter.person())
         assertEquals(1, inspektør.utbetalinger.size)
@@ -437,7 +437,7 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
         assertTilstander(
             1.vedtaksperiode,
             AVSLUTTET,
-            AVVENTER_GJENNOMFØRT_REVURDERING,
+            AVVENTER_REVURDERING,AVVENTER_GJENNOMFØRT_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING,
             AVVENTER_SIMULERING_REVURDERING,
             AVVENTER_GODKJENNING_REVURDERING
@@ -469,7 +469,7 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
         assertTilstander(
             1.vedtaksperiode,
             AVSLUTTET,
-            AVVENTER_GJENNOMFØRT_REVURDERING,
+            AVVENTER_REVURDERING,AVVENTER_GJENNOMFØRT_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING,
             AVVENTER_SIMULERING_REVURDERING,
             AVVENTER_GODKJENNING_REVURDERING
@@ -615,7 +615,7 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
         assertTilstander(
             2.vedtaksperiode,
             AVSLUTTET,
-            AVVENTER_GJENNOMFØRT_REVURDERING,
+            AVVENTER_REVURDERING,AVVENTER_GJENNOMFØRT_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING,
             AVVENTER_SIMULERING_REVURDERING,
             AVVENTER_GODKJENNING_REVURDERING,
@@ -661,7 +661,7 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
         assertTilstander(
             2.vedtaksperiode,
             AVSLUTTET,
-            AVVENTER_GJENNOMFØRT_REVURDERING,
+            AVVENTER_REVURDERING,AVVENTER_GJENNOMFØRT_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING,
             AVVENTER_SIMULERING_REVURDERING,
             AVVENTER_GODKJENNING_REVURDERING,
@@ -740,13 +740,7 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
         assertTilstander(2.vedtaksperiode, TIL_UTBETALING)
         håndterUtbetalt()
         assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING)
-        assertTilstander(
-            2.vedtaksperiode,
-            TIL_UTBETALING,
-            AVSLUTTET,
-            AVVENTER_GJENNOMFØRT_REVURDERING,
-            AVVENTER_HISTORIKK_REVURDERING
-        )
+        assertTilstander(2.vedtaksperiode, TIL_UTBETALING, AVSLUTTET, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
     }
 
     @Test
