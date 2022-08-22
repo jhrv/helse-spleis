@@ -61,7 +61,12 @@ abstract class SykdomstidslinjeHendelse(
         internal fun toJson() = mapOf("type" to type, "id" to meldingsreferanseId, "tidsstempel" to tidsstempel)
     }
 
-    internal abstract fun sykdomstidslinje(): Sykdomstidslinje
+    internal fun sykdomstidslinje(): Sykdomstidslinje {
+        val sykdomstidslinje = lagSykdomstidslinje()
+        val kuttdato = nesteFom ?: return sykdomstidslinje
+        return sykdomstidslinje.fraOgMed(kuttdato)
+    }
+    internal abstract fun lagSykdomstidslinje(): Sykdomstidslinje
 
     internal fun erRelevant(other: Periode) = overlappsperiode()?.overlapperMed(other) ?: false
 
@@ -70,7 +75,7 @@ abstract class SykdomstidslinjeHendelse(
         return other.oppdaterFom(this.periode())
     }
 
-    protected open fun overlappsperiode(): Periode? = sykdomstidslinje().periode()
+    protected open fun overlappsperiode(): Periode? = lagSykdomstidslinje().periode()
 
     internal fun trimLeft(dato: LocalDate) {
         nesteFom = dato.plusDays(1)
@@ -82,7 +87,7 @@ abstract class SykdomstidslinjeHendelse(
         val periode = overlappsperiode() ?: aldri
         val fom = nesteFom?.takeUnless { it < periode.start } ?: return periode
         if (fom > periode.endInclusive) return aldri
-        return (sykdomstidslinje().førsteSykedagEtter(fom) ?: fom) til periode.endInclusive
+        return (lagSykdomstidslinje().førsteSykedagEtter(fom) ?: fom) til periode.endInclusive
     }
 
     internal open fun validerIkkeOppgittFlereArbeidsforholdMedSykmelding(): IAktivitetslogg = this

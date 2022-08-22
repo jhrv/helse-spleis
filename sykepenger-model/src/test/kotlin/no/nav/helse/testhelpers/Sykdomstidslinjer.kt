@@ -121,7 +121,7 @@ private const val AKTØRID = "42"
 private const val ORGNUMMER = "987654321"
 
 internal class TestHendelse(private val tidslinje: Sykdomstidslinje = Sykdomstidslinje()) : SykdomstidslinjeHendelse(UUID.randomUUID(), UNG_PERSON_FNR_2018, AKTØRID, ORGNUMMER, LocalDateTime.now()) {
-    override fun sykdomstidslinje() = tidslinje
+    override fun lagSykdomstidslinje() = tidslinje
     override fun valider(periode: Periode, subsumsjonObserver: SubsumsjonObserver) = Aktivitetslogg()
     override fun fortsettÅBehandle(arbeidsgiver: Arbeidsgiver) = Unit
     override fun leggTil(hendelseIder: MutableSet<Dokumentsporing>) {}

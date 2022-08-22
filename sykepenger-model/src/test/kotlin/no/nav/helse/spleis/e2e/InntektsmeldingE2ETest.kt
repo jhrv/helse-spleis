@@ -2060,26 +2060,30 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
 
         håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 19.januar)
 
-        assertTrue(inspektør.sykdomstidslinje[1.januar] is Dag.Arbeidsgiverdag)
-        assertTrue(inspektør.sykdomstidslinje[2.januar] is Dag.Arbeidsgiverdag)
-        assertTrue(inspektør.sykdomstidslinje[11.januar] is Dag.Arbeidsgiverdag)
-
         assertForventetFeil(
             forklaring = "inntektsmelding bør være relevant for korte (dog spredte) arbeidsgiverperiode-" +
                     "vedtaksperioder, selv om første fraværsdag er oppgitt etterpå (men bare om det ikke foreligger" +
                     "utbetaling mellom …)",
             nå = {
+                assertFalse(inspektør.sykdomstidslinje[1.januar] is Dag.Arbeidsgiverdag)
+                assertFalse(inspektør.sykdomstidslinje[2.januar] is Dag.Arbeidsgiverdag)
+                assertFalse(inspektør.sykdomstidslinje[11.januar] is Dag.Arbeidsgiverdag)
                 assertEquals(3.januar til 10.januar, inspektør.periode(1.vedtaksperiode))
                 assertEquals(12.januar til 16.januar, inspektør.periode(2.vedtaksperiode))
+                assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+                assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+                assertSisteTilstand(3.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
             },
             ønsket = {
+                assertTrue(inspektør.sykdomstidslinje[1.januar] is Dag.Arbeidsgiverdag)
+                assertTrue(inspektør.sykdomstidslinje[2.januar] is Dag.Arbeidsgiverdag)
+                assertTrue(inspektør.sykdomstidslinje[11.januar] is Dag.Arbeidsgiverdag)
                 assertEquals(1.januar til 10.januar, inspektør.periode(1.vedtaksperiode))
                 assertEquals(11.januar til 16.januar, inspektør.periode(2.vedtaksperiode))
+                assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+                assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+                assertSisteTilstand(3.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
             })
-
-        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-        assertSisteTilstand(3.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
     }
 
     @Test

@@ -65,7 +65,7 @@ class Søknad(
         arbeidsgiver.håndter(this)
     }
 
-    override fun sykdomstidslinje() = sykdomstidslinje
+    override fun lagSykdomstidslinje() = sykdomstidslinje
 
     override fun validerIkkeOppgittFlereArbeidsforholdMedSykmelding(): IAktivitetslogg {
         andreInntektskilder.forEach { it.validerIkkeSykmeldt(this) }

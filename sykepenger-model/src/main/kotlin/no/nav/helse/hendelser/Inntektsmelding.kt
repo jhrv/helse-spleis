@@ -79,7 +79,7 @@ class Inntektsmelding(
 
     private fun asArbeidsgivertidslinje(periode: Periode) = Sykdomstidslinje.arbeidsgiverdager(periode.start, periode.endInclusive, 100.prosent, kilde)
 
-    override fun sykdomstidslinje() = sykdomstidslinje
+    override fun lagSykdomstidslinje() = sykdomstidslinje
 
     // Pad days prior to employer-paid days with assumed work days
     override fun padLeft(dato: LocalDate) {

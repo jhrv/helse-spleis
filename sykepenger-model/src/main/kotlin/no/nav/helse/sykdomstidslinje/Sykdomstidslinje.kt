@@ -110,7 +110,7 @@ internal class Sykdomstidslinje private constructor(
         ?.findLast { erEnSykedag(this[it]) }
         ?.let { this.subset(Periode(dager.firstKey(), it)) } ?: Sykdomstidslinje()
 
-    private fun fraOgMed(dato: LocalDate) =
+    internal fun fraOgMed(dato: LocalDate) =
         Sykdomstidslinje(dager.tailMap(dato).toMap())
 
     internal fun trim(perioder: List<Periode>): Sykdomstidslinje {
