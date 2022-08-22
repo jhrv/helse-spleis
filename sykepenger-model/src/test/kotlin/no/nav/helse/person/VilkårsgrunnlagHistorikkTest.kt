@@ -4,7 +4,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
@@ -91,7 +90,7 @@ internal class VilkårsgrunnlagHistorikkTest {
         assertEquals(listOf(nyttSkjæringstidspunkt), skjæringstidspunkter)
 
         assertEquals(1, historikk.inspektør.vilkårsgrunnlagTeller.size)
-        historikk.oppdaterHistorikk(sykdomstidslinje)
+        historikk.oppdaterHistorikk(Aktivitetslogg(), sykdomstidslinje.skjæringstidspunkter())
 
         assertEquals(2, historikk.inspektør.vilkårsgrunnlagTeller.size)
         assertEquals(0, historikk.inspektør.vilkårsgrunnlagTeller[0]) { "det siste innslaget skal være tomt" }

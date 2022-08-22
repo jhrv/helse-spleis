@@ -331,15 +331,10 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
 
         håndterSykmelding(Sykmeldingsperiode(18.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(18.januar, 31.januar, 100.prosent))
-        håndterInntektsmelding(listOf(1.januar til 18.januar))
-
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
         håndterYtelser(2.vedtaksperiode)
 
-        assertForventetFeil(
-            forklaring = "https://trello.com/c/edYRnoPm",
-            nå = { assertSisteTilstand(2.vedtaksperiode, AVVENTER_SIMULERING) },
-            ønsket = { assertSisteTilstand(2.vedtaksperiode, TIL_INFOTRYGD) }
-        )
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
     }
 
     @Test
