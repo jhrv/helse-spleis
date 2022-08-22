@@ -32,6 +32,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
+import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING_REVURDERING
 import no.nav.helse.person.TilstandType.REVURDERING_FEILET
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
@@ -623,6 +624,8 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
 
         håndterOverstyrTidslinje((3.januar til 20.januar).map { manuellFeriedag(it) } + (21.januar til 26.januar).map { manuellPermisjonsdag(it) })
         håndterYtelser(1.vedtaksperiode)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
         håndterUtbetalt()
@@ -631,6 +634,8 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             1.vedtaksperiode,
             AVSLUTTET,
             AVVENTER_GJENNOMFØRT_REVURDERING,
+            AVVENTER_HISTORIKK_REVURDERING,
+            AVVENTER_VILKÅRSPRØVING_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING,
             AVVENTER_SIMULERING_REVURDERING,
             AVVENTER_GODKJENNING_REVURDERING,

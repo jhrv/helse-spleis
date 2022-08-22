@@ -61,7 +61,10 @@ abstract class SykdomstidslinjeHendelse(
         internal fun toJson() = mapOf("type" to type, "id" to meldingsreferanseId, "tidsstempel" to tidsstempel)
     }
 
-    internal abstract fun sykdomstidslinje(): Sykdomstidslinje
+    internal fun sykdomstidslinje(): Sykdomstidslinje =
+        nesteFom?.let { kuttdato -> lagSykdomstidslinje().fraOgMed(kuttdato) } ?: lagSykdomstidslinje()
+
+    internal abstract fun lagSykdomstidslinje(): Sykdomstidslinje
 
     internal fun erRelevant(other: Periode) = overlappsperiode()?.overlapperMed(other) ?: false
 

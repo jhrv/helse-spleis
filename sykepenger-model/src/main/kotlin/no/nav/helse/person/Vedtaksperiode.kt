@@ -501,8 +501,8 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun oppdaterHistorikk(hendelse: SykdomstidslinjeHendelse) {
-        hendelse.trimLeft(periode.endInclusive)
         sykdomstidslinje = arbeidsgiver.oppdaterSykdom(hendelse).subset(periode)
+        hendelse.trimLeft(periode.endInclusive)
     }
 
     private fun håndterSøknad(hendelse: Søknad, nesteTilstand: () -> Vedtaksperiodetilstand? = { null }) {

@@ -293,22 +293,24 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `skal ikke gjenbruke et vilkårsgrunnlag som feiler pga frilanser arbeidsforhold`() = Toggle.IkkeForlengInfotrygdperioder.disable {
+        val feilInntekt = INNTEKT
+        val riktigInntekt = INNTEKT*0.7
         håndterSykmelding(Sykmeldingsperiode(1.januar, 17.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 17.januar, 100.prosent))
-        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = feilInntekt)
 
         håndterYtelser(1.vedtaksperiode)
 
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
-            INNTEKT,
+            feilInntekt,
             inntektsvurdering = Inntektsvurdering(
-                inntekter = listOf(sammenligningsgrunnlag(a1, 1.januar, (INNTEKT*1.3).repeat(12))),
+                inntekter = listOf(sammenligningsgrunnlag(a1, 1.januar, (feilInntekt*1.3).repeat(12))),
             ),
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
                 inntekter = listOf(
-                    grunnlag(a1, 1.januar, INNTEKT.repeat(3)),
-                    grunnlag(a2, 1.januar, INNTEKT.repeat(1))
+                    grunnlag(a1, 1.januar, feilInntekt.repeat(3)),
+                    grunnlag(a2, 1.januar, feilInntekt.repeat(1))
                 ),
                 arbeidsforhold = listOf(
                     InntektForSykepengegrunnlag.Arbeidsforhold(
@@ -331,10 +333,12 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
 
         håndterSykmelding(Sykmeldingsperiode(18.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(18.januar, 31.januar, 100.prosent))
-        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterUtbetalingshistorikk(2.vedtaksperiode, ArbeidsgiverUtbetalingsperiode(a1, 17.januar, 17.januar, 100.prosent, riktigInntekt), inntektshistorikk = listOf(
+            Inntektsopplysning(a1, 17.januar, riktigInntekt, true)
+        ))
         håndterYtelser(2.vedtaksperiode)
-
-        assertSisteTilstand(2.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
+        assertEquals(riktigInntekt, inspektør.vilkårsgrunnlag(2.vedtaksperiode)?.inspektør?.sykepengegrunnlag?.inspektør?.sykepengegrunnlag)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_SIMULERING)
     }
 
     @Test

@@ -1,16 +1,41 @@
 package no.nav.helse.tournament
 
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.UUID
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Arbeidsgiver
+import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.sykdomstidslinje.Dag
-import no.nav.helse.sykdomstidslinje.Dag.*
+import no.nav.helse.sykdomstidslinje.Dag.Arbeidsdag
+import no.nav.helse.sykdomstidslinje.Dag.ArbeidsgiverHelgedag
+import no.nav.helse.sykdomstidslinje.Dag.Arbeidsgiverdag
+import no.nav.helse.sykdomstidslinje.Dag.Feriedag
+import no.nav.helse.sykdomstidslinje.Dag.FriskHelgedag
+import no.nav.helse.sykdomstidslinje.Dag.Permisjonsdag
+import no.nav.helse.sykdomstidslinje.Dag.ProblemDag
+import no.nav.helse.sykdomstidslinje.Dag.SykHelgedag
+import no.nav.helse.sykdomstidslinje.Dag.Sykedag
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse.Hendelseskilde.Companion.INGEN
-import no.nav.helse.tournament.Turneringsnøkkel.*
+import no.nav.helse.tournament.Turneringsnøkkel.Arbeidsdag_IM
+import no.nav.helse.tournament.Turneringsnøkkel.Arbeidsdag_SØ
+import no.nav.helse.tournament.Turneringsnøkkel.ArbeidsgiverHelgedag_IM
+import no.nav.helse.tournament.Turneringsnøkkel.ArbeidsgiverHelgedag_SØ
+import no.nav.helse.tournament.Turneringsnøkkel.Arbeidsgiverdag_IM
+import no.nav.helse.tournament.Turneringsnøkkel.Arbeidsgiverdag_SØ
 import no.nav.helse.tournament.Turneringsnøkkel.Companion.fraDag
+import no.nav.helse.tournament.Turneringsnøkkel.Feriedag_IM
+import no.nav.helse.tournament.Turneringsnøkkel.Feriedag_SØ
+import no.nav.helse.tournament.Turneringsnøkkel.Permisjonsdag_SØ
+import no.nav.helse.tournament.Turneringsnøkkel.SykHelgedag_SM
+import no.nav.helse.tournament.Turneringsnøkkel.SykHelgedag_SØ
+import no.nav.helse.tournament.Turneringsnøkkel.Sykedag_SM
+import no.nav.helse.tournament.Turneringsnøkkel.Sykedag_SØ
+import no.nav.helse.tournament.Turneringsnøkkel.UbestemtDag
 import no.nav.helse.tournament.TurneringsnøkkelTest.TestHendelse.Companion.inntektsmelding
 import no.nav.helse.tournament.TurneringsnøkkelTest.TestHendelse.Companion.sykmelding
 import no.nav.helse.tournament.TurneringsnøkkelTest.TestHendelse.Companion.søknad
@@ -18,10 +43,6 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import no.nav.helse.økonomi.Økonomi
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.*
-import no.nav.helse.person.Dokumentsporing
 
 internal class TurneringsnøkkelTest {
     private val enDag = LocalDate.now()
@@ -64,7 +85,7 @@ internal class TurneringsnøkkelTest {
         object Søknad : TestHendelse()
         object Aareg : TestHendelse() // Dette er ren spekulasjon omkring AAreg som kilde
 
-        override fun sykdomstidslinje(): Sykdomstidslinje = throw RuntimeException("Brukes ikke i testene")
+        override fun lagSykdomstidslinje(): Sykdomstidslinje = throw RuntimeException("Brukes ikke i testene")
         override fun valider(periode: Periode, subsumsjonObserver: SubsumsjonObserver): Aktivitetslogg = throw RuntimeException("Brukes ikke i testene")
         override fun fortsettÅBehandle(arbeidsgiver: Arbeidsgiver) = throw RuntimeException("Brukes ikke i testene")
         override fun leggTil(hendelseIder: MutableSet<Dokumentsporing>) {}

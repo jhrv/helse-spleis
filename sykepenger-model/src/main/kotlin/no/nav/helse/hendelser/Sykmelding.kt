@@ -51,7 +51,7 @@ class Sykmelding(
         if (periode.endInclusive < mottatt.toLocalDate().minusMonths(6)) funksjonellFeil(ERRORTEKST_FOR_GAMMEL)
     }
 
-    override fun sykdomstidslinje() = sykdomstidslinje
+    override fun lagSykdomstidslinje() = sykdomstidslinje
 
     override fun fortsettÅBehandle(arbeidsgiver: Arbeidsgiver) {
         arbeidsgiver.håndter(this)
