@@ -147,7 +147,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterInntektsmeldingReplay(im, 2.vedtaksperiode.id(a2))
 
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a1)
-        assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, orgnummer = a2)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
@@ -2065,25 +2065,18 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
                     "vedtaksperioder, selv om første fraværsdag er oppgitt etterpå (men bare om det ikke foreligger" +
                     "utbetaling mellom …)",
             nå = {
-                assertFalse(inspektør.sykdomstidslinje[1.januar] is Dag.Arbeidsgiverdag)
-                assertFalse(inspektør.sykdomstidslinje[2.januar] is Dag.Arbeidsgiverdag)
-                assertFalse(inspektør.sykdomstidslinje[11.januar] is Dag.Arbeidsgiverdag)
-                assertEquals(3.januar til 10.januar, inspektør.periode(1.vedtaksperiode))
                 assertEquals(12.januar til 16.januar, inspektør.periode(2.vedtaksperiode))
-                assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-                assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-                assertSisteTilstand(3.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
             },
             ønsket = {
-                assertTrue(inspektør.sykdomstidslinje[1.januar] is Dag.Arbeidsgiverdag)
-                assertTrue(inspektør.sykdomstidslinje[2.januar] is Dag.Arbeidsgiverdag)
-                assertTrue(inspektør.sykdomstidslinje[11.januar] is Dag.Arbeidsgiverdag)
                 assertEquals(1.januar til 10.januar, inspektør.periode(1.vedtaksperiode))
                 assertEquals(11.januar til 16.januar, inspektør.periode(2.vedtaksperiode))
-                assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-                assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-                assertSisteTilstand(3.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
             })
+        assertTrue(inspektør.sykdomstidslinje[1.januar] is Dag.Arbeidsgiverdag)
+        assertTrue(inspektør.sykdomstidslinje[2.januar] is Dag.Arbeidsgiverdag)
+        assertTrue(inspektør.sykdomstidslinje[11.januar] is Dag.Arbeidsgiverdag)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+        assertSisteTilstand(3.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
     }
 
     @Test

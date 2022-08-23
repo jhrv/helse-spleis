@@ -97,10 +97,6 @@ class Inntektsmelding(
         if (relevantePerioder.isEmpty()) return false
 
         padLeft(periode.start)
-        if (periode !in relevantePerioder) {
-            trimLeft(periode.endInclusive)
-            return false
-        }
 
         if (førsteFraværsdagErEtterArbeidsgiverperioden(førsteFraværsdag) && perioder.size != relevantePerioder.size)
             varsel("Vi har mottatt en inntektsmelding i en løpende sykmeldingsperiode med oppgitt første/bestemmende fraværsdag som er ulik tidligere fastsatt skjæringstidspunkt.")

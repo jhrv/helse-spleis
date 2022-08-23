@@ -224,9 +224,12 @@ internal class Vedtaksperiode private constructor(
                 sikkerlogg.info("Vedtaksperiode med id=$id har allerede hensyntatt inntektsmeldingen med id=${inntektsmelding.meldingsreferanseId()}, replayes det en inntektsmelding unødvendig?")
                 return@also
             }
-            if (it) inntektsmelding.leggTil(hendelseIder)
-            if (!it) return@also inntektsmelding.trimLeft(periode.endInclusive)
+            if (!it) {
+                if (tilstand != AvsluttetUtenUtbetaling) inntektsmelding.trimLeft(periode.endInclusive)
+                return@also
+            }
             kontekst(inntektsmelding)
+            inntektsmelding.leggTil(hendelseIder)
             if (!inntektsmelding.erRelevant(periode, sammenhengendePerioder.map { it.periode })) return@also
             tilstand.håndter(this, inntektsmelding)
         }
@@ -659,6 +662,7 @@ internal class Vedtaksperiode private constructor(
         hendelse: ArbeidstakerHendelse
     ) {
         val vedtaksperioder = person.nåværendeVedtaksperioder(IKKE_FERDIG_BEHANDLET)
+            .filterNot { it.ingenUtbetaling() }
         vedtaksperioder
             .filter { this.periode.overlapperMed(it.periode) }
             .forEach { it.lagUtbetaling(maksimumSykepenger, hendelse) }
